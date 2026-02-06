@@ -1,0 +1,221 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthForm } from '../components/AuthForm';
+import { LogOut, User, Sparkles } from 'lucide-react';
+
+export function LandingPage() {
+  const navigate = useNavigate();
+  const { user, profile, loading, signOut } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-300 via-gray-200 to-slate-400 flex items-center justify-center">
+        <div className="animate-pulse text-gray-600 font-display">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-300 via-gray-200 to-slate-400 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.4)_0%,_transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(180,180,180,0.3)_0%,_transparent_50%)]" />
+
+      <nav className="relative flex justify-end p-4">
+        {user ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm font-display">
+              <User size={16} className="text-gray-600" />
+              <span className="text-gray-700 text-sm font-medium">
+                {profile?.username || user.email}
+              </span>
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-300 hover:text-white transition-all duration-300 bg-gray-700"
+              style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)' }}
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
+          </div>
+        ) : (
+          <div
+            className="flex rounded-full p-1 bg-gray-700"
+            style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)' }}
+          >
+            <button
+              onClick={() => {
+                setAuthMode('login');
+                setShowAuthModal(true);
+              }}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                authMode === 'login' && showAuthModal
+                  ? 'bg-gray-100 text-gray-800 shadow-md'
+                  : 'text-gray-300 hover:text-white'
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode('register');
+                setShowAuthModal(true);
+              }}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                authMode === 'register' && showAuthModal
+                  ? 'bg-gray-100 text-gray-800 shadow-md'
+                  : 'text-gray-300 hover:text-white'
+              }`}
+            >
+              Register
+            </button>
+          </div>
+        )}
+      </nav>
+
+      <header className="relative flex flex-col items-center pb-6">
+        <h1
+          className="text-4xl md:text-5xl lg:text-6xl tracking-wider font-display font-bold text-gray-800"
+          style={{
+            textShadow: `
+              1px 1px 0 #BFCFFF,
+              2px 2px 0 #BFCFFF,
+              3px 3px 0 #BFCFFF,
+              4px 4px 0 #BFCFFF,
+              5px 5px 0 #BFCFFF,
+              6px 6px 10px rgba(0,0,0,0.15)
+            `
+          }}
+        >
+          DIGITARIA
+        </h1>
+        <div className="w-48 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent mt-3 mb-4" />
+        <p className="text-gray-600 tracking-wide text-center px-4 font-display">
+          The Code Journey through 520 Programming Terms
+        </p>
+      </header>
+
+      <main className="relative flex flex-col items-center px-4 pb-12">
+        <div className="mt-4 relative">
+          <div
+            className="absolute -inset-3 rounded-xl"
+            style={{
+              background: 'linear-gradient(135deg, #BFCFFF 0%, #8BA3E6 50%, #BFCFFF 100%)',
+              boxShadow: `
+                0 0 0 1px rgba(255,255,255,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.6),
+                4px 4px 12px rgba(0,0,0,0.15),
+                8px 8px 24px rgba(143,163,230,0.3)
+              `
+            }}
+          />
+          <div
+            className="absolute -inset-1.5 rounded-lg"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(191,207,255,0.4) 100%)',
+            }}
+          />
+          <video
+            className="relative max-h-[50vh] w-auto rounded-lg"
+            style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
+            src="/movie_top02.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        </div>
+
+        {user ? (
+          <button
+            onClick={() => navigate('/home')}
+            className="mt-8 group relative px-8 py-4 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+          >
+            <span className="flex items-center gap-3">
+              <Sparkles size={20} className="group-hover:animate-pulse" />
+              Start Your Journey
+              <Sparkles size={20} className="group-hover:animate-pulse" />
+            </span>
+          </button>
+        ) : (
+          <p className="mt-8 text-gray-500 font-display">
+            Sign in to start your adventure
+          </p>
+        )}
+      </main>
+
+      <footer className="relative py-6 border-t border-gray-400/30">
+        <p className="text-center text-gray-500 text-sm font-display">
+          &copy; 2026 DIGITARIA. All rights reserved.
+        </p>
+      </footer>
+
+      {showAuthModal && !user && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAuthModal(false);
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-white/95 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl"
+            style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.5)' }}
+          >
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <div className="flex justify-center mb-6">
+              <div
+                className="flex rounded-full p-1 bg-gray-700"
+                style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)' }}
+              >
+                <button
+                  onClick={() => setAuthMode('login')}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    authMode === 'login'
+                      ? 'bg-gray-100 text-gray-800 shadow-md'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setAuthMode('register')}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    authMode === 'register'
+                      ? 'bg-gray-100 text-gray-800 shadow-md'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Register
+                </button>
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 font-display">
+              {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+            </h2>
+
+            <AuthForm
+              mode={authMode}
+              onSuccess={() => setShowAuthModal(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
