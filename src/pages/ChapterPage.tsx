@@ -28,10 +28,7 @@ export function ChapterPage() {
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <p className="text-gray-500">Chapter not found</p>
-          <button
-            onClick={() => navigate('/home')}
-            className="text-teal-500 hover:text-teal-600"
-          >
+          <button onClick={() => navigate('/home')} className="text-teal-500 hover:text-teal-600">
             Return to Home
           </button>
         </div>
@@ -58,17 +55,11 @@ export function ChapterPage() {
             <span>{chapter.category_name}</span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-            {chapter.title}
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{chapter.title}</h1>
 
-          {chapter.subtitle && (
-            <p className="text-lg text-gray-600 mb-4">{chapter.subtitle}</p>
-          )}
+          {chapter.subtitle && <p className="text-lg text-gray-600 mb-4">{chapter.subtitle}</p>}
 
-          {chapter.description && (
-            <p className="text-gray-600 mb-6">{chapter.description}</p>
-          )}
+          {chapter.description && <p className="text-gray-600 mb-6">{chapter.description}</p>}
 
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span className="flex items-center gap-1">
@@ -84,7 +75,7 @@ export function ChapterPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="flex flex-col gap-4 max-w-xl mx-auto">
           <button
             onClick={() => navigate(`/chapter/${chapter.id}/flashcard`)}
             className="group relative overflow-hidden bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
@@ -92,9 +83,7 @@ export function ChapterPage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
             <Layers className="w-10 h-10 mb-3" />
             <h3 className="text-xl font-semibold mb-1">Flashcard Mode</h3>
-            <p className="text-teal-100 text-sm">
-              Learn terms with interactive cards
-            </p>
+            <p className="text-teal-100 text-sm">Learn terms with interactive cards</p>
           </button>
 
           <button
@@ -104,35 +93,9 @@ export function ChapterPage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
             <BookOpen className="w-10 h-10 mb-3" />
             <h3 className="text-xl font-semibold mb-1">Term List</h3>
-            <p className="text-amber-100 text-sm">
-              Browse all terms in this chapter
-            </p>
+            <p className="text-amber-100 text-sm">Browse all terms in this chapter</p>
           </button>
         </div>
-
-        <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Terms Preview
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {terms.slice(0, 8).map((term) => (
-              <div
-                key={term.id}
-                className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50"
-              >
-                <p className="font-medium text-gray-800 truncate">{term.term}</p>
-                <p className="text-xs text-gray-500 truncate">{term.term_ja}</p>
-              </div>
-            ))}
-            {terms.length > 8 && (
-              <div className="bg-gray-100/60 rounded-xl p-3 flex items-center justify-center">
-                <span className="text-sm text-gray-500">
-                  +{terms.length - 8} more
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
       </div>
     </Layout>
   );

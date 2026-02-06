@@ -1,0 +1,11 @@
+# Files that are exempt from test requirements
+# Add one filename per line (without path)
+# Example: SimpleWrapper.tsx
+
+# Layout and Auth components - can be added later
+AuthForm.tsx
+Layout.tsx
+TermCard.tsx
+
+# Hooks without tests yet
+useCharacters.ts

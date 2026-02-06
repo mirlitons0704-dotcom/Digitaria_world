@@ -35,8 +35,8 @@ export function HomePage() {
     );
   }
 
-  const mainChapters = chapters.filter(c => c.id >= 1 && c.id <= 16);
-  const epilogue = chapters.find(c => c.id === 17);
+  const mainChapters = chapters.filter((c) => c.id >= 1 && c.id <= 16);
+  const epilogue = chapters.find((c) => c.id === 17);
 
   return (
     <Layout>
@@ -77,6 +77,18 @@ export function HomePage() {
                   <Search className="w-5 h-5 text-teal-500" />
                   <span className="font-titillium-semibold text-gray-700">Search Terms</span>
                 </button>
+              </div>
+
+              {/* Scrolling marquee */}
+              <div className="mt-6 overflow-hidden">
+                <div className="animate-marquee whitespace-nowrap">
+                  <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
+                    🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+                  </span>
+                  <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
+                    🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+                  </span>
+                </div>
               </div>
             </div>
 

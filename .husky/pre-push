@@ -1,0 +1,28 @@
+# Documentation audit - ensures docs match code
+./scripts/docs-audit.sh
+
+# Test coverage audit - ensures new code has tests
+./scripts/test-audit.sh
+
+# TypeScript type checking
+npx tsc -p tsconfig.app.json --noEmit
+
+# Linting
+npx eslint .
+
+# Run all tests
+npm test -- --run
+
+# Security audit - BLOCK on production vulnerabilities
+echo "🔒 Checking production dependencies..."
+if ! npm audit --omit=dev --audit-level=high; then
+  echo "❌ Production security vulnerabilities found. Fix before pushing."
+  exit 1
+fi
+
+# Security audit - WARN on dev vulnerabilities (don't block)
+echo "🔍 Checking dev dependencies..."
+npm audit --audit-level=high 2>/dev/null || echo "⚠️ Dev dependency vulnerabilities found (non-blocking)"
+
+# File size check - warn about files exceeding 400 lines
+./scripts/file-size-audit.sh

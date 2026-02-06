@@ -21,3 +21,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Coverage and audit files
+coverage
+.oversized-files
