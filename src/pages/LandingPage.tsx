@@ -95,7 +95,7 @@ export function LandingPage() {
           DIGITARIA
         </h1>
         <div className="w-48 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent mt-3 mb-4" />
-        <p className="tracking-wide text-center px-4 font-display" style={{ color: '#605c5c' }}>
+        <p className="tracking-wide text-center px-4" style={{ color: '#605c5c', fontFamily: '"Titillium Web", sans-serif', fontWeight: 300 }}>
           The code journey through 520 programming terms
         </p>
       </header>
