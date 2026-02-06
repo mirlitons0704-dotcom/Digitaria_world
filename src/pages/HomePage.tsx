@@ -80,7 +80,16 @@ export function HomePage() {
               </div>
             </div>
 
-            <div className="hidden md:block w-28 flex-shrink-0" />
+            <div className="hidden md:block w-28 flex-shrink-0">
+              <video
+                className="w-full h-auto"
+                src="/c2_encourage.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            </div>
           </div>
         </header>
 
