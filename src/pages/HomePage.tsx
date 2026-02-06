@@ -41,31 +41,48 @@ export function HomePage() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <header className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl text-gray-800 font-display mb-2">
-            Your Journey Awaits
-          </h1>
-          <p className="text-gray-600 font-titillium-light text-lg">
-            Explore 520 programming terms across 17 chapters
-          </p>
-        </header>
+        <header className="mb-12">
+          <div className="flex items-center justify-center gap-6">
+            <div className="hidden md:block w-28 flex-shrink-0">
+              <video
+                className="w-full h-auto"
+                src="/c1_happy.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          <button
-            onClick={() => navigate('/my-folder')}
-            className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-          >
-            <Folder className="w-5 h-5 text-amber-500" />
-            <span className="font-titillium-semibold text-gray-700">My Folder</span>
-          </button>
-          <button
-            onClick={() => navigate('/search')}
-            className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-          >
-            <Search className="w-5 h-5 text-teal-500" />
-            <span className="font-titillium-semibold text-gray-700">Search Terms</span>
-          </button>
-        </div>
+            <div className="text-center">
+              <h1 className="text-3xl md:text-4xl text-gray-800 font-display mb-2">
+                Your Journey Awaits
+              </h1>
+              <p className="text-gray-600 font-titillium-light text-lg">
+                Explore 520 programming terms across 17 chapters
+              </p>
+
+              <div className="flex flex-wrap justify-center gap-4 mt-6">
+                <button
+                  onClick={() => navigate('/my-folder')}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                >
+                  <Folder className="w-5 h-5 text-amber-500" />
+                  <span className="font-titillium-semibold text-gray-700">My Folder</span>
+                </button>
+                <button
+                  onClick={() => navigate('/search')}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                >
+                  <Search className="w-5 h-5 text-teal-500" />
+                  <span className="font-titillium-semibold text-gray-700">Search Terms</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="hidden md:block w-28 flex-shrink-0" />
+          </div>
+        </header>
 
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
