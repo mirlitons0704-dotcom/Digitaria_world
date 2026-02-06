@@ -95,10 +95,10 @@ export function HomePage() {
           <div className="mt-6 overflow-hidden">
             <div className="animate-marquee whitespace-nowrap">
               <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+                ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ！　さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって！！
               </span>
               <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+                ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ！　さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって！！
               </span>
             </div>
           </div>
