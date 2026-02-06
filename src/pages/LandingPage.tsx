@@ -144,7 +144,7 @@ export function LandingPage() {
             </span>
           </button>
         ) : (
-          <p className="mt-8 text-gray-500" style={{ fontFamily: '"Titillium Web", sans-serif', fontWeight: 600 }}>
+          <p className="mt-8 text-gray-500 text-lg" style={{ fontFamily: '"Titillium Web", sans-serif', fontWeight: 600 }}>
             Sign in to start your adventure
           </p>
         )}
