@@ -135,7 +135,7 @@ export function LandingPage() {
           <button
             onClick={() => navigate('/home')}
             className="mt-8 group relative px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(to bottom right, #f5e6c8, #e8dcc8)', color: '#605c5c' }}
+            style={{ background: 'linear-gradient(to bottom right, #f5e6c8, #e8dcc8)', color: '#605c5c', fontFamily: '"Playwrite NZ Basic", cursive' }}
           >
             <span className="flex items-center gap-3">
               <Sparkles size={20} className="group-hover:animate-pulse" />
