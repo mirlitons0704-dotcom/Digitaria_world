@@ -5,6 +5,9 @@ import { ChapterCard } from '../components/ChapterCard';
 import { Layout } from '../components/Layout';
 import { Loader2, BookOpen, Folder, Search } from 'lucide-react';
 
+// Supabase Storage base URL for assets
+const STORAGE_URL = 'https://erkvissuydjosstfhywf.supabase.co/storage/v1/object/public/assets';
+
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -42,23 +45,21 @@ export function HomePage() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <header className="mb-12">
-          <div className="flex items-center justify-center gap-6">
-            <div className="hidden md:block w-28 flex-shrink-0">
-              <video
-                className="w-full h-auto"
-                src="/c1_happy.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
+          <div className="flex items-center justify-center gap-4 md:gap-6">
+            <div className="w-20 md:w-28 flex-shrink-0">
+              <img
+                className="w-full h-auto rounded-lg"
+                src={`${STORAGE_URL}/c1_bit.png`}
+                alt="ビットくん"
+                onError={(e) => console.error('Failed to load bit-kun image', e)}
               />
             </div>
 
-            <div className="text-center">
-              <h1 className="text-3xl md:text-4xl text-gray-800 font-display mb-2">
+            <div className="text-center flex-1">
+              <h1 className="text-2xl md:text-4xl text-gray-800 font-display mb-2">
                 Your Journey Awaits
               </h1>
-              <p className="text-gray-600 font-titillium-light text-lg">
+              <p className="text-gray-600 font-titillium-light text-sm md:text-lg">
                 Explore 520 programming terms across 17 chapters
               </p>
 
@@ -78,29 +79,27 @@ export function HomePage() {
                   <span className="font-titillium-semibold text-gray-700">Search Terms</span>
                 </button>
               </div>
-
-              {/* Scrolling marquee */}
-              <div className="mt-6 overflow-hidden">
-                <div className="animate-marquee whitespace-nowrap">
-                  <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                    ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ！　さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって！！
-                  </span>
-                  <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                    ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ！　さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって！！
-                  </span>
-                </div>
-              </div>
             </div>
 
-            <div className="hidden md:block w-28 flex-shrink-0">
-              <video
-                className="w-full h-auto"
-                src="/c2_encourage.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
+            <div className="w-20 md:w-28 flex-shrink-0">
+              <img
+                className="w-full h-auto rounded-lg"
+                src={`${STORAGE_URL}/c2_bite.png`}
+                alt="バイトさん"
+                onError={(e) => console.error('Failed to load byte-san image', e)}
               />
+            </div>
+          </div>
+
+          {/* Scrolling marquee */}
+          <div className="mt-6 overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+              <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
+                🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+              </span>
+              <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
+                🤖 ビットくんとバイトさんが、あなたをプログラミング言語習得の旅を応援するよ！ 🤖
+              </span>
             </div>
           </div>
         </header>

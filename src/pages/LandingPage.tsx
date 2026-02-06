@@ -4,6 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthForm } from '../components/AuthForm';
 import { LogOut, User, Sparkles } from 'lucide-react';
 
+// Supabase Storage base URL for assets
+const STORAGE_URL = 'https://erkvissuydjosstfhywf.supabase.co/storage/v1/object/public/assets';
+
 export function LandingPage() {
   const navigate = useNavigate();
   const { user, profile, loading, signOut } = useAuth();
@@ -13,9 +16,7 @@ export function LandingPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-300 via-gray-200 to-slate-400 flex items-center justify-center">
-        <div className="animate-pulse text-gray-600 font-display">
-          Loading...
-        </div>
+        <div className="animate-pulse text-gray-600 font-display">Loading...</div>
       </div>
     );
   }
@@ -37,7 +38,9 @@ export function LandingPage() {
             <button
               onClick={() => signOut()}
               className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-300 hover:text-white transition-all duration-300 bg-gray-700"
-              style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)' }}
+              style={{
+                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)',
+              }}
             >
               <LogOut size={16} />
               <span>Logout</span>
@@ -46,7 +49,9 @@ export function LandingPage() {
         ) : (
           <div
             className="flex rounded-full p-1 bg-gray-700"
-            style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)' }}
+            style={{
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(255,255,255,0.1)',
+            }}
           >
             <button
               onClick={() => {
@@ -89,13 +94,16 @@ export function LandingPage() {
               4px 4px 0 #BFCFFF,
               5px 5px 0 #BFCFFF,
               6px 6px 10px rgba(0,0,0,0.15)
-            `
+            `,
           }}
         >
           DIGITARIA
         </h1>
         <div className="w-48 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent mt-3 mb-4" />
-        <p className="tracking-wide text-center px-4" style={{ color: '#605c5c', fontFamily: '"Titillium Web", sans-serif', fontWeight: 300 }}>
+        <p
+          className="tracking-wide text-center px-4"
+          style={{ color: '#605c5c', fontFamily: '"Titillium Web", sans-serif', fontWeight: 300 }}
+        >
           The code journey through 520 programming terms
         </p>
       </header>
@@ -111,19 +119,20 @@ export function LandingPage() {
                 inset 0 1px 0 rgba(255,255,255,0.6),
                 4px 4px 12px rgba(0,0,0,0.15),
                 8px 8px 24px rgba(143,163,230,0.3)
-              `
+              `,
             }}
           />
           <div
             className="absolute -inset-1.5 rounded-lg"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(191,207,255,0.4) 100%)',
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(191,207,255,0.4) 100%)',
             }}
           />
           <video
             className="relative max-h-[50vh] min-w-[300px] min-h-[200px] w-auto rounded-lg object-cover"
             style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
-            src="/movie_top02.mp4"
+            src={`${STORAGE_URL}/movie_top02.mp4`}
             autoPlay
             loop
             muted
@@ -137,17 +146,19 @@ export function LandingPage() {
             onClick={() => navigate('/home')}
             className="mt-8 group relative px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 border border-slate-200/60"
             style={{
-              background: 'linear-gradient(135deg, #f1f5f9 0%, #e0e7ef 25%, #cbd5e1 50%, #e0e7ef 75%, #f1f5f9 100%)',
+              background:
+                'linear-gradient(135deg, #f1f5f9 0%, #e0e7ef 25%, #cbd5e1 50%, #e0e7ef 75%, #f1f5f9 100%)',
               color: '#475569',
               fontFamily: '"Titillium Web", sans-serif',
               fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(148,163,184,0.3), inset 0 1px 0 rgba(255,255,255,0.6)'
+              boxShadow: '0 4px 15px rgba(148,163,184,0.3), inset 0 1px 0 rgba(255,255,255,0.6)',
             }}
           >
             <div
               className="absolute inset-0 rounded-xl opacity-40 pointer-events-none"
               style={{
-                background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)',
+                background:
+                  'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)',
               }}
             />
             <span className="relative flex items-center gap-3">
@@ -157,7 +168,10 @@ export function LandingPage() {
             </span>
           </button>
         ) : (
-          <p className="mt-8 text-gray-500 text-lg" style={{ fontFamily: '"Titillium Web", sans-serif', fontWeight: 600 }}>
+          <p
+            className="mt-8 text-gray-500 text-lg"
+            style={{ fontFamily: '"Titillium Web", sans-serif', fontWeight: 600 }}
+          >
             Sign in to start your adventure
           </p>
         )}
@@ -179,13 +193,25 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             className="relative bg-white/95 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl"
-            style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.5)' }}
+            style={{
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.5)',
+            }}
           >
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -223,10 +249,7 @@ export function LandingPage() {
               {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
 
-            <AuthForm
-              mode={authMode}
-              onSuccess={() => setShowAuthModal(false)}
-            />
+            <AuthForm mode={authMode} onSuccess={() => setShowAuthModal(false)} />
           </div>
         </div>
       )}
