@@ -134,8 +134,8 @@ export function LandingPage() {
         {user ? (
           <button
             onClick={() => navigate('/home')}
-            className="mt-8 group relative px-8 py-4 text-white rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(to bottom right, #8153a0, #6a4585)' }}
+            className="mt-8 group relative px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+            style={{ background: 'linear-gradient(to bottom right, #ecf95c, #d4e052)', color: '#605c5c' }}
           >
             <span className="flex items-center gap-3">
               <Sparkles size={20} className="group-hover:animate-pulse" />
