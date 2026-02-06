@@ -42,10 +42,10 @@ export function HomePage() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 font-display mb-2">
+          <h1 className="text-3xl md:text-4xl text-gray-800 font-display mb-2">
             Your Journey Awaits
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 font-titillium-light text-lg">
             Explore 520 programming terms across 17 chapters
           </p>
         </header>
@@ -56,22 +56,22 @@ export function HomePage() {
             className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
           >
             <Folder className="w-5 h-5 text-amber-500" />
-            <span className="font-medium text-gray-700">My Folder</span>
+            <span className="font-titillium-semibold text-gray-700">My Folder</span>
           </button>
           <button
             onClick={() => navigate('/search')}
             className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
           >
             <Search className="w-5 h-5 text-teal-500" />
-            <span className="font-medium text-gray-700">Search Terms</span>
+            <span className="font-titillium-semibold text-gray-700">Search Terms</span>
           </button>
         </div>
 
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
             <BookOpen className="w-6 h-6 text-teal-600" />
-            <h2 className="text-xl font-semibold text-gray-800">Main Story</h2>
-            <span className="text-sm text-gray-500">16 Chapters</span>
+            <h2 className="text-xl font-titillium-semibold text-gray-800">Main Story</h2>
+            <span className="text-sm text-gray-500 font-titillium-light">16 Chapters</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -89,8 +89,8 @@ export function HomePage() {
           <section>
             <div className="flex items-center gap-3 mb-6">
               <span className="text-2xl">🦋</span>
-              <h2 className="text-xl font-semibold text-gray-800">Epilogue</h2>
-              <span className="text-sm text-gray-500">Memory Garden</span>
+              <h2 className="text-xl font-titillium-semibold text-gray-800">Epilogue</h2>
+              <span className="text-sm text-gray-500 font-titillium-light">Memory Garden</span>
             </div>
 
             <div className="max-w-sm">

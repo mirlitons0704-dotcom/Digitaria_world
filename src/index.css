@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Titillium+Web:wght@300;400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,6 +15,20 @@
 @layer utilities {
   .font-display {
     font-family: 'Cinzel', serif;
+  }
+
+  .font-titillium {
+    font-family: 'Titillium Web', sans-serif;
+  }
+
+  .font-titillium-semibold {
+    font-family: 'Titillium Web', sans-serif;
+    font-weight: 600;
+  }
+
+  .font-titillium-light {
+    font-family: 'Titillium Web', sans-serif;
+    font-weight: 300;
   }
 
   .perspective-1000 {
