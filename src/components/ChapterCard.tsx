@@ -25,29 +25,29 @@ const categoryIcons: Record<string, typeof BookOpen> = {
   sparkles: Sparkles,
 };
 
-const categoryColors: Record<string, { bg: string; border: string; icon: string }> = {
-  basics: { bg: 'from-sky-50 to-sky-100', border: 'border-sky-200', icon: 'text-sky-500' },
-  fileTypes: { bg: 'from-amber-50 to-amber-100', border: 'border-amber-200', icon: 'text-amber-500' },
-  dataTypes: { bg: 'from-emerald-50 to-emerald-100', border: 'border-emerald-200', icon: 'text-emerald-500' },
-  programming: { bg: 'from-rose-50 to-rose-100', border: 'border-rose-200', icon: 'text-rose-500' },
-  htmlCss: { bg: 'from-orange-50 to-orange-100', border: 'border-orange-200', icon: 'text-orange-500' },
-  networking: { bg: 'from-blue-50 to-blue-100', border: 'border-blue-200', icon: 'text-blue-500' },
-  javascript: { bg: 'from-yellow-50 to-yellow-100', border: 'border-yellow-300', icon: 'text-yellow-600' },
-  react: { bg: 'from-cyan-50 to-cyan-100', border: 'border-cyan-200', icon: 'text-cyan-500' },
-  uiComponents: { bg: 'from-pink-50 to-pink-100', border: 'border-pink-200', icon: 'text-pink-500' },
-  uiux: { bg: 'from-fuchsia-50 to-fuchsia-100', border: 'border-fuchsia-200', icon: 'text-fuchsia-500' },
-  cssFrameworks: { bg: 'from-teal-50 to-teal-100', border: 'border-teal-200', icon: 'text-teal-500' },
-  devTools: { bg: 'from-slate-100 to-slate-200', border: 'border-slate-300', icon: 'text-slate-600' },
-  packageManagement: { bg: 'from-green-50 to-green-100', border: 'border-green-200', icon: 'text-green-600' },
-  git: { bg: 'from-orange-50 to-orange-100', border: 'border-orange-200', icon: 'text-orange-600' },
-  backend: { bg: 'from-lime-50 to-lime-100', border: 'border-lime-200', icon: 'text-lime-600' },
-  api: { bg: 'from-violet-50 to-violet-100', border: 'border-violet-200', icon: 'text-violet-500' },
-  epilogue: { bg: 'from-amber-100 to-yellow-100', border: 'border-amber-300', icon: 'text-amber-600' },
+const categoryIconColors: Record<string, string> = {
+  basics: 'text-sky-500',
+  fileTypes: 'text-amber-500',
+  dataTypes: 'text-emerald-500',
+  programming: 'text-rose-500',
+  htmlCss: 'text-orange-500',
+  networking: 'text-blue-500',
+  javascript: 'text-yellow-600',
+  react: 'text-cyan-500',
+  uiComponents: 'text-pink-500',
+  uiux: 'text-fuchsia-500',
+  cssFrameworks: 'text-teal-500',
+  devTools: 'text-slate-600',
+  packageManagement: 'text-green-600',
+  git: 'text-orange-600',
+  backend: 'text-lime-600',
+  api: 'text-blue-500',
+  epilogue: 'text-amber-600',
 };
 
 export function ChapterCard({ chapter, onClick, isSpecial, isLocked, progress = 0 }: ChapterCardProps) {
   const Icon = categoryIcons[chapter.category_icon] || BookOpen;
-  const colors = categoryColors[chapter.category] || categoryColors.basics;
+  const iconColor = categoryIconColors[chapter.category] || 'text-slate-500';
 
   return (
     <button
@@ -55,59 +55,82 @@ export function ChapterCard({ chapter, onClick, isSpecial, isLocked, progress = 
       disabled={isLocked}
       className={`
         relative w-full text-left rounded-2xl p-5 transition-all duration-300
-        bg-gradient-to-br ${colors.bg} border ${colors.border}
+        ${isSpecial
+          ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border border-amber-200/60 shadow-amber-100/50'
+          : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-slate-100 border border-slate-200/60'
+        }
         ${isLocked
           ? 'opacity-60 cursor-not-allowed'
-          : 'hover:shadow-lg hover:-translate-y-1 cursor-pointer'
+          : 'hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 cursor-pointer'
         }
-        ${isSpecial ? 'ring-2 ring-amber-300 ring-offset-2' : ''}
+        ${isSpecial ? 'ring-1 ring-amber-300/50 hover:ring-amber-400/60' : 'hover:border-slate-300/80'}
       `}
+      style={{
+        backgroundImage: isSpecial
+          ? 'linear-gradient(135deg, rgba(251,191,36,0.05) 0%, rgba(253,224,71,0.08) 50%, rgba(251,191,36,0.05) 100%)'
+          : 'linear-gradient(135deg, rgba(148,163,184,0.08) 0%, rgba(191,219,254,0.12) 50%, rgba(148,163,184,0.08) 100%)',
+      }}
     >
+      <div
+        className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
+        style={{
+          background: isSpecial
+            ? 'linear-gradient(45deg, transparent 40%, rgba(251,191,36,0.15) 50%, transparent 60%)'
+            : 'linear-gradient(45deg, transparent 40%, rgba(148,163,184,0.2) 50%, transparent 60%)',
+        }}
+      />
+
       {isLocked && (
         <div className="absolute top-3 right-3">
           <Lock size={18} className="text-gray-400" />
         </div>
       )}
 
-      <div className="flex items-start gap-3 mb-3">
-        <div className={`p-2 rounded-xl bg-white/60 ${colors.icon}`}>
+      <div className="relative flex items-start gap-3 mb-3">
+        <div className={`p-2 rounded-xl ${isSpecial ? 'bg-amber-100/60' : 'bg-white/70'} backdrop-blur-sm ${iconColor}`}>
           <Icon size={24} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">
+            <span className={`text-xs font-medium ${isSpecial ? 'text-amber-700' : 'text-slate-500'}`}>
               {chapter.id === 17 ? 'Epilogue' : `Chapter ${chapter.id}`}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className={`text-xs ${isSpecial ? 'text-amber-500' : 'text-slate-400'}`}>
               {chapter.term_count} terms
             </span>
           </div>
-          <h3 className="font-semibold text-gray-800 truncate mt-0.5">
+          <h3 className={`font-semibold truncate mt-0.5 ${isSpecial ? 'text-amber-900' : 'text-slate-800'}`}>
             {chapter.title}
           </h3>
         </div>
       </div>
 
       {chapter.subtitle && (
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        <p className={`relative text-sm mb-3 line-clamp-2 ${isSpecial ? 'text-amber-700' : 'text-slate-600'}`}>
           {chapter.subtitle}
         </p>
       )}
 
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-1.5 bg-white/50 rounded-full overflow-hidden">
+      <div className="relative flex items-center gap-2">
+        <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isSpecial ? 'bg-amber-200/50' : 'bg-slate-200/60'}`}>
           <div
-            className="h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-full transition-all duration-500"
+            className={`h-full rounded-full transition-all duration-500 ${isSpecial ? 'bg-gradient-to-r from-amber-400 to-yellow-500' : 'bg-gradient-to-r from-blue-400 to-teal-400'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-xs text-gray-500 font-medium">
+        <span className={`text-xs font-medium ${isSpecial ? 'text-amber-600' : 'text-slate-500'}`}>
           {progress}%
         </span>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <span className={`text-xs px-2 py-0.5 rounded-full bg-white/60 ${colors.icon}`}>
+      <div className="relative mt-3 flex items-center gap-2">
+        <span className={`
+          text-xs px-2.5 py-0.5 rounded-full backdrop-blur-sm
+          ${isSpecial
+            ? 'bg-gradient-to-r from-amber-100/80 to-yellow-100/80 text-amber-700 border border-amber-200/50'
+            : 'bg-gradient-to-r from-slate-100/80 to-blue-50/80 text-slate-600 border border-slate-200/50'
+          }
+        `}>
           {chapter.category_name}
         </span>
       </div>
