@@ -121,13 +121,14 @@ export function LandingPage() {
             }}
           />
           <video
-            className="relative max-h-[50vh] w-auto rounded-lg"
+            className="relative max-h-[50vh] min-w-[300px] min-h-[200px] w-auto rounded-lg object-cover"
             style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
             src="/movie_top02.mp4"
             autoPlay
             loop
             muted
             playsInline
+            preload="auto"
           />
         </div>
 
