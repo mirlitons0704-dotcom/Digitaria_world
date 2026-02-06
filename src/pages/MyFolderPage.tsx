@@ -29,11 +29,13 @@ export function MyFolderPage() {
   useEffect(() => {
     if (!user) return;
 
+    const userId = user.id;
+
     async function fetchCollections() {
       setLoading(true);
 
       try {
-        const progress = await getUserCollectedTerms(user.id);
+        const progress = await getUserCollectedTerms(userId);
 
         if (!progress || progress.length === 0) {
           setCollections([]);
