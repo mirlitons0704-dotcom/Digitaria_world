@@ -44,7 +44,7 @@ export function StoryTeleprompter({
   const lastTimeRef = useRef<number>(0);
 
   const [isAutoScroll, setIsAutoScroll] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(2);
+  const [speedIndex, setSpeedIndex] = useState(1);
   const [showAudioToast, setShowAudioToast] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -232,7 +232,8 @@ export function StoryTeleprompter({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
         e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
       )
         return;
 
@@ -302,7 +303,10 @@ export function StoryTeleprompter({
               <div className="relative flex items-center">
                 <select
                   value={speedIndex}
-                  onChange={(e) => setSpeedIndex(Number(e.target.value))}
+                  onChange={(e) => {
+                    setSpeedIndex(Number(e.target.value));
+                    e.target.blur();
+                  }}
                   className="appearance-none pl-2.5 pr-6 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500/30"
                 >
                   {SPEED_OPTIONS.map((opt, i) => (
