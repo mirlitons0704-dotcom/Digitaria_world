@@ -121,6 +121,56 @@
   opacity: 1;
 }
 
+.gradient-btn-emerald {
+  --btn-bg: linear-gradient(135deg, #064e3b 0%, #059669 40%, #10b981 60%, #047857 100%);
+  --btn-shine: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.15) 60%,
+    transparent 100%
+  );
+  position: relative;
+  overflow: hidden;
+  background: var(--btn-bg);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.gradient-btn-emerald::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--btn-shine);
+  background-size: 300% 100%;
+  animation: gradient-button-shine 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gradient-btn-emerald::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gradient-btn-emerald:hover::after {
+  opacity: 1;
+}
+
 .teleprompter-container {
   position: relative;
   overflow-y: auto;

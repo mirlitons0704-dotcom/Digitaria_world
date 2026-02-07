@@ -89,11 +89,11 @@ export function ChapterPage() {
           <div className="flex justify-center">
             <button
               onClick={() => navigate(`/chapter/${chapter.id}/terms`)}
-              className="gradient-btn min-w-[200px] px-9 py-4 rounded-[11px] font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
+              className="gradient-btn-emerald min-w-[200px] px-9 py-4 rounded-[11px] font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
               style={{
                 fontFamily: '"Titillium Web", sans-serif',
                 boxShadow:
-                  '0 4px 20px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.1)',
+                  '0 4px 20px rgba(16,185,129,0.35), 0 1px 3px rgba(0,0,0,0.1)',
               }}
             >
               <span className="relative z-10 flex items-center gap-3">
