@@ -360,7 +360,7 @@ export function StoryTeleprompter({
           className="teleprompter-container h-full overflow-y-auto"
         >
           <div className="max-w-2xl mx-auto px-6 py-8">
-            <h2 className="text-center text-sm font-medium text-teal-600 mb-8 tracking-wider uppercase">
+            <h2 className="text-center text-xl font-semibold text-teal-600 mb-10 tracking-wide">
               {chapterTitle}
             </h2>
 
@@ -373,7 +373,7 @@ export function StoryTeleprompter({
                 {scene.title && (
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-                    <span className="text-xs font-medium text-gray-400 tracking-wide uppercase whitespace-nowrap">
+                    <span className="text-sm font-semibold text-gray-500 tracking-wide whitespace-nowrap">
                       {scene.title}
                     </span>
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />

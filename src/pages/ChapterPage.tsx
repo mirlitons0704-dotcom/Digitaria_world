@@ -54,14 +54,14 @@ export function ChapterPage() {
           </button>
 
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="shrink-0 px-2 py-0.5 bg-teal-50 text-teal-600 rounded-full text-xs font-medium">
+            <span className="shrink-0 px-2.5 py-0.5 bg-teal-50 text-teal-600 rounded-full text-sm font-semibold">
               {chapter.id === 17 ? 'Epilogue' : `Ch.${chapter.id}`}
             </span>
-            <h1 className="text-sm font-semibold text-gray-800 truncate">
+            <h1 className="text-base font-bold text-gray-800 truncate">
               {chapter.title}
             </h1>
             {chapter.subtitle && (
-              <span className="hidden md:inline text-xs text-gray-400 truncate">
+              <span className="hidden md:inline text-sm text-gray-400 truncate">
                 {chapter.subtitle}
               </span>
             )}
