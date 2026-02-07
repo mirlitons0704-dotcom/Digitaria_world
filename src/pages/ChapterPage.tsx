@@ -83,25 +83,14 @@ export function ChapterPage() {
 
         <div className="flex-1 min-h-0 relative">
           <StoryTeleprompter scenes={scenes} chapterTitle={chapter.title} terms={terms} />
-        </div>
 
-        <div className="px-4 py-4 bg-white/60 backdrop-blur-sm border-t border-gray-200/40">
-          <div className="flex justify-center">
-            <button
-              onClick={() => navigate(`/chapter/${chapter.id}/terms`)}
-              className="gradient-btn-emerald min-w-[200px] px-9 py-4 rounded-[11px] font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
-              style={{
-                fontFamily: '"Titillium Web", sans-serif',
-                boxShadow:
-                  '0 4px 20px rgba(16,185,129,0.35), 0 1px 3px rgba(0,0,0,0.1)',
-              }}
-            >
-              <span className="relative z-10 flex items-center gap-3">
-                <BookOpen size={20} />
-                Term List
-              </span>
-            </button>
-          </div>
+          <button
+            onClick={() => navigate(`/chapter/${chapter.id}/terms`)}
+            className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-teal-700 text-sm font-semibold border border-teal-200/60 shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 hover:-translate-y-0.5"
+          >
+            <BookOpen size={16} />
+            Term List
+          </button>
         </div>
       </div>
     </Layout>

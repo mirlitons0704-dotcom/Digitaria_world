@@ -229,7 +229,6 @@
 .teleprompter-container {
   position: relative;
   overflow-y: auto;
-  scroll-behavior: smooth;
 }
 
 .teleprompter-container::before,
