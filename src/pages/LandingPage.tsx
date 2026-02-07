@@ -129,7 +129,7 @@ export function LandingPage() {
             }}
           >
             <video
-              className="block max-h-[50vh] min-w-[300px] w-auto rounded-lg"
+              className="block max-h-[50vh] w-auto rounded-lg"
               style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
               src={`${STORAGE_URL}/movie_top02.mp4`}
               autoPlay
