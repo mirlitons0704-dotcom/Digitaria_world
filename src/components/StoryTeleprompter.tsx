@@ -3,7 +3,7 @@ import {
   Play,
   Pause,
   Volume2,
-  Gauge,
+  ChevronDownIcon,
   Hand,
   ChevronsDown,
   ChevronUp,
@@ -24,6 +24,7 @@ interface StoryTeleprompterProps {
 }
 
 const SPEED_OPTIONS = [
+  { label: 'Super Slow', value: 0.25 },
   { label: 'Slow', value: 0.5 },
   { label: 'Normal', value: 1 },
   { label: 'Fast', value: 2 },
@@ -43,7 +44,7 @@ export function StoryTeleprompter({
   const lastTimeRef = useRef<number>(0);
 
   const [isAutoScroll, setIsAutoScroll] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(1);
+  const [speedIndex, setSpeedIndex] = useState(2);
   const [showAudioToast, setShowAudioToast] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -203,10 +204,6 @@ export function StoryTeleprompter({
     setTimeout(() => setShowAudioToast(false), 2500);
   };
 
-  const cycleSpeed = () => {
-    setSpeedIndex((prev) => (prev + 1) % SPEED_OPTIONS.length);
-  };
-
   const scrollBy = useCallback(
     (amount: number) => {
       if (!scrollRef.current) return;
@@ -302,16 +299,20 @@ export function StoryTeleprompter({
             </button>
 
             {isAutoScroll && (
-              <button
-                onClick={cycleSpeed}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm transition-all"
-                title="Change speed"
-              >
-                <Gauge size={14} />
-                <span className="text-xs font-medium">
-                  {SPEED_OPTIONS[speedIndex].label}
-                </span>
-              </button>
+              <div className="relative flex items-center">
+                <select
+                  value={speedIndex}
+                  onChange={(e) => setSpeedIndex(Number(e.target.value))}
+                  className="appearance-none pl-2.5 pr-6 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                >
+                  {SPEED_OPTIONS.map((opt, i) => (
+                    <option key={i} value={i}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDownIcon size={12} className="absolute right-2 pointer-events-none text-gray-400" />
+              </div>
             )}
 
             {!isAutoScroll && (
