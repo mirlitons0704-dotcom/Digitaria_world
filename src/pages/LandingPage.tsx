@@ -110,7 +110,7 @@ export function LandingPage() {
 
       <main className="relative flex flex-col items-center px-4 pb-12">
         <div
-          className="mt-4 inline-block p-3 rounded-xl"
+          className="mt-4 inline-block p-[3px] rounded-xl"
           style={{
             background: 'linear-gradient(135deg, #BFCFFF 0%, #8BA3E6 50%, #BFCFFF 100%)',
             boxShadow: `
@@ -122,7 +122,7 @@ export function LandingPage() {
           }}
         >
           <div
-            className="p-1.5 rounded-lg"
+            className="p-[2px] rounded-lg"
             style={{
               background:
                 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(191,207,255,0.4) 100%)',
