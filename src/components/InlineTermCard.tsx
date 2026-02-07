@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { BookOpen, Lightbulb, AlertTriangle, Cog, X } from 'lucide-react';
+import { BookOpen, Lightbulb, AlertTriangle, Cog, X, Check, Loader2, Sparkles } from 'lucide-react';
 import type { Term } from '../lib/database.types';
 
 interface InlineTermCardProps {
   term: Term;
+  isCollected?: boolean;
+  saving?: boolean;
   onClose: () => void;
+  onGotIt?: () => void;
 }
 
-export function InlineTermCard({ term, onClose }: InlineTermCardProps) {
+export function InlineTermCard({ term, isCollected, saving, onClose, onGotIt }: InlineTermCardProps) {
   const [activeTab, setActiveTab] = useState<'definition' | 'mechanism' | 'analogy' | 'pitfall'>('definition');
 
   const tabs = [
@@ -73,9 +76,33 @@ export function InlineTermCard({ term, onClose }: InlineTermCardProps) {
         </div>
       )}
 
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-3">
         <p className="text-xs text-gray-600 leading-relaxed">{currentTab.content}</p>
       </div>
+
+      {onGotIt && (
+        <div className="px-4 pb-4 pt-1 border-t border-emerald-100/50">
+          {isCollected ? (
+            <div className="flex items-center justify-center gap-1.5 py-1.5 text-emerald-600">
+              <Sparkles size={13} />
+              <span className="text-xs font-medium">My Folder に追加済み</span>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); onGotIt(); }}
+              disabled={saving}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all disabled:opacity-60 shadow-sm"
+            >
+              {saving ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <Check size={13} />
+              )}
+              {saving ? '保存中...' : '理解した！'}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

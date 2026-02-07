@@ -4,7 +4,6 @@ import {
   LandingPage,
   HomePage,
   ChapterPage,
-  FlashcardPage,
   TermListPage,
   MyFolderPage,
   SearchPage,
@@ -46,14 +45,6 @@ function App() {
           element={
             <ProtectedRoute>
               <ChapterPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/chapter/:id/flashcard"
-          element={
-            <ProtectedRoute>
-              <FlashcardPage />
             </ProtectedRoute>
           }
         />

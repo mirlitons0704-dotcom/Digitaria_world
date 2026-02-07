@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
 import { InlineTermCard } from './InlineTermCard';
+import { useAuth } from '../contexts/AuthContext';
+import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -35,6 +37,7 @@ export function StoryTeleprompter({
   chapterTitle,
   terms = [],
 }: StoryTeleprompterProps) {
+  const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -47,6 +50,28 @@ export function StoryTeleprompter({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollNav, setShowScrollNav] = useState(false);
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
+  const [collectedTermIds, setCollectedTermIds] = useState<Set<string>>(new Set());
+  const [savingTermId, setSavingTermId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getUserCollectedTerms(user.id).then((progress) => {
+      setCollectedTermIds(new Set(progress.map((p) => p.term_id)));
+    }).catch(() => {});
+  }, [user]);
+
+  const handleGotIt = useCallback(async (termId: string) => {
+    if (!user) return;
+    setSavingTermId(termId);
+    try {
+      await saveTermProgress(user.id, termId, 3, 'butterfly');
+      setCollectedTermIds((prev) => new Set([...prev, termId]));
+    } catch {
+      // silent fail
+    } finally {
+      setSavingTermId(null);
+    }
+  }, [user]);
 
   const termMap = useMemo(() => {
     const map = new Map<string, Term>();
@@ -388,7 +413,10 @@ export function StoryTeleprompter({
                         <InlineTermCard
                           key={`card-${termId}`}
                           term={term}
+                          isCollected={collectedTermIds.has(termId)}
+                          saving={savingTermId === termId}
                           onClose={() => setExpandedTermId(null)}
+                          onGotIt={() => handleGotIt(termId)}
                         />
                       );
                     })}
