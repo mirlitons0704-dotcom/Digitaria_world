@@ -385,7 +385,7 @@ export function StoryTeleprompter({
                     <img
                       src={scene.image_url}
                       alt=""
-                      className="w-28 h-28 object-contain drop-shadow-md"
+                      className="w-56 h-56 object-contain drop-shadow-lg"
                       loading="lazy"
                     />
                   </div>
