@@ -109,36 +109,36 @@ export function LandingPage() {
       </header>
 
       <main className="relative flex flex-col items-center px-4 pb-12">
-        <div className="mt-4 relative">
+        <div
+          className="mt-4 inline-block p-3 rounded-xl"
+          style={{
+            background: 'linear-gradient(135deg, #BFCFFF 0%, #8BA3E6 50%, #BFCFFF 100%)',
+            boxShadow: `
+              0 0 0 1px rgba(255,255,255,0.5),
+              inset 0 1px 0 rgba(255,255,255,0.6),
+              4px 4px 12px rgba(0,0,0,0.15),
+              8px 8px 24px rgba(143,163,230,0.3)
+            `,
+          }}
+        >
           <div
-            className="absolute -inset-3 rounded-xl"
-            style={{
-              background: 'linear-gradient(135deg, #BFCFFF 0%, #8BA3E6 50%, #BFCFFF 100%)',
-              boxShadow: `
-                0 0 0 1px rgba(255,255,255,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.6),
-                4px 4px 12px rgba(0,0,0,0.15),
-                8px 8px 24px rgba(143,163,230,0.3)
-              `,
-            }}
-          />
-          <div
-            className="absolute -inset-1.5 rounded-lg"
+            className="p-1.5 rounded-lg"
             style={{
               background:
                 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(191,207,255,0.4) 100%)',
             }}
-          />
-          <video
-            className="relative max-h-[50vh] min-w-[300px] w-auto rounded-lg object-contain"
-            style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
-            src={`${STORAGE_URL}/movie_top02.mp4`}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-          />
+          >
+            <video
+              className="block max-h-[50vh] min-w-[300px] w-auto rounded-lg"
+              style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
+              src={`${STORAGE_URL}/movie_top02.mp4`}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+            />
+          </div>
         </div>
 
         {user ? (
