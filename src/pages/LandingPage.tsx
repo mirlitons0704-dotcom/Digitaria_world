@@ -84,6 +84,34 @@ export function LandingPage() {
       </nav>
 
       <header className="relative flex flex-col items-center pb-6">
+        <div className="absolute left-4 md:left-12 lg:left-20 top-0 w-24 md:w-32 lg:w-40 pointer-events-none select-none">
+          <div className="relative animate-float">
+            <img
+              src={`${STORAGE_URL}/c3_bfg.png`}
+              alt=""
+              className="w-full h-auto drop-shadow-lg"
+              style={{
+                filter: 'brightness(1.15) contrast(1.05)',
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-lg animate-hologram"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(120,200,255,0.25) 0%, rgba(200,160,255,0.2) 25%, rgba(255,200,120,0.15) 50%, rgba(120,255,200,0.2) 75%, rgba(120,200,255,0.25) 100%)',
+                mixBlendMode: 'screen',
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-lg animate-hologram-reverse"
+              style={{
+                background:
+                  'linear-gradient(225deg, rgba(255,255,255,0.3) 0%, transparent 40%, rgba(255,255,255,0.15) 60%, transparent 100%)',
+                mixBlendMode: 'overlay',
+              }}
+            />
+          </div>
+        </div>
         <h1
           className="text-4xl md:text-5xl lg:text-6xl tracking-wider font-display font-bold text-gray-800"
           style={{
