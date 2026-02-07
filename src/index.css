@@ -171,6 +171,61 @@
   opacity: 1;
 }
 
+.term-toggle-pill {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.term-toggle-pill-inactive {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.term-toggle-pill-inactive:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.term-toggle-pill-active {
+  background: linear-gradient(135deg, #064e3b 0%, #059669 40%, #10b981 60%, #047857 100%);
+  border: 1px solid rgba(16, 185, 129, 0.6);
+}
+
+.term-toggle-pill-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.15) 60%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  animation: gradient-button-shine 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes inline-term-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.inline-term-card {
+  animation: inline-term-card-enter 0.25s ease-out forwards;
+}
+
 .teleprompter-container {
   position: relative;
   overflow-y: auto;

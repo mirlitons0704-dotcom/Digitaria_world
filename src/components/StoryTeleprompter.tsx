@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -9,12 +9,16 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUp,
+  ToggleLeft,
+  ToggleRight,
 } from 'lucide-react';
-import type { StoryScene } from '../lib/database.types';
+import type { StoryScene, Term } from '../lib/database.types';
+import { InlineTermCard } from './InlineTermCard';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
   chapterTitle: string;
+  terms?: Term[];
 }
 
 const SPEED_OPTIONS = [
@@ -29,6 +33,7 @@ const MANUAL_SCROLL_STEP = 200;
 export function StoryTeleprompter({
   scenes,
   chapterTitle,
+  terms = [],
 }: StoryTeleprompterProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -41,6 +46,17 @@ export function StoryTeleprompter({
   const [isAtTop, setIsAtTop] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollNav, setShowScrollNav] = useState(false);
+  const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
+
+  const termMap = useMemo(() => {
+    const map = new Map<string, Term>();
+    terms.forEach((t) => map.set(t.id, t));
+    return map;
+  }, [terms]);
+
+  const toggleTerm = useCallback((termId: string) => {
+    setExpandedTermId((prev) => (prev === termId ? null : termId));
+  }, []);
 
   const speed = SPEED_OPTIONS[speedIndex].value;
 
@@ -344,15 +360,38 @@ export function StoryTeleprompter({
                 </div>
 
                 {scene.terms_introduced.length > 0 && (
-                  <div className="mt-4 flex items-center gap-2 flex-wrap">
-                    {scene.terms_introduced.map((termId) => (
-                      <span
-                        key={termId}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 text-xs font-medium border border-teal-100"
-                      >
-                        {termId}
-                      </span>
-                    ))}
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {scene.terms_introduced.map((termId) => {
+                        const term = termMap.get(termId);
+                        const isExpanded = expandedTermId === termId;
+                        return (
+                          <button
+                            key={termId}
+                            onClick={() => toggleTerm(termId)}
+                            className={`term-toggle-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300 ${
+                              isExpanded
+                                ? 'term-toggle-pill-active text-white shadow-md'
+                                : 'term-toggle-pill-inactive text-emerald-700 hover:shadow-sm'
+                            }`}
+                          >
+                            {isExpanded ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
+                            {term ? term.term : termId}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {scene.terms_introduced.map((termId) => {
+                      const term = termMap.get(termId);
+                      if (!term || expandedTermId !== termId) return null;
+                      return (
+                        <InlineTermCard
+                          key={`card-${termId}`}
+                          term={term}
+                          onClose={() => setExpandedTermId(null)}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>

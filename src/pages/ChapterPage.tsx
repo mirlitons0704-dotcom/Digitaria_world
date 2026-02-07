@@ -82,7 +82,7 @@ export function ChapterPage() {
         </div>
 
         <div className="flex-1 min-h-0 relative">
-          <StoryTeleprompter scenes={scenes} chapterTitle={chapter.title} />
+          <StoryTeleprompter scenes={scenes} chapterTitle={chapter.title} terms={terms} />
         </div>
 
         <div className="px-4 py-4 bg-white/60 backdrop-blur-sm border-t border-gray-200/40">
