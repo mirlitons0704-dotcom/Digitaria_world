@@ -4,7 +4,7 @@ import { useChapter } from '../hooks/useChapters';
 import { useTermsByChapter } from '../hooks/useTerms';
 import { Layout } from '../components/Layout';
 import { TermCard } from '../components/TermCard';
-import { Loader2, ArrowLeft, Search, X } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export function TermListPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,16 +13,9 @@ export function TermListPage() {
   const { chapter, loading: chapterLoading } = useChapter(chapterId);
   const { terms, loading: termsLoading } = useTermsByChapter(chapterId);
 
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
 
   const loading = chapterLoading || termsLoading;
-
-  const filteredTerms = terms.filter(term =>
-    term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    term.term_ja.includes(searchQuery) ||
-    term.one_liner.includes(searchQuery)
-  );
 
   if (loading) {
     return (
@@ -70,27 +63,8 @@ export function TermListPage() {
           <div className="w-16" />
         </div>
 
-        <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search terms..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-10 py-3 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-
         <div className="space-y-3">
-          {filteredTerms.map((term) => (
+          {terms.map((term) => (
             <TermCard
               key={term.id}
               term={term}
@@ -100,9 +74,9 @@ export function TermListPage() {
           ))}
         </div>
 
-        {filteredTerms.length === 0 && (
+        {terms.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No terms found matching "{searchQuery}"</p>
+            <p className="text-gray-500">No terms found</p>
           </div>
         )}
       </div>
