@@ -380,6 +380,17 @@ export function StoryTeleprompter({
                   </div>
                 )}
 
+                {scene.image_url && (
+                  <div className="scene-image-enter flex justify-center my-6">
+                    <img
+                      src={scene.image_url}
+                      alt=""
+                      className="w-28 h-28 object-contain drop-shadow-md"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+
                 <div className="text-gray-700 text-lg leading-loose whitespace-pre-line">
                   {scene.content}
                 </div>

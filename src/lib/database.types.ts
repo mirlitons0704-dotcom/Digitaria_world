@@ -136,6 +136,7 @@ export interface Database {
           content: string;
           terms_introduced: string[];
           character_ids: string[];
+          image_url: string | null;
           created_at: string;
         };
         Insert: {
@@ -146,6 +147,7 @@ export interface Database {
           content: string;
           terms_introduced?: string[];
           character_ids?: string[];
+          image_url?: string | null;
           created_at?: string;
         };
         Update: {
@@ -156,6 +158,7 @@ export interface Database {
           content?: string;
           terms_introduced?: string[];
           character_ids?: string[];
+          image_url?: string | null;
           created_at?: string;
         };
       };
