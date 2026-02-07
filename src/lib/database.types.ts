@@ -295,6 +295,7 @@ export interface Database {
           id: string;
           username: string;
           email: string;
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -302,6 +303,7 @@ export interface Database {
           id: string;
           username: string;
           email: string;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -309,6 +311,7 @@ export interface Database {
           id?: string;
           username?: string;
           email?: string;
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Home, Folder, Search, LogOut, User } from 'lucide-react';
+import { Home, Folder, Search, LogOut, User, Shield } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
 
   const navItems = [
     { path: '/home', icon: Home, label: 'Home' },
@@ -50,6 +50,15 @@ export function Layout({ children }: LayoutProps) {
             <div className="flex items-center gap-3">
               {user && (
                 <>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate('/admin')}
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 text-gray-100 hover:bg-gray-800 transition-colors text-xs font-medium"
+                    >
+                      <Shield size={14} />
+                      Admin
+                    </button>
+                  )}
                   <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100">
                     <User size={14} className="text-gray-500" />
                     <span className="text-sm text-gray-600">
@@ -84,6 +93,15 @@ export function Layout({ children }: LayoutProps) {
               <span className="text-xs">{label}</span>
             </button>
           ))}
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex flex-col items-center gap-1 px-4 py-1 rounded-lg text-gray-500 transition-all"
+            >
+              <Shield size={20} />
+              <span className="text-xs">Admin</span>
+            </button>
+          )}
         </div>
       </nav>
 
