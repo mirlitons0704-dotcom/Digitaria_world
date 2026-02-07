@@ -130,7 +130,7 @@ export function LandingPage() {
             }}
           />
           <video
-            className="relative max-h-[50vh] min-w-[300px] min-h-[200px] w-auto rounded-lg object-cover"
+            className="relative max-h-[50vh] min-w-[300px] w-auto rounded-lg object-contain"
             style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
             src={`${STORAGE_URL}/movie_top02.mp4`}
             autoPlay
