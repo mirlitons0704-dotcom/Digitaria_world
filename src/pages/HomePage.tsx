@@ -3,10 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useChapters } from '../hooks/useChapters';
 import { ChapterCard } from '../components/ChapterCard';
 import { Layout } from '../components/Layout';
+import { ASSETS } from '../lib/constants';
 import { Loader2, BookOpen, Folder, Search } from 'lucide-react';
-
-// Supabase Storage base URL for assets
-const STORAGE_URL = 'https://erkvissuydjosstfhywf.supabase.co/storage/v1/object/public/assets';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -47,12 +45,7 @@ export function HomePage() {
         <header className="mb-12">
           <div className="flex items-center justify-center gap-4 md:gap-6">
             <div className="w-20 md:w-28 flex-shrink-0">
-              <img
-                className="w-full h-auto rounded-lg"
-                src={`${STORAGE_URL}/c1_bit.png`}
-                alt="ビットくん"
-                onError={(e) => console.error('Failed to load bit-kun image', e)}
-              />
+              <img className="w-full h-auto rounded-lg" src={ASSETS.bitKun} alt="ビットくん" />
             </div>
 
             <div className="text-center flex-1">
@@ -82,12 +75,7 @@ export function HomePage() {
             </div>
 
             <div className="w-20 md:w-28 flex-shrink-0">
-              <img
-                className="w-full h-auto rounded-lg"
-                src={`${STORAGE_URL}/c2_bite.png`}
-                alt="バイトさん"
-                onError={(e) => console.error('Failed to load byte-san image', e)}
-              />
+              <img className="w-full h-auto rounded-lg" src={ASSETS.byteSan} alt="バイトさん" />
             </div>
           </div>
 

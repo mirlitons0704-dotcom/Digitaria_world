@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthForm } from '../components/AuthForm';
+import { ASSETS } from '../lib/constants';
 import { LogOut, User, Sparkles } from 'lucide-react';
-
-// Supabase Storage base URL for assets
-const STORAGE_URL = 'https://erkvissuydjosstfhywf.supabase.co/storage/v1/object/public/assets';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -131,7 +129,7 @@ export function LandingPage() {
             <video
               className="block max-h-[50vh] w-auto rounded-lg"
               style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)' }}
-              src={`${STORAGE_URL}/movie_top02.mp4`}
+              src={ASSETS.landingVideo}
               autoPlay
               loop
               muted

@@ -25,3 +25,6 @@ dist-ssr
 # Coverage and audit files
 coverage
 .oversized-files
+
+# Supabase temp files
+supabase/.temp

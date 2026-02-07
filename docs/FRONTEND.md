@@ -83,6 +83,17 @@ Hooks for fetching and searching programming terms.
   - `useSearchTerms(query)`: Searches terms with 300ms debounce
   - `useQuizTerms(chapterId, count)`: Fetches random terms for quiz
 
+## Lib (Utilities)
+
+### constants.ts
+
+Shared constants for the application.
+
+- Location: `src/lib/constants.ts`
+- Exports:
+  - `STORAGE_URL`: Base URL for Supabase Storage
+  - `ASSETS`: Object containing all asset URLs (images, videos)
+
 ## Directory Structure
 
 ```
@@ -90,23 +101,26 @@ src/
 ├── components/
 │   ├── AuthForm.tsx
 │   ├── ChapterCard.tsx
-│   ├── ChapterCard.test.tsx
 │   ├── FlashCard.tsx
-│   ├── FlashCard.test.tsx
 │   ├── Layout.tsx
 │   └── TermCard.tsx
 ├── hooks/
 │   ├── useChapters.ts
-│   ├── useChapters.test.ts
 │   ├── useCharacters.ts
-│   ├── useTerms.ts
-│   └── useTerms.test.ts
+│   └── useTerms.ts
 ├── lib/
 │   ├── api.ts
+│   ├── constants.ts
 │   ├── database.types.ts
 │   └── supabase.ts
 ├── pages/
-│   └── (page components)
+│   ├── LandingPage.tsx
+│   ├── HomePage.tsx
+│   ├── ChapterPage.tsx
+│   ├── FlashcardPage.tsx
+│   ├── TermListPage.tsx
+│   ├── MyFolderPage.tsx
+│   └── SearchPage.tsx
 └── test/
     ├── setup.ts
     └── test-utils.tsx
