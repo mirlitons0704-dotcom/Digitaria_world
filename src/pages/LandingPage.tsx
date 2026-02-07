@@ -142,24 +142,14 @@ export function LandingPage() {
         {user ? (
           <button
             onClick={() => navigate('/home')}
-            className="mt-8 group relative px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 border border-slate-200/60"
+            className="gradient-btn mt-8 group min-w-[200px] px-9 py-4 rounded-[11px] font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
             style={{
-              background:
-                'linear-gradient(135deg, #f1f5f9 0%, #e0e7ef 25%, #cbd5e1 50%, #e0e7ef 75%, #f1f5f9 100%)',
-              color: '#475569',
               fontFamily: '"Titillium Web", sans-serif',
-              fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(148,163,184,0.3), inset 0 1px 0 rgba(255,255,255,0.6)',
+              boxShadow:
+                '0 4px 20px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.1)',
             }}
           >
-            <div
-              className="absolute inset-0 rounded-xl opacity-40 pointer-events-none"
-              style={{
-                background:
-                  'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)',
-              }}
-            />
-            <span className="relative flex items-center gap-3">
+            <span className="relative z-10 flex items-center gap-3">
               <Sparkles size={20} className="group-hover:animate-pulse" />
               Start Your Journey
               <Sparkles size={20} className="group-hover:animate-pulse" />
