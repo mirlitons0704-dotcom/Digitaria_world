@@ -161,7 +161,6 @@ src/
 │   ├── Layout.tsx
 │   ├── StoryTeleprompter.tsx
 │   └── TermCard.tsx
-│   └── TermCard.tsx
 ├── hooks/
 │   ├── useChapters.ts
 │   ├── useCharacters.ts
