@@ -35,6 +35,7 @@ export interface Database {
           chapter_appearance?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       chapters: {
         Row: {
@@ -76,6 +77,15 @@ export interface Database {
           term_count?: number;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'chapters_guide_id_fkey';
+            columns: ['guide_id'];
+            isOneToOne: false;
+            referencedRelation: 'characters';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       terms: {
         Row: {
@@ -126,6 +136,7 @@ export interface Database {
           story_context?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       story_scenes: {
         Row: {
@@ -161,6 +172,7 @@ export interface Database {
           image_url?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       user_profiles: {
         Row: {
@@ -190,6 +202,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       user_term_progress: {
         Row: {
@@ -225,6 +238,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       user_chapter_progress: {
         Row: {
@@ -260,6 +274,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       quiz_history: {
         Row: {
@@ -289,6 +304,7 @@ export interface Database {
           total_questions?: number;
           completed_at?: string;
         };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -315,7 +331,23 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      get_random_terms: {
+        Args: { p_chapter_id: number | null; p_count: number };
+        Returns: Database['public']['Tables']['terms']['Row'][];
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }

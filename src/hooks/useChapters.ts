@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getChapters, getChapter, getChapterWithGuide } from '../lib/api';
 import type { Chapter, Character } from '../lib/database.types';
 
@@ -7,14 +7,20 @@ export function useChapters() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetch = useCallback(() => {
+    setLoading(true);
+    setError(null);
     getChapters()
       .then(setChapters)
       .catch(setError)
       .finally(() => setLoading(false));
   }, []);
 
-  return { chapters, loading, error };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { chapters, loading, error, retry: fetch };
 }
 
 export function useChapter(id: number | null) {
@@ -22,20 +28,24 @@ export function useChapter(id: number | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetch = useCallback(() => {
     if (id === null) {
       setLoading(false);
       return;
     }
-
     setLoading(true);
+    setError(null);
     getChapter(id)
       .then(setChapter)
       .catch(setError)
       .finally(() => setLoading(false));
   }, [id]);
 
-  return { chapter, loading, error };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { chapter, loading, error, retry: fetch };
 }
 
 export function useChapterWithGuide(id: number | null) {
@@ -43,18 +53,22 @@ export function useChapterWithGuide(id: number | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetch = useCallback(() => {
     if (id === null) {
       setLoading(false);
       return;
     }
-
     setLoading(true);
+    setError(null);
     getChapterWithGuide(id)
       .then(setData)
       .catch(setError)
       .finally(() => setLoading(false));
   }, [id]);
 
-  return { chapter: data, loading, error };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { chapter: data, loading, error, retry: fetch };
 }

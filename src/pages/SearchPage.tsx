@@ -5,6 +5,7 @@ import { useChapters } from '../hooks/useChapters';
 import { Layout } from '../components/Layout';
 import { TermCard } from '../components/TermCard';
 import { Search, X, Loader2, BookOpen } from 'lucide-react';
+import { TOTAL_TERMS } from '../lib/constants';
 
 export function SearchPage() {
   const navigate = useNavigate();
@@ -13,14 +14,16 @@ export function SearchPage() {
   const { results, loading } = useSearchTerms(query);
   const { chapters } = useChapters();
 
-  const chapterMap = new Map(chapters.map(c => [c.id, c]));
+  const chapterMap = new Map(chapters.map((c) => [c.id, c]));
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Search Terms</h1>
-          <p className="text-gray-500">Find any term across all 520 programming concepts</p>
+          <p className="text-gray-500">
+            Find any term across all {TOTAL_TERMS} programming concepts
+          </p>
         </header>
 
         <div className="relative mb-8">
@@ -46,9 +49,7 @@ export function SearchPage() {
         {!query ? (
           <div className="text-center py-16">
             <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">
-              Start typing to search through all terms
-            </p>
+            <p className="text-gray-500">Start typing to search through all terms</p>
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center py-16">
@@ -56,12 +57,8 @@ export function SearchPage() {
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500 mb-4">
-              No terms found for "{query}"
-            </p>
-            <p className="text-sm text-gray-400">
-              Try searching with different keywords
-            </p>
+            <p className="text-gray-500 mb-4">No terms found for "{query}"</p>
+            <p className="text-sm text-gray-400">Try searching with different keywords</p>
           </div>
         ) : (
           <>

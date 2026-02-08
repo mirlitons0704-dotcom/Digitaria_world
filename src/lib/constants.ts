@@ -1,6 +1,9 @@
+// Total number of programming terms in the app
+export const TOTAL_TERMS = 520;
+
 // Supabase Storage base URL for assets
-export const STORAGE_URL =
-  'https://erkvissuydjosstfhywf.supabase.co/storage/v1/object/public/assets';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+export const STORAGE_URL = `${supabaseUrl}/storage/v1/object/public/assets`;
 
 // Asset paths
 export const ASSETS = {

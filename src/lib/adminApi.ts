@@ -84,8 +84,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
     .select('id, display_name, total_butterflies, current_chapter')
     .in('id', userIds);
 
-  const typedUserProfiles =
-    (userProfiles || []) as unknown as UserProfileRow[];
+  const typedUserProfiles = (userProfiles || []) as unknown as UserProfileRow[];
   const profileMap = new Map(typedUserProfiles.map((up) => [up.id, up]));
 
   return typedProfiles.map((p) => {
@@ -99,9 +98,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
   });
 }
 
-export async function getAdminUserDetail(
-  userId: string,
-): Promise<UserDetail | null> {
+export async function getAdminUserDetail(userId: string): Promise<UserDetail | null> {
   const { data: profile } = await supabase
     .from('profiles')
     .select('id, username, email, is_admin, created_at')
@@ -178,9 +175,7 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
     .from('quiz_history')
     .select('*', { count: 'exact', head: true });
 
-  const { data: butterflyData } = await supabase
-    .from('user_profiles')
-    .select('total_butterflies');
+  const { data: butterflyData } = await supabase.from('user_profiles').select('total_butterflies');
 
   const typedButterflyData = (butterflyData || []) as unknown as {
     total_butterflies: number;
@@ -188,7 +183,7 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
 
   const totalButterflies = typedButterflyData.reduce(
     (sum, u) => sum + (u.total_butterflies || 0),
-    0,
+    0
   );
   const userCount = typedButterflyData.length || 1;
 
@@ -218,8 +213,7 @@ export async function getChapterAnalytics(): Promise<ChapterStats[]> {
     .from('user_chapter_progress')
     .select('chapter_id, is_unlocked, is_completed, terms_mastered');
 
-  const typedProgress =
-    (chapterProgress || []) as unknown as ChapterProgressRow[];
+  const typedProgress = (chapterProgress || []) as unknown as ChapterProgressRow[];
 
   const progressMap = new Map<
     number,
@@ -247,17 +241,13 @@ export async function getChapterAnalytics(): Promise<ChapterStats[]> {
       users_started: stats?.started ?? 0,
       users_completed: stats?.completed ?? 0,
       avg_terms_mastered:
-        stats && stats.started > 0
-          ? Math.round(stats.totalMastered / stats.started)
-          : 0,
+        stats && stats.started > 0 ? Math.round(stats.totalMastered / stats.started) : 0,
     };
   });
 }
 
-export async function getButterflyDistribution(): Promise<
-  ButterflyDistribution[]
-> {
-  const stages = ['none', 'light', 'egg', 'larva', 'pupa', 'butterfly'];
+export async function getButterflyDistribution(): Promise<ButterflyDistribution[]> {
+  const stages = ['none', 'light', 'egg', 'larva', 'pupa', 'butterfly'] as const;
   const results: ButterflyDistribution[] = [];
 
   for (const stage of stages) {
@@ -272,9 +262,7 @@ export async function getButterflyDistribution(): Promise<
   return results;
 }
 
-export async function getDifficultyBreakdown(): Promise<
-  DifficultyBreakdown[]
-> {
+export async function getDifficultyBreakdown(): Promise<DifficultyBreakdown[]> {
   const results: DifficultyBreakdown[] = [];
 
   for (const difficulty of [1, 2, 3]) {
@@ -310,10 +298,8 @@ export async function getDifficultyBreakdown(): Promise<
 }
 
 export async function getRecentSignups(
-  limit: number = 10,
-): Promise<
-  { id: string; username: string; email: string; created_at: string }[]
-> {
+  limit: number = 10
+): Promise<{ id: string; username: string; email: string; created_at: string }[]> {
   const { data, error } = await supabase
     .from('profiles')
     .select('id, username, email, created_at')
@@ -330,10 +316,8 @@ export async function getRecentSignups(
 }
 
 export async function getTopLearners(
-  limit: number = 10,
-): Promise<
-  { id: string; display_name: string | null; total_butterflies: number }[]
-> {
+  limit: number = 10
+): Promise<{ id: string; display_name: string | null; total_butterflies: number }[]> {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('id, display_name, total_butterflies')

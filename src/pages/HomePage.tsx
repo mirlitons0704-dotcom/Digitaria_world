@@ -3,13 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useChapters } from '../hooks/useChapters';
 import { ChapterCard } from '../components/ChapterCard';
 import { Layout } from '../components/Layout';
-import { ASSETS } from '../lib/constants';
+import { ASSETS, TOTAL_TERMS } from '../lib/constants';
 import { Loader2, BookOpen, Folder, Search } from 'lucide-react';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { chapters, loading, error } = useChapters();
+  const { chapters, loading, error, retry } = useChapters();
 
   if (!user) {
     navigate('/');
@@ -29,8 +29,14 @@ export function HomePage() {
   if (error) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <p className="text-red-500">Failed to load chapters</p>
+          <button
+            onClick={retry}
+            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm"
+          >
+            Retry
+          </button>
         </div>
       </Layout>
     );
@@ -53,7 +59,7 @@ export function HomePage() {
                 Your Journey Awaits
               </h1>
               <p className="text-gray-600 font-titillium-light text-sm md:text-lg">
-                Explore 520 programming terms across 17 chapters
+                Explore {TOTAL_TERMS} programming terms across 17 chapters
               </p>
 
               <div className="flex flex-wrap justify-center gap-4 mt-6">

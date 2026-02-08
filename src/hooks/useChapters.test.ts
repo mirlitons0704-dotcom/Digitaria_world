@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChapters, useChapter, useChapterWithGuide } from './useChapters';
 import * as api from '../lib/api';
 import { createMockChapter, createMockCharacter } from '../test/test-utils';
@@ -53,6 +53,29 @@ describe('useChapters', () => {
 
     expect(result.current.chapters).toEqual([]);
     expect(result.current.error).toEqual(mockError);
+  });
+
+  it('retry recovers from error', async () => {
+    const mockError = new Error('Network error');
+    vi.mocked(api.getChapters).mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockChapters);
+
+    const { result } = renderHook(() => useChapters());
+
+    await waitFor(() => {
+      expect(result.current.error).toEqual(mockError);
+    });
+
+    // Retry
+    await act(async () => {
+      result.current.retry();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe(null);
+    expect(result.current.chapters).toEqual(mockChapters);
   });
 });
 

@@ -7,6 +7,8 @@ import {
   TermListPage,
   MyFolderPage,
   SearchPage,
+  TermsPage,
+  PrivacyPage,
 } from './pages';
 import {
   AdminDashboardPage,
@@ -133,6 +135,9 @@ function App() {
             </AdminRoute>
           }
         />
+
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

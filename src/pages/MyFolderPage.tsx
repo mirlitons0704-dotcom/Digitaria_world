@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useChapters } from '../hooks/useChapters';
 import { Layout } from '../components/Layout';
 import { getUserCollectedTerms, getTermsByIds } from '../lib/api';
+import { TOTAL_TERMS } from '../lib/constants';
 import { Term, Chapter } from '../lib/database.types';
 import { Loader2, Folder, Sparkles, Grid3X3, List, ChevronRight } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export function MyFolderPage() {
   const { chapters } = useChapters();
   const [collections, setCollections] = useState<ChapterCollection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [expandedChapter, setExpandedChapter] = useState<number | null>(null);
   const [totalButterflies, setTotalButterflies] = useState(0);
@@ -44,8 +46,8 @@ export function MyFolderPage() {
           return;
         }
 
-        const termIds = progress.map(p => p.term_id);
-        const progressMap = new Map(progress.map(p => [p.term_id, p.created_at]));
+        const termIds = progress.map((p) => p.term_id);
+        const progressMap = new Map(progress.map((p) => [p.term_id, p.created_at]));
 
         const terms = await getTermsByIds(termIds);
 
@@ -55,21 +57,21 @@ export function MyFolderPage() {
           return;
         }
 
-        const collectedTerms: CollectedTerm[] = terms.map(term => ({
+        const collectedTerms: CollectedTerm[] = terms.map((term) => ({
           ...term,
           collected_at: progressMap.get(term.id) || new Date().toISOString(),
         }));
 
         const chapterMap = new Map<number, CollectedTerm[]>();
-        collectedTerms.forEach(term => {
+        collectedTerms.forEach((term) => {
           const existing = chapterMap.get(term.chapter_id) || [];
           existing.push(term);
           chapterMap.set(term.chapter_id, existing);
         });
 
         const result: ChapterCollection[] = chapters
-          .filter(chapter => chapterMap.has(chapter.id))
-          .map(chapter => ({
+          .filter((chapter) => chapterMap.has(chapter.id))
+          .map((chapter) => ({
             chapter,
             terms: chapterMap.get(chapter.id)!.sort((a, b) => a.order_index - b.order_index),
           }));
@@ -78,6 +80,7 @@ export function MyFolderPage() {
         setTotalButterflies(collectedTerms.length);
       } catch (error) {
         console.error('Failed to fetch collections:', error);
+        setFetchError('Failed to load your collection. Please try again.');
         setCollections([]);
       } finally {
         setLoading(false);
@@ -102,6 +105,22 @@ export function MyFolderPage() {
     );
   }
 
+  if (fetchError) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <p className="text-red-500">{fetchError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-teal-500 hover:text-teal-600"
+          >
+            Reload
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -109,7 +128,7 @@ export function MyFolderPage() {
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-100 to-yellow-100 px-6 py-3 rounded-2xl mb-4">
             <Sparkles className="w-6 h-6 text-amber-500" />
             <span className="text-3xl font-bold text-amber-600">{totalButterflies}</span>
-            <span className="text-amber-600">/ 520</span>
+            <span className="text-amber-600">/ {TOTAL_TERMS}</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-1">My Folder</h1>
           <p className="text-gray-500">Your collection of Code Butterflies</p>
@@ -118,9 +137,7 @@ export function MyFolderPage() {
         {collections.length === 0 ? (
           <div className="text-center py-16">
             <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-medium text-gray-600 mb-2">
-              No butterflies yet
-            </h2>
+            <h2 className="text-xl font-medium text-gray-600 mb-2">No butterflies yet</h2>
             <p className="text-gray-500 mb-6">
               Start learning to collect your first Code Butterfly!
             </p>
@@ -161,9 +178,9 @@ export function MyFolderPage() {
                   className="bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 overflow-hidden"
                 >
                   <button
-                    onClick={() => setExpandedChapter(
-                      expandedChapter === chapter.id ? null : chapter.id
-                    )}
+                    onClick={() =>
+                      setExpandedChapter(expandedChapter === chapter.id ? null : chapter.id)
+                    }
                     className="w-full flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -209,7 +226,7 @@ export function MyFolderPage() {
                     <div className="border-t border-gray-100 p-4">
                       {viewMode === 'grid' ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                          {terms.map(term => (
+                          {terms.map((term) => (
                             <div
                               key={term.id}
                               className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-3 border border-amber-100"
@@ -228,16 +245,14 @@ export function MyFolderPage() {
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          {terms.map(term => (
+                          {terms.map((term) => (
                             <div
                               key={term.id}
                               className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
                             >
                               <span className="text-xl">🦋</span>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-800 truncate">
-                                  {term.term}
-                                </p>
+                                <p className="font-medium text-gray-800 truncate">{term.term}</p>
                                 <p className="text-sm text-gray-500 truncate">
                                   {term.term_ja} - {term.one_liner}
                                 </p>
@@ -257,16 +272,14 @@ export function MyFolderPage() {
                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full transition-all duration-500"
-                    style={{ width: `${(totalButterflies / 520) * 100}%` }}
+                    style={{ width: `${(totalButterflies / TOTAL_TERMS) * 100}%` }}
                   />
                 </div>
                 <p className="text-sm text-gray-600">
-                  {Math.round((totalButterflies / 520) * 100)}% complete
+                  {Math.round((totalButterflies / TOTAL_TERMS) * 100)}% complete
                 </p>
                 {totalButterflies >= 500 && (
-                  <p className="text-amber-600 font-medium">
-                    Memory Garden unlocked!
-                  </p>
+                  <p className="text-amber-600 font-medium">Memory Garden unlocked!</p>
                 )}
               </div>
             </div>

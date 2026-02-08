@@ -71,6 +71,30 @@ describe('useTermsByChapter', () => {
 
     expect(result.current.error).toEqual(mockError);
   });
+
+  it('retry recovers from error', async () => {
+    const mockError = new Error('Network error');
+    vi.mocked(api.getTermsByChapter)
+      .mockRejectedValueOnce(mockError)
+      .mockResolvedValueOnce(mockTerms);
+
+    const { result } = renderHook(() => useTermsByChapter(1));
+
+    await waitFor(() => {
+      expect(result.current.error).toEqual(mockError);
+    });
+
+    await act(async () => {
+      result.current.retry();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBe(null);
+    expect(result.current.terms).toEqual(mockTerms);
+  });
 });
 
 describe('useTerm', () => {

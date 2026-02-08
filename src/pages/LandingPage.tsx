@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthForm } from '../components/AuthForm';
-import { ASSETS } from '../lib/constants';
+import { ASSETS, TOTAL_TERMS } from '../lib/constants';
 import { LogOut, User, Sparkles } from 'lucide-react';
 
 export function LandingPage() {
@@ -10,6 +10,23 @@ export function LandingPage() {
   const { user, profile, loading, signOut } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const handleEscKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') setShowAuthModal(false);
+  }, []);
+
+  useEffect(() => {
+    if (showAuthModal) {
+      document.addEventListener('keydown', handleEscKey);
+      // Focus the modal when it opens
+      requestAnimationFrame(() => {
+        const firstInput = modalRef.current?.querySelector('input');
+        if (firstInput) (firstInput as HTMLElement).focus();
+      });
+      return () => document.removeEventListener('keydown', handleEscKey);
+    }
+  }, [showAuthModal, handleEscKey]);
 
   if (loading) {
     return (
@@ -102,7 +119,7 @@ export function LandingPage() {
           className="tracking-wide text-center px-4"
           style={{ color: '#605c5c', fontFamily: '"Titillium Web", sans-serif', fontWeight: 300 }}
         >
-          The code journey through 520 programming terms
+          The code journey through {TOTAL_TERMS} programming terms
         </p>
       </header>
 
@@ -145,8 +162,7 @@ export function LandingPage() {
             className="gradient-btn mt-8 group min-w-[200px] px-9 py-4 rounded-[11px] font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
             style={{
               fontFamily: '"Titillium Web", sans-serif',
-              boxShadow:
-                '0 4px 20px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 20px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.1)',
             }}
           >
             <span className="relative z-10 flex items-center gap-3">
@@ -174,12 +190,16 @@ export function LandingPage() {
       {showAuthModal && !user && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={authMode === 'login' ? 'ログイン' : 'アカウント作成'}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowAuthModal(false);
           }}
         >
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
           <div
+            ref={modalRef}
             className="relative bg-white/95 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl"
             style={{
               boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.5)',
@@ -188,6 +208,7 @@ export function LandingPage() {
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="閉じる"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

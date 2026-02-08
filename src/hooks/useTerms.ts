@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getTermsByChapter, getTerm, searchTerms, getRandomTermsForQuiz } from '../lib/api';
 import type { Term } from '../lib/database.types';
 
@@ -7,21 +7,25 @@ export function useTermsByChapter(chapterId: number | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetch = useCallback(() => {
     if (chapterId === null) {
       setTerms([]);
       setLoading(false);
       return;
     }
-
     setLoading(true);
+    setError(null);
     getTermsByChapter(chapterId)
       .then(setTerms)
       .catch(setError)
       .finally(() => setLoading(false));
   }, [chapterId]);
 
-  return { terms, loading, error };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { terms, loading, error, retry: fetch };
 }
 
 export function useTerm(id: string | null) {
@@ -29,20 +33,24 @@ export function useTerm(id: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetch = useCallback(() => {
     if (id === null) {
       setLoading(false);
       return;
     }
-
     setLoading(true);
+    setError(null);
     getTerm(id)
       .then(setTerm)
       .catch(setError)
       .finally(() => setLoading(false));
   }, [id]);
 
-  return { term, loading, error };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { term, loading, error, retry: fetch };
 }
 
 export function useSearchTerms(query: string) {
@@ -57,6 +65,7 @@ export function useSearchTerms(query: string) {
     }
 
     setLoading(true);
+    setError(null);
     const timeoutId = setTimeout(() => {
       searchTerms(query)
         .then(setResults)
@@ -75,17 +84,17 @@ export function useQuizTerms(chapterId: number | null, count: number = 10) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const refresh = () => {
+  const fetchQuiz = useCallback(() => {
     setLoading(true);
     getRandomTermsForQuiz(chapterId, count)
       .then(setTerms)
       .catch(setError)
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    refresh();
   }, [chapterId, count]);
 
-  return { terms, loading, error, refresh };
+  useEffect(() => {
+    fetchQuiz();
+  }, [fetchQuiz]);
+
+  return { terms, loading, error, refresh: fetchQuiz };
 }

@@ -1,4 +1,16 @@
-import { BookOpen, Lightbulb, AlertTriangle, Cog, X, Check, Loader2, Sparkles, Link2 } from 'lucide-react';
+import { useState } from 'react';
+import {
+  BookOpen,
+  Lightbulb,
+  AlertTriangle,
+  Cog,
+  X,
+  Check,
+  Loader2,
+  Sparkles,
+  Link2,
+  ArrowRight,
+} from 'lucide-react';
 import type { Term } from '../lib/database.types';
 
 interface InlineTermCardProps {
@@ -9,7 +21,15 @@ interface InlineTermCardProps {
   onGotIt?: () => void;
 }
 
-export function InlineTermCard({ term, isCollected, saving, onClose, onGotIt }: InlineTermCardProps) {
+export function InlineTermCard({
+  term,
+  isCollected,
+  saving,
+  onClose,
+  onGotIt,
+}: InlineTermCardProps) {
+  const [confirming, setConfirming] = useState(false);
+
   return (
     <div className="inline-term-card mt-3 mb-2 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 backdrop-blur-md border border-emerald-200/50 shadow-lg shadow-emerald-100/30 overflow-hidden">
       <div className="px-5 pt-4 pb-3">
@@ -21,7 +41,10 @@ export function InlineTermCard({ term, isCollected, saving, onClose, onGotIt }: 
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs text-gray-500">{term.term_ja}</span>
             <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-white/60 transition-colors"
             >
               <X size={16} />
@@ -99,18 +122,39 @@ export function InlineTermCard({ term, isCollected, saving, onClose, onGotIt }: 
               <Sparkles size={13} />
               <span className="text-xs font-medium">My Folder に追加済み</span>
             </div>
+          ) : confirming ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirming(false);
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-all"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGotIt();
+                }}
+                disabled={saving}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all disabled:opacity-60 shadow-sm"
+              >
+                {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                {saving ? '保存中...' : 'My Folderに追加'}
+              </button>
+            </div>
           ) : (
             <button
-              onClick={(e) => { e.stopPropagation(); onGotIt(); }}
-              disabled={saving}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all disabled:opacity-60 shadow-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirming(true);
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm"
             >
-              {saving ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Check size={14} />
-              )}
-              {saving ? '保存中...' : '理解した！'}
+              <ArrowRight size={14} />
+              理解した！
             </button>
           )}
         </div>

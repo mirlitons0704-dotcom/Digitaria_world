@@ -6,6 +6,11 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // Set ALLOWED_ORIGIN via `supabase secrets set ALLOWED_ORIGIN=https://your-app.com`
 // ---------------------------------------------------------------------------
 const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') || '*';
+if (ALLOWED_ORIGIN === '*') {
+  console.warn(
+    '[TTS] ALLOWED_ORIGIN is not set — CORS allows all origins. Set ALLOWED_ORIGIN for production.'
+  );
+}
 
 function corsHeaders(origin?: string | null) {
   // If ALLOWED_ORIGIN is '*' (dev), allow everything.

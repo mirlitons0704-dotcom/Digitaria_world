@@ -115,19 +115,13 @@ export async function getRandomTermsForQuiz(
   chapterId: number | null,
   count: number = 10
 ): Promise<Term[]> {
-  let query = supabase.from('terms').select('*');
-
-  if (chapterId) {
-    query = query.eq('chapter_id', chapterId);
-  }
-
-  const { data, error } = await query;
+  const { data, error } = await supabase.rpc('get_random_terms', {
+    p_chapter_id: chapterId,
+    p_count: count,
+  });
 
   if (error) throw error;
-
-  const terms = data || [];
-  const shuffled = terms.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  return (data || []) as Term[];
 }
 
 type ButterflyStage = 'none' | 'light' | 'egg' | 'larva' | 'pupa' | 'butterfly';
@@ -146,8 +140,8 @@ export async function saveTermProgress(
     .maybeSingle();
 
   if (existing) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('user_term_progress') as any)
+    const { error: updateError } = await supabase
+      .from('user_term_progress')
       .update({
         mastery_level: masteryLevel,
         butterfly_stage: butterflyStage,
@@ -156,9 +150,9 @@ export async function saveTermProgress(
       })
       .eq('user_id', userId)
       .eq('term_id', termId);
+    if (updateError) throw updateError;
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('user_term_progress') as any).insert({
+    const { error: insertError } = await supabase.from('user_term_progress').insert({
       user_id: userId,
       term_id: termId,
       mastery_level: masteryLevel,
@@ -166,6 +160,7 @@ export async function saveTermProgress(
       times_reviewed: 1,
       last_reviewed_at: new Date().toISOString(),
     });
+    if (insertError) throw insertError;
   }
 }
 
@@ -175,9 +170,23 @@ export async function saveMultipleTermProgress(
   masteryLevel: number = 3,
   butterflyStage: ButterflyStage = 'butterfly'
 ): Promise<void> {
-  for (const termId of termIds) {
-    await saveTermProgress(userId, termId, masteryLevel, butterflyStage);
-  }
+  if (termIds.length === 0) return;
+
+  const now = new Date().toISOString();
+  const rows = termIds.map((termId) => ({
+    user_id: userId,
+    term_id: termId,
+    mastery_level: masteryLevel,
+    butterfly_stage: butterflyStage,
+    times_reviewed: 1,
+    last_reviewed_at: now,
+  }));
+
+  const { error } = await supabase
+    .from('user_term_progress')
+    .upsert(rows, { onConflict: 'user_id,term_id' });
+
+  if (error) throw error;
 }
 
 export async function getUserButterflyCount(userId: string): Promise<number> {
@@ -192,10 +201,11 @@ export async function getUserButterflyCount(userId: string): Promise<number> {
 }
 
 export async function updateUserButterflyCount(userId: string, count: number): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase.from('user_profiles') as any)
+  const { error } = await supabase
+    .from('user_profiles')
     .update({ total_butterflies: count })
     .eq('id', userId);
+  if (error) throw error;
 }
 
 interface TermProgress {

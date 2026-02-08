@@ -52,8 +52,16 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [collectedTermIds, setCollectedTermIds] = useState<Set<string>>(new Set());
   const [savingTermId, setSavingTermId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const tts = useTts(scenes);
+
+  // Auto-dismiss save error after 3 seconds
+  useEffect(() => {
+    if (!saveError) return;
+    const timer = setTimeout(() => setSaveError(null), 3000);
+    return () => clearTimeout(timer);
+  }, [saveError]);
 
   useEffect(() => {
     if (!user) return;
@@ -61,18 +69,21 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
       .then((progress) => {
         setCollectedTermIds(new Set(progress.map((p) => p.term_id)));
       })
-      .catch(() => {});
+      .catch(() => {
+        // Non-critical: collected status will just not show
+      });
   }, [user]);
 
   const handleGotIt = useCallback(
     async (termId: string) => {
       if (!user) return;
       setSavingTermId(termId);
+      setSaveError(null);
       try {
         await saveTermProgress(user.id, termId, 3, 'butterfly');
         setCollectedTermIds((prev) => new Set([...prev, termId]));
       } catch {
-        // silent fail
+        setSaveError('Failed to save progress. Please try again.');
       } finally {
         setSavingTermId(null);
       }
@@ -288,11 +299,17 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      {saveError && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg animate-fade-in">
+          {saveError}
+        </div>
+      )}
       <div className="relative">
         <div className="flex items-center justify-between px-4 py-2 bg-white/60 backdrop-blur-sm border-b border-gray-200/50">
           <div className="flex items-center gap-2">
             <button
               onClick={toggleAutoScroll}
+              aria-label={isAutoScroll ? 'オートスクロールを停止' : 'オートスクロールを開始'}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 isAutoScroll
                   ? 'bg-teal-500 text-white shadow-md'
@@ -328,7 +345,10 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                     </option>
                   ))}
                 </select>
-                <ChevronDownIcon size={12} className="absolute right-2 pointer-events-none text-gray-400" />
+                <ChevronDownIcon
+                  size={12}
+                  className="absolute right-2 pointer-events-none text-gray-400"
+                />
               </div>
             )}
 
@@ -353,6 +373,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                   onClick={tts.stop}
                   className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 text-sm transition-all"
                   title="Stop"
+                  aria-label="音声を停止"
                 >
                   <Square size={12} />
                 </button>
@@ -362,6 +383,13 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                 <button
                   onClick={handleAudioClick}
                   disabled={tts.status === 'loading'}
+                  aria-label={
+                    tts.status === 'playing'
+                      ? '音声を一時停止'
+                      : tts.status === 'paused'
+                        ? '音声を再開'
+                        : '音声を再生'
+                  }
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                     tts.status === 'playing'
                       ? 'bg-teal-500 text-white shadow-md'
@@ -552,6 +580,12 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
             >
               <ChevronsDown size={16} />
             </button>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg">
+            {saveError}
           </div>
         )}
 

@@ -6,7 +6,7 @@ All notable changes to the Digitaria project are documented in this file.
 
 ### Added
 
-#### Test Suite (2024-02-06)
+#### Test Suite (2026-02-06)
 
 - Vitest test framework setup with jsdom environment
 - Test utilities (`src/test/test-utils.tsx`)
@@ -20,7 +20,7 @@ All notable changes to the Digitaria project are documented in this file.
   - `useTerms.test.ts` - 14 tests for term fetching/searching hooks
 - Total: 52 tests passing
 
-#### Pre-Push Git Hooks (2024-02-06)
+#### Pre-Push Git Hooks (2026-02-06)
 
 - Husky setup for Git hooks
 - Pre-commit hook: lint-staged with Prettier
@@ -33,7 +33,7 @@ All notable changes to the Digitaria project are documented in this file.
   - Test execution
   - npm security audit
 
-#### Configuration Files (2024-02-06)
+#### Configuration Files (2026-02-06)
 
 - `.prettierrc` - Code formatting rules
 - `.prettierignore` - Prettier exclusions
@@ -41,13 +41,13 @@ All notable changes to the Digitaria project are documented in this file.
 - Updated `vitest.config.ts` - Coverage configuration
 - `scripts/.test-exceptions` - Test requirement exemptions
 
-#### Documentation (2024-02-06)
+#### Documentation (2026-02-06)
 
 - `docs/FRONTEND.md` - Component and hook documentation
 - `docs/DEVELOPMENT.md` - Development workflow guide
 - `CHANGELOG.md` - This file
 
-#### Story Content Organization (2024-02-06)
+#### Story Content Organization (2026-02-06)
 
 - Split integrated story files into individual chapters
 - Created `docs/stories/` directory with:
@@ -66,7 +66,7 @@ All notable changes to the Digitaria project are documented in this file.
 - Unused variable warnings in `AuthForm.tsx` and `seed-terms/index.ts`
 - Test assertion issues in `FlashCard.test.tsx` and `useTerms.test.ts`
 
-## Project Setup (2024-02-06)
+## Project Setup (2026-02-06)
 
 ### Initial Configuration
 

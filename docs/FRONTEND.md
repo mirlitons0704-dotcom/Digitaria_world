@@ -21,13 +21,6 @@ Layout wrapper for the admin panel with sidebar navigation.
 - Location: `src/components/AdminLayout.tsx`
 - Features: Sidebar with Dashboard/Users/Analytics navigation, back-to-app link, dark theme
 
-### AdminLayout.tsx
-
-Admin panel layout with sidebar navigation.
-
-- Location: `src/components/AdminLayout.tsx`
-- Features: Dashboard/Users/Analytics navigation, dark theme sidebar, back-to-app link
-
 ### AuthForm.tsx
 
 Authentication form component for user login and registration.
@@ -74,6 +67,13 @@ Expandable term card for term list pages.
 - Props: term data, isExpanded, onToggle
 - Features: Difficulty stars, definition, mechanism, analogy, pitfall, related terms
 
+### ErrorBoundary.tsx
+
+React error boundary to catch runtime errors and display a recovery UI.
+
+- Location: `src/components/ErrorBoundary.tsx`
+- Features: Error fallback screen, reload/retry buttons
+
 ## Hooks
 
 ### useChapters.ts
@@ -113,6 +113,14 @@ Hook for fetching story scenes by chapter.
 - Location: `src/hooks/useStoryScenes.ts`
 - Exports:
   - `useStoryScenes(chapterId)`: Fetches all scenes for a chapter, ordered by scene_number
+
+### useOnlineStatus.ts
+
+Hook for monitoring browser online/offline status.
+
+- Location: `src/hooks/useOnlineStatus.ts`
+- Exports:
+  - `useOnlineStatus()`: Returns boolean `isOnline` state, listens to browser online/offline events
 
 ### useTts.ts
 
@@ -157,6 +165,7 @@ src/
 │   ├── AdminLayout.tsx
 │   ├── AuthForm.tsx
 │   ├── ChapterCard.tsx
+│   ├── ErrorBoundary.tsx
 │   ├── InlineTermCard.tsx
 │   ├── Layout.tsx
 │   ├── StoryTeleprompter.tsx
@@ -164,6 +173,7 @@ src/
 ├── hooks/
 │   ├── useChapters.ts
 │   ├── useCharacters.ts
+│   ├── useOnlineStatus.ts
 │   ├── useStoryScenes.ts
 │   ├── useTerms.ts
 │   ├── useTts.ts
