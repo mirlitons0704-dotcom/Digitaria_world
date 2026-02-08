@@ -248,53 +248,54 @@ export async function getChapterAnalytics(): Promise<ChapterStats[]> {
 
 export async function getButterflyDistribution(): Promise<ButterflyDistribution[]> {
   const stages = ['none', 'light', 'egg', 'larva', 'pupa', 'butterfly'] as const;
-  const results: ButterflyDistribution[] = [];
 
-  for (const stage of stages) {
-    const { count } = await supabase
-      .from('user_term_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('butterfly_stage', stage);
+  // Single query instead of 6 separate queries
+  const { data, error } = await supabase.from('user_term_progress').select('butterfly_stage');
 
-    results.push({ stage, count: count ?? 0 });
+  if (error) throw error;
+
+  const typedData = (data || []) as unknown as { butterfly_stage: string }[];
+  const countMap = new Map<string, number>();
+  for (const row of typedData) {
+    countMap.set(row.butterfly_stage, (countMap.get(row.butterfly_stage) || 0) + 1);
   }
 
-  return results;
+  return stages.map((stage) => ({ stage, count: countMap.get(stage) ?? 0 }));
 }
 
 export async function getDifficultyBreakdown(): Promise<DifficultyBreakdown[]> {
-  const results: DifficultyBreakdown[] = [];
+  // 2 queries instead of 9: fetch all terms + all mastered progress
+  const { data: allTerms, error: termsError } = await supabase
+    .from('terms')
+    .select('id, difficulty');
 
-  for (const difficulty of [1, 2, 3]) {
-    const { count: total } = await supabase
-      .from('terms')
-      .select('*', { count: 'exact', head: true })
-      .eq('difficulty', difficulty);
+  if (termsError) throw termsError;
 
-    const { data: termsOfDifficulty } = await supabase
-      .from('terms')
-      .select('id')
-      .eq('difficulty', difficulty);
+  const typedTerms = (allTerms || []) as unknown as { id: string; difficulty: number }[];
 
-    const typedTerms = (termsOfDifficulty || []) as unknown as {
-      id: string;
-    }[];
-    const termIds = typedTerms.map((t) => t.id);
-
-    let mastered = 0;
-    if (termIds.length > 0) {
-      const { count } = await supabase
-        .from('user_term_progress')
-        .select('*', { count: 'exact', head: true })
-        .in('term_id', termIds)
-        .eq('butterfly_stage', 'butterfly');
-      mastered = count ?? 0;
-    }
-
-    results.push({ difficulty, total: total ?? 0, mastered });
+  // Group term IDs by difficulty
+  const termsByDifficulty = new Map<number, string[]>();
+  for (const t of typedTerms) {
+    const ids = termsByDifficulty.get(t.difficulty) || [];
+    ids.push(t.id);
+    termsByDifficulty.set(t.difficulty, ids);
   }
 
-  return results;
+  const { data: masteredData, error: progressError } = await supabase
+    .from('user_term_progress')
+    .select('term_id')
+    .eq('butterfly_stage', 'butterfly');
+
+  if (progressError) throw progressError;
+
+  const typedMastered = (masteredData || []) as unknown as { term_id: string }[];
+  const masteredTermIds = new Set(typedMastered.map((m) => m.term_id));
+
+  return [1, 2, 3].map((difficulty) => {
+    const ids = termsByDifficulty.get(difficulty) || [];
+    const mastered = ids.filter((id) => masteredTermIds.has(id)).length;
+    return { difficulty, total: ids.length, mastered };
+  });
 }
 
 export async function getRecentSignups(

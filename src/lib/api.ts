@@ -132,36 +132,19 @@ export async function saveTermProgress(
   masteryLevel: number = 3,
   butterflyStage: ButterflyStage = 'butterfly'
 ): Promise<void> {
-  const { data: existing } = await supabase
-    .from('user_term_progress')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('term_id', termId)
-    .maybeSingle();
-
-  if (existing) {
-    const { error: updateError } = await supabase
-      .from('user_term_progress')
-      .update({
-        mastery_level: masteryLevel,
-        butterfly_stage: butterflyStage,
-        times_reviewed: 1,
-        last_reviewed_at: new Date().toISOString(),
-      })
-      .eq('user_id', userId)
-      .eq('term_id', termId);
-    if (updateError) throw updateError;
-  } else {
-    const { error: insertError } = await supabase.from('user_term_progress').insert({
+  const { error } = await supabase.from('user_term_progress').upsert(
+    {
       user_id: userId,
       term_id: termId,
       mastery_level: masteryLevel,
       butterfly_stage: butterflyStage,
       times_reviewed: 1,
       last_reviewed_at: new Date().toISOString(),
-    });
-    if (insertError) throw insertError;
-  }
+    },
+    { onConflict: 'user_id,term_id' }
+  );
+
+  if (error) throw error;
 }
 
 export async function saveMultipleTermProgress(
