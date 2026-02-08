@@ -11,22 +11,48 @@ export function LandingPage() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
-  const handleEscKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') setShowAuthModal(false);
+  const closeModal = useCallback(() => {
+    setShowAuthModal(false);
+    requestAnimationFrame(() => triggerRef.current?.focus());
   }, []);
 
   useEffect(() => {
-    if (showAuthModal) {
-      document.addEventListener('keydown', handleEscKey);
-      // Focus the modal when it opens
-      requestAnimationFrame(() => {
-        const firstInput = modalRef.current?.querySelector('input');
-        if (firstInput) (firstInput as HTMLElement).focus();
-      });
-      return () => document.removeEventListener('keydown', handleEscKey);
-    }
-  }, [showAuthModal, handleEscKey]);
+    if (!showAuthModal || !modalRef.current) return;
+
+    const modal = modalRef.current;
+
+    // Focus the first input when modal opens
+    requestAnimationFrame(() => {
+      const firstInput = modal.querySelector('input');
+      if (firstInput) (firstInput as HTMLElement).focus();
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showAuthModal, closeModal]);
 
   if (loading) {
     return (
@@ -69,7 +95,8 @@ export function LandingPage() {
             }}
           >
             <button
-              onClick={() => {
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
                 setAuthMode('login');
                 setShowAuthModal(true);
               }}
@@ -82,7 +109,8 @@ export function LandingPage() {
               Login
             </button>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                triggerRef.current = e.currentTarget;
                 setAuthMode('register');
                 setShowAuthModal(true);
               }}
@@ -194,7 +222,7 @@ export function LandingPage() {
           aria-modal="true"
           aria-label={authMode === 'login' ? 'ログイン' : 'アカウント作成'}
           onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAuthModal(false);
+            if (e.target === e.currentTarget) closeModal();
           }}
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
@@ -206,7 +234,7 @@ export function LandingPage() {
             }}
           >
             <button
-              onClick={() => setShowAuthModal(false)}
+              onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="閉じる"
             >
@@ -258,7 +286,7 @@ export function LandingPage() {
               {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
 
-            <AuthForm mode={authMode} onSuccess={() => setShowAuthModal(false)} />
+            <AuthForm mode={authMode} onSuccess={closeModal} />
           </div>
         </div>
       )}

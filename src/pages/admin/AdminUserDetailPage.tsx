@@ -29,7 +29,7 @@ function DetailItem({
         <Icon size={16} className="text-gray-400" />
       </div>
       <div>
-        <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+        <p className="text-xs text-gray-400 mb-0.5">{label}</p>
         <p className="text-sm font-medium text-gray-200">{value}</p>
       </div>
     </div>
@@ -71,7 +71,7 @@ export function AdminUserDetailPage() {
     return (
       <AdminLayout>
         <div className="text-center py-20">
-          <p className="text-gray-500 mb-4">User not found</p>
+          <p className="text-gray-400 mb-4">User not found</p>
           <button
             onClick={() => navigate('/admin/users')}
             className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
@@ -84,9 +84,7 @@ export function AdminUserDetailPage() {
   }
 
   const progressPercent =
-    user.terms_mastered > 0
-      ? Math.round((user.terms_mastered / 520) * 100)
-      : 0;
+    user.terms_mastered > 0 ? Math.round((user.terms_mastered / 520) * 100) : 0;
 
   return (
     <AdminLayout>
@@ -113,15 +111,13 @@ export function AdminUserDetailPage() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500">@{user.username}</p>
+              <p className="text-sm text-gray-400">@{user.username}</p>
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-500">
-                Overall Progress
-              </span>
+              <span className="text-xs text-gray-400">Overall Progress</span>
               <span className="text-xs font-medium text-teal-400">
                 {user.terms_mastered} / 520 terms ({progressPercent}%)
               </span>
@@ -135,11 +131,7 @@ export function AdminUserDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <DetailItem
-              icon={Mail}
-              label="Email"
-              value={user.email}
-            />
+            <DetailItem icon={Mail} label="Email" value={user.email} />
             <DetailItem
               icon={Calendar}
               label="Joined"
@@ -154,21 +146,13 @@ export function AdminUserDetailPage() {
               label="Current Chapter"
               value={`Chapter ${user.current_chapter}`}
             />
-            <DetailItem
-              icon={Bug}
-              label="Butterflies Collected"
-              value={user.total_butterflies}
-            />
+            <DetailItem icon={Bug} label="Butterflies Collected" value={user.total_butterflies} />
             <DetailItem
               icon={Trophy}
               label="Chapters Completed"
               value={`${user.chapters_completed} / 17`}
             />
-            <DetailItem
-              icon={Trophy}
-              label="Quizzes Taken"
-              value={user.quiz_count}
-            />
+            <DetailItem icon={Trophy} label="Quizzes Taken" value={user.quiz_count} />
             <DetailItem
               icon={Clock}
               label="Last Activity"

@@ -31,7 +31,11 @@ export function InlineTermCard({
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="inline-term-card mt-3 mb-2 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 backdrop-blur-md border border-emerald-200/50 shadow-lg shadow-emerald-100/30 overflow-hidden">
+    <div
+      role="region"
+      aria-label={`${term.term} の用語カード`}
+      className="inline-term-card mt-3 mb-2 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 backdrop-blur-md border border-emerald-200/50 shadow-lg shadow-emerald-100/30 overflow-hidden"
+    >
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -53,7 +57,7 @@ export function InlineTermCard({
         </div>
 
         <div className="flex items-start gap-2 mb-4">
-          <BookOpen size={15} className="text-gray-400 mt-0.5 shrink-0" />
+          <BookOpen size={15} className="text-gray-500 mt-0.5 shrink-0" />
           <p className="text-sm text-gray-600 leading-relaxed">{term.definition}</p>
         </div>
 
@@ -61,7 +65,7 @@ export function InlineTermCard({
           {term.mechanism && (
             <div className="bg-white/50 rounded-xl p-3">
               <div className="flex items-start gap-2">
-                <Cog size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                <Cog size={15} className="text-gray-500 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500 font-medium mb-1">How it works</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{term.mechanism}</p>
@@ -96,7 +100,7 @@ export function InlineTermCard({
 
           {term.related_terms && term.related_terms.length > 0 && (
             <div className="flex items-start gap-2 pt-1">
-              <Link2 size={15} className="text-gray-400 mt-0.5 shrink-0" />
+              <Link2 size={15} className="text-gray-500 mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Related</p>
                 <div className="flex flex-wrap gap-1.5">

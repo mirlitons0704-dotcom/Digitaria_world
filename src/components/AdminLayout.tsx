@@ -31,7 +31,7 @@ function SidebarContent({ onNavigate }: { onNavigate: (path: string) => void }) 
           </div>
           <div>
             <h1 className="text-sm font-semibold text-white tracking-wide">DIGITARIA</h1>
-            <p className="text-xs text-gray-500">Admin Panel</p>
+            <p className="text-xs text-gray-400">Admin Panel</p>
           </div>
         </div>
       </div>
@@ -68,10 +68,10 @@ function SidebarContent({ onNavigate }: { onNavigate: (path: string) => void }) 
         </button>
 
         <div className="flex items-center justify-between px-4 py-2">
-          <span className="text-xs text-gray-500 truncate max-w-[140px]">{profile?.username}</span>
+          <span className="text-xs text-gray-400 truncate max-w-[140px]">{profile?.username}</span>
           <button
             onClick={() => signOut()}
-            className="p-1.5 text-gray-500 hover:text-gray-300 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-300 transition-colors"
             title="Sign out"
             aria-label="サインアウト"
           >
@@ -95,7 +95,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-950 md:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 bg-gray-900 border-r border-gray-800 flex-shrink-0 flex-col">
+      <aside
+        className="hidden md:flex w-64 bg-gray-900 border-r border-gray-800 flex-shrink-0 flex-col"
+        aria-label="Admin navigation"
+      >
         <SidebarContent onNavigate={handleNavigate} />
       </aside>
 
@@ -122,7 +125,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-gray-900 flex flex-col shadow-2xl">
+          <aside
+            className="absolute left-0 top-0 bottom-0 w-64 bg-gray-900 flex flex-col shadow-2xl"
+            aria-label="Admin navigation"
+          >
             <div className="flex justify-end p-2">
               <button
                 onClick={() => setDrawerOpen(false)}

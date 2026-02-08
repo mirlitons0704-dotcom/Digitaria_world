@@ -300,7 +300,10 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {saveError && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg animate-fade-in">
+        <div
+          role="alert"
+          className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg animate-fade-in"
+        >
           {saveError}
         </div>
       )}
@@ -347,13 +350,13 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                 </select>
                 <ChevronDownIcon
                   size={12}
-                  className="absolute right-2 pointer-events-none text-gray-400"
+                  className="absolute right-2 pointer-events-none text-gray-500"
                 />
               </div>
             )}
 
             {!isAutoScroll && (
-              <span className="flex items-center gap-1 text-xs text-gray-400 ml-1">
+              <span className="flex items-center gap-1 text-xs text-gray-500 ml-1">
                 <Hand size={12} />
                 <span className="hidden sm:inline">Scroll to read</span>
               </span>
@@ -361,7 +364,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 tabular-nums hidden sm:inline">
+            <span className="text-xs text-gray-500 tabular-nums hidden sm:inline">
               {Math.round(scrollProgress * 100)}%
             </span>
 
@@ -468,7 +471,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                   <div className="scene-image-enter flex justify-center my-6">
                     <img
                       src={scene.image_url}
-                      alt=""
+                      alt={scene.title || 'シーン画像'}
                       className="w-56 h-56 object-contain drop-shadow-lg"
                       loading="lazy"
                     />
@@ -584,7 +587,10 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
         )}
 
         {saveError && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg">
+          <div
+            role="alert"
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-red-600 text-white text-sm rounded-lg shadow-lg"
+          >
             {saveError}
           </div>
         )}

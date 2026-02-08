@@ -31,10 +31,7 @@ export function ChapterPage() {
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <p className="text-gray-500">Chapter not found</p>
-          <button
-            onClick={() => navigate('/home')}
-            className="text-teal-500 hover:text-teal-600"
-          >
+          <button onClick={() => navigate('/home')} className="text-teal-500 hover:text-teal-600">
             Return to Home
           </button>
         </div>
@@ -57,17 +54,15 @@ export function ChapterPage() {
             <span className="shrink-0 px-2.5 py-0.5 bg-teal-50 text-teal-600 rounded-full text-sm font-semibold">
               {chapter.id === 17 ? 'Epilogue' : `Ch.${chapter.id}`}
             </span>
-            <h1 className="text-base font-bold text-gray-800 truncate">
-              {chapter.title}
-            </h1>
+            <h1 className="text-base font-bold text-gray-800 truncate">{chapter.title}</h1>
             {chapter.subtitle && (
-              <span className="hidden md:inline text-sm text-gray-400 truncate">
+              <span className="hidden md:inline text-sm text-gray-500 truncate">
                 {chapter.subtitle}
               </span>
             )}
           </div>
 
-          <div className="hidden sm:flex items-center gap-3 text-xs text-gray-400 shrink-0">
+          <div className="hidden sm:flex items-center gap-3 text-xs text-gray-500 shrink-0">
             <span className="flex items-center gap-1">
               <BookOpen size={12} />
               {terms.length}

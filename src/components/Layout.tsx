@@ -124,7 +124,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       <footer className="border-t border-gray-200/50 py-4 text-center">
-        <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
           <button
             onClick={() => navigate('/terms')}
             className="hover:text-gray-600 transition-colors"

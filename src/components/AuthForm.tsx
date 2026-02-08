@@ -86,7 +86,10 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div
+          role="alert"
+          className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+        >
           <AlertCircle size={16} />
           <span>{error}</span>
         </div>

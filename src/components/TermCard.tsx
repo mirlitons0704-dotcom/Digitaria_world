@@ -8,7 +8,9 @@ interface TermCardProps {
 }
 
 export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
-  const difficultyStars = Array(3).fill(0).map((_, i) => i < term.difficulty);
+  const difficultyStars = Array(3)
+    .fill(0)
+    .map((_, i) => i < term.difficulty);
 
   return (
     <div
@@ -19,17 +21,15 @@ export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
     >
       <button
         onClick={onToggle}
+        aria-expanded={isExpanded}
         className="w-full flex items-center justify-between p-4 text-left"
       >
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center">
-            <span className="text-xs text-gray-400">#{term.order_index}</span>
+            <span className="text-xs text-gray-500">#{term.order_index}</span>
             <div className="flex gap-0.5 mt-1">
               {difficultyStars.map((active, i) => (
-                <span
-                  key={i}
-                  className={`text-xs ${active ? 'text-amber-400' : 'text-gray-200'}`}
-                >
+                <span key={i} className={`text-xs ${active ? 'text-amber-400' : 'text-gray-200'}`}>
                   ★
                 </span>
               ))}
@@ -47,7 +47,7 @@ export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
           </p>
           <ChevronDown
             size={20}
-            className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           />
         </div>
       </button>
@@ -57,14 +57,14 @@ export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
           <div>
             <p className="font-medium text-teal-700 mb-2">{term.one_liner}</p>
             <div className="flex items-start gap-2">
-              <BookOpen size={16} className="text-gray-400 mt-1 shrink-0" />
+              <BookOpen size={16} className="text-gray-500 mt-1 shrink-0" />
               <p className="text-gray-600 text-sm">{term.definition}</p>
             </div>
           </div>
 
           {term.mechanism && (
             <div className="flex items-start gap-2 bg-gray-50 rounded-lg p-3">
-              <Cog size={16} className="text-gray-400 mt-0.5 shrink-0" />
+              <Cog size={16} className="text-gray-500 mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-gray-500 font-medium mb-1">How it works</p>
                 <p className="text-gray-600 text-sm">{term.mechanism}</p>

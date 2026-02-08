@@ -181,6 +181,7 @@ export function MyFolderPage() {
                     onClick={() =>
                       setExpandedChapter(expandedChapter === chapter.id ? null : chapter.id)
                     }
+                    aria-expanded={expandedChapter === chapter.id}
                     className="w-full flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">

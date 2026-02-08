@@ -7,14 +7,7 @@ import {
   getTopLearners,
   type AnalyticsOverview,
 } from '../../lib/adminApi';
-import {
-  Users,
-  Bug,
-  Trophy,
-  TrendingUp,
-  Loader2,
-  ChevronRight,
-} from 'lucide-react';
+import { Users, Bug, Trophy, TrendingUp, Loader2, ChevronRight } from 'lucide-react';
 
 function StatCard({
   label,
@@ -27,29 +20,28 @@ function StatCard({
   icon: React.ElementType;
   color: string;
 }) {
-  const colorMap: Record<string, { bg: string; text: string; border: string }> =
-    {
-      teal: {
-        bg: 'bg-teal-500/10',
-        text: 'text-teal-400',
-        border: 'border-teal-500/20',
-      },
-      amber: {
-        bg: 'bg-amber-500/10',
-        text: 'text-amber-400',
-        border: 'border-amber-500/20',
-      },
-      blue: {
-        bg: 'bg-blue-500/10',
-        text: 'text-blue-400',
-        border: 'border-blue-500/20',
-      },
-      emerald: {
-        bg: 'bg-emerald-500/10',
-        text: 'text-emerald-400',
-        border: 'border-emerald-500/20',
-      },
-    };
+  const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+    teal: {
+      bg: 'bg-teal-500/10',
+      text: 'text-teal-400',
+      border: 'border-teal-500/20',
+    },
+    amber: {
+      bg: 'bg-amber-500/10',
+      text: 'text-amber-400',
+      border: 'border-amber-500/20',
+    },
+    blue: {
+      bg: 'bg-blue-500/10',
+      text: 'text-blue-400',
+      border: 'border-blue-500/20',
+    },
+    emerald: {
+      bg: 'bg-emerald-500/10',
+      text: 'text-emerald-400',
+      border: 'border-emerald-500/20',
+    },
+  };
   const c = colorMap[color] || colorMap.teal;
 
   return (
@@ -62,7 +54,7 @@ function StatCard({
         </div>
       </div>
       <p className="text-2xl font-semibold text-white mb-1">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-sm text-gray-400">{label}</p>
     </div>
   );
 }
@@ -113,9 +105,7 @@ export function AdminDashboardPage() {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
-          <p className="text-sm text-gray-500">
-            DIGITARIA overview and key metrics
-          </p>
+          <p className="text-sm text-gray-400">DIGITARIA overview and key metrics</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -148,9 +138,7 @@ export function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
-              <h2 className="text-sm font-semibold text-white">
-                Recent Signups
-              </h2>
+              <h2 className="text-sm font-semibold text-white">Recent Signups</h2>
               <button
                 onClick={() => navigate('/admin/users')}
                 className="flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300 transition-colors"
@@ -160,7 +148,7 @@ export function AdminDashboardPage() {
             </div>
             <div className="divide-y divide-gray-800">
               {recentUsers.length === 0 ? (
-                <p className="p-6 text-sm text-gray-500">No users yet</p>
+                <p className="p-6 text-sm text-gray-400">No users yet</p>
               ) : (
                 recentUsers.map((user) => (
                   <div
@@ -169,10 +157,8 @@ export function AdminDashboardPage() {
                     onClick={() => navigate(`/admin/users/${user.id}`)}
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-200">
-                        {user.username}
-                      </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-sm font-medium text-gray-200">{user.username}</p>
+                      <p className="text-xs text-gray-400">{user.email}</p>
                     </div>
                     <span className="text-xs text-gray-600">
                       {new Date(user.created_at).toLocaleDateString('ja-JP')}
@@ -185,21 +171,14 @@ export function AdminDashboardPage() {
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl">
             <div className="p-6 border-b border-gray-800">
-              <h2 className="text-sm font-semibold text-white">
-                Top Learners
-              </h2>
+              <h2 className="text-sm font-semibold text-white">Top Learners</h2>
             </div>
             <div className="divide-y divide-gray-800">
               {topLearners.length === 0 ? (
-                <p className="p-6 text-sm text-gray-500">
-                  No learners yet
-                </p>
+                <p className="p-6 text-sm text-gray-400">No learners yet</p>
               ) : (
                 topLearners.map((learner, index) => (
-                  <div
-                    key={learner.id}
-                    className="flex items-center justify-between px-6 py-4"
-                  >
+                  <div key={learner.id} className="flex items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-3">
                       <span
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -209,22 +188,18 @@ export function AdminDashboardPage() {
                               ? 'bg-gray-400/20 text-gray-300'
                               : index === 2
                                 ? 'bg-orange-500/20 text-orange-400'
-                                : 'bg-gray-800 text-gray-500'
+                                : 'bg-gray-800 text-gray-400'
                         }`}
                       >
                         {index + 1}
                       </span>
-                      <p className="text-sm text-gray-200">
-                        {learner.display_name || 'Traveler'}
-                      </p>
+                      <p className="text-sm text-gray-200">{learner.display_name || 'Traveler'}</p>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold text-teal-400">
                         {learner.total_butterflies}
                       </span>
-                      <span className="text-xs text-gray-500">
-                        butterflies
-                      </span>
+                      <span className="text-xs text-gray-400">butterflies</span>
                     </div>
                   </div>
                 ))

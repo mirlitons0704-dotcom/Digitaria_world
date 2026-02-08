@@ -74,6 +74,7 @@ export function ChapterCard({
     <button
       onClick={onClick}
       disabled={isLocked}
+      aria-disabled={isLocked || undefined}
       className={`
         relative w-full text-left rounded-2xl p-5 transition-all duration-300
         ${
@@ -114,7 +115,7 @@ export function ChapterCard({
 
       {isLocked && (
         <div className="absolute top-3 right-3">
-          <Lock size={18} className="text-gray-400" />
+          <Lock size={18} className="text-gray-500" />
         </div>
       )}
 
@@ -131,7 +132,7 @@ export function ChapterCard({
             >
               {chapter.id === 17 ? 'Epilogue' : `Chapter ${chapter.id}`}
             </span>
-            <span className={`text-xs ${isSpecial ? 'text-amber-500' : 'text-slate-400'}`}>
+            <span className={`text-xs ${isSpecial ? 'text-amber-500' : 'text-slate-500'}`}>
               {chapter.term_count} terms
             </span>
           </div>

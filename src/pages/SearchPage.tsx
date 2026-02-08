@@ -27,7 +27,7 @@ export function SearchPage() {
         </header>
 
         <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={22} />
           <input
             type="text"
             placeholder="Search by term, Japanese, or description..."
@@ -58,11 +58,11 @@ export function SearchPage() {
         ) : results.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 mb-4">No terms found for "{query}"</p>
-            <p className="text-sm text-gray-400">Try searching with different keywords</p>
+            <p className="text-sm text-gray-500">Try searching with different keywords</p>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 mb-4" aria-live="polite">
               Found {results.length} result{results.length !== 1 ? 's' : ''}
             </p>
 
