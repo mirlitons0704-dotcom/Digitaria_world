@@ -2,33 +2,30 @@ import { supabase } from './supabase';
 import type { Chapter, Term, Character, StoryScene } from './database.types';
 
 export async function getChapters(): Promise<Chapter[]> {
-  const { data, error } = await supabase
-    .from('chapters')
-    .select('*')
-    .order('id');
+  const { data, error } = await supabase.from('chapters').select('*').order('id');
 
   if (error) throw error;
   return data || [];
 }
 
 export async function getChapter(id: number): Promise<Chapter | null> {
-  const { data, error } = await supabase
-    .from('chapters')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  const { data, error } = await supabase.from('chapters').select('*').eq('id', id).maybeSingle();
 
   if (error) throw error;
   return data;
 }
 
-export async function getChapterWithGuide(id: number): Promise<(Chapter & { guide: Character | null }) | null> {
+export async function getChapterWithGuide(
+  id: number
+): Promise<(Chapter & { guide: Character | null }) | null> {
   const { data, error } = await supabase
     .from('chapters')
-    .select(`
+    .select(
+      `
       *,
       guide:characters!chapters_guide_id_fkey(*)
-    `)
+    `
+    )
     .eq('id', id)
     .maybeSingle();
 
@@ -48,21 +45,34 @@ export async function getTermsByChapter(chapterId: number): Promise<Term[]> {
 }
 
 export async function getTerm(id: string): Promise<Term | null> {
-  const { data, error } = await supabase
-    .from('terms')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  const { data, error } = await supabase.from('terms').select('*').eq('id', id).maybeSingle();
 
   if (error) throw error;
   return data;
 }
 
+/**
+ * Sanitize a user-supplied string so it can be safely embedded
+ * inside a PostgREST filter expression (.or / .ilike).
+ * Escapes characters that have special meaning in the filter DSL:
+ *   ,  (  )  \  %  _
+ */
+function sanitizeFilterValue(raw: string): string {
+  return raw
+    .replace(/\\/g, '\\\\')
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_')
+    .replace(/,/g, '\\,')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
 export async function searchTerms(query: string): Promise<Term[]> {
+  const safe = sanitizeFilterValue(query);
   const { data, error } = await supabase
     .from('terms')
     .select('*')
-    .or(`term.ilike.%${query}%,term_ja.ilike.%${query}%,one_liner.ilike.%${query}%`)
+    .or(`term.ilike.%${safe}%,term_ja.ilike.%${safe}%,one_liner.ilike.%${safe}%`)
     .limit(20);
 
   if (error) throw error;
@@ -70,21 +80,14 @@ export async function searchTerms(query: string): Promise<Term[]> {
 }
 
 export async function getCharacter(id: string): Promise<Character | null> {
-  const { data, error } = await supabase
-    .from('characters')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  const { data, error } = await supabase.from('characters').select('*').eq('id', id).maybeSingle();
 
   if (error) throw error;
   return data;
 }
 
 export async function getCharacters(): Promise<Character[]> {
-  const { data, error } = await supabase
-    .from('characters')
-    .select('*')
-    .order('chapter_appearance');
+  const { data, error } = await supabase.from('characters').select('*').order('chapter_appearance');
 
   if (error) throw error;
   return data || [];
@@ -102,9 +105,7 @@ export async function getStoryScenes(chapterId: number): Promise<StoryScene[]> {
 }
 
 export async function getTotalTermCount(): Promise<number> {
-  const { count, error } = await supabase
-    .from('terms')
-    .select('*', { count: 'exact', head: true });
+  const { count, error } = await supabase.from('terms').select('*', { count: 'exact', head: true });
 
   if (error) throw error;
   return count || 0;
@@ -157,15 +158,14 @@ export async function saveTermProgress(
       .eq('term_id', termId);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('user_term_progress') as any)
-      .insert({
-        user_id: userId,
-        term_id: termId,
-        mastery_level: masteryLevel,
-        butterfly_stage: butterflyStage,
-        times_reviewed: 1,
-        last_reviewed_at: new Date().toISOString(),
-      });
+    await (supabase.from('user_term_progress') as any).insert({
+      user_id: userId,
+      term_id: termId,
+      mastery_level: masteryLevel,
+      butterfly_stage: butterflyStage,
+      times_reviewed: 1,
+      last_reviewed_at: new Date().toISOString(),
+    });
   }
 }
 
@@ -217,10 +217,7 @@ export async function getUserCollectedTerms(userId: string): Promise<TermProgres
 export async function getTermsByIds(termIds: string[]): Promise<Term[]> {
   if (termIds.length === 0) return [];
 
-  const { data, error } = await supabase
-    .from('terms')
-    .select('*')
-    .in('id', termIds);
+  const { data, error } = await supabase.from('terms').select('*').in('id', termIds);
 
   if (error) throw error;
   return data || [];

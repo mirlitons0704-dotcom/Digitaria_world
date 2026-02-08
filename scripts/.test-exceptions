@@ -9,3 +9,10 @@ TermCard.tsx
 
 # Hooks without tests yet
 useCharacters.ts
+useStoryScenes.ts
+useTts.ts
+
+# Complex components - tests deferred
+AdminLayout.tsx
+InlineTermCard.tsx
+StoryTeleprompter.tsx

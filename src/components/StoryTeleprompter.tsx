@@ -3,6 +3,7 @@ import {
   Play,
   Pause,
   Volume2,
+  VolumeX,
   ChevronDownIcon,
   Hand,
   ChevronsDown,
@@ -11,11 +12,14 @@ import {
   ChevronsUp,
   ToggleLeft,
   ToggleRight,
+  Loader2,
+  Square,
 } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
 import { InlineTermCard } from './InlineTermCard';
 import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
+import { useTts } from '../hooks/useTts';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -33,11 +37,7 @@ const SPEED_OPTIONS = [
 
 const MANUAL_SCROLL_STEP = 200;
 
-export function StoryTeleprompter({
-  scenes,
-  chapterTitle,
-  terms = [],
-}: StoryTeleprompterProps) {
+export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTeleprompterProps) {
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -45,7 +45,6 @@ export function StoryTeleprompter({
 
   const [isAutoScroll, setIsAutoScroll] = useState(false);
   const [speedIndex, setSpeedIndex] = useState(1);
-  const [showAudioToast, setShowAudioToast] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -54,25 +53,32 @@ export function StoryTeleprompter({
   const [collectedTermIds, setCollectedTermIds] = useState<Set<string>>(new Set());
   const [savingTermId, setSavingTermId] = useState<string | null>(null);
 
+  const tts = useTts(scenes);
+
   useEffect(() => {
     if (!user) return;
-    getUserCollectedTerms(user.id).then((progress) => {
-      setCollectedTermIds(new Set(progress.map((p) => p.term_id)));
-    }).catch(() => {});
+    getUserCollectedTerms(user.id)
+      .then((progress) => {
+        setCollectedTermIds(new Set(progress.map((p) => p.term_id)));
+      })
+      .catch(() => {});
   }, [user]);
 
-  const handleGotIt = useCallback(async (termId: string) => {
-    if (!user) return;
-    setSavingTermId(termId);
-    try {
-      await saveTermProgress(user.id, termId, 3, 'butterfly');
-      setCollectedTermIds((prev) => new Set([...prev, termId]));
-    } catch {
-      // silent fail
-    } finally {
-      setSavingTermId(null);
-    }
-  }, [user]);
+  const handleGotIt = useCallback(
+    async (termId: string) => {
+      if (!user) return;
+      setSavingTermId(termId);
+      try {
+        await saveTermProgress(user.id, termId, 3, 'butterfly');
+        setCollectedTermIds((prev) => new Set([...prev, termId]));
+      } catch {
+        // silent fail
+      } finally {
+        setSavingTermId(null);
+      }
+    },
+    [user]
+  );
 
   const termMap = useMemo(() => {
     const map = new Map<string, Term>();
@@ -116,7 +122,7 @@ export function StoryTeleprompter({
 
       animFrameRef.current = requestAnimationFrame(tick);
     },
-    [speed, stopAutoScroll],
+    [speed, stopAutoScroll]
   );
 
   const startAutoScroll = useCallback(() => {
@@ -200,8 +206,15 @@ export function StoryTeleprompter({
   }, [scenes]);
 
   const handleAudioClick = () => {
-    setShowAudioToast(true);
-    setTimeout(() => setShowAudioToast(false), 2500);
+    if (tts.status === 'playing') {
+      tts.pause();
+    } else if (tts.status === 'paused') {
+      tts.play();
+    } else if (tts.status === 'loading') {
+      tts.stop();
+    } else {
+      tts.play();
+    }
   };
 
   const scrollBy = useCallback(
@@ -210,7 +223,7 @@ export function StoryTeleprompter({
       if (isAutoScroll) stopAutoScroll();
       scrollRef.current.scrollBy({ top: amount, behavior: 'smooth' });
     },
-    [isAutoScroll, stopAutoScroll],
+    [isAutoScroll, stopAutoScroll]
   );
 
   const scrollToTop = useCallback(() => {
@@ -332,21 +345,62 @@ export function StoryTeleprompter({
               {Math.round(scrollProgress * 100)}%
             </span>
 
-            <div className="relative">
-              <button
-                onClick={handleAudioClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium transition-all"
-              >
-                <Volume2 size={14} />
-                <span className="hidden sm:inline">Listen</span>
-              </button>
-
-              {showAudioToast && (
-                <div className="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 animate-fade-in">
-                  Coming soon
-                  <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-800 rotate-45" />
-                </div>
+            <div className="flex items-center gap-1.5">
+              {(tts.status === 'playing' ||
+                tts.status === 'paused' ||
+                tts.status === 'loading') && (
+                <button
+                  onClick={tts.stop}
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 text-sm transition-all"
+                  title="Stop"
+                >
+                  <Square size={12} />
+                </button>
               )}
+
+              <div className="relative">
+                <button
+                  onClick={handleAudioClick}
+                  disabled={tts.status === 'loading'}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    tts.status === 'playing'
+                      ? 'bg-teal-500 text-white shadow-md'
+                      : tts.status === 'loading'
+                        ? 'bg-amber-100 text-amber-600 cursor-wait'
+                        : tts.status === 'error'
+                          ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {tts.status === 'loading' ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : tts.status === 'playing' ? (
+                    <Pause size={14} />
+                  ) : tts.status === 'error' ? (
+                    <VolumeX size={14} />
+                  ) : (
+                    <Volume2 size={14} />
+                  )}
+                  <span className="hidden sm:inline">
+                    {tts.status === 'loading'
+                      ? `Loading ${tts.currentSceneIndex + 1}/${scenes.length}`
+                      : tts.status === 'playing'
+                        ? `${tts.currentSceneIndex + 1}/${scenes.length}`
+                        : tts.status === 'paused'
+                          ? 'Resume'
+                          : tts.status === 'error'
+                            ? 'Retry'
+                            : 'Listen'}
+                  </span>
+                </button>
+
+                {tts.status === 'error' && tts.errorMessage && (
+                  <div className="absolute right-0 top-full mt-2 px-3 py-2 bg-red-800 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 animate-fade-in max-w-[200px] truncate">
+                    {tts.errorMessage}
+                    <div className="absolute -top-1 right-4 w-2 h-2 bg-red-800 rotate-45" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -360,10 +414,7 @@ export function StoryTeleprompter({
       </div>
 
       <div className="relative flex-1 min-h-0">
-        <div
-          ref={scrollRef}
-          className="teleprompter-container h-full overflow-y-auto"
-        >
+        <div ref={scrollRef} className="teleprompter-container h-full overflow-y-auto">
           <div className="max-w-2xl mx-auto px-6 py-8">
             <h2 className="text-center text-xl font-semibold text-teal-600 mb-10 tracking-wide">
               {chapterTitle}

@@ -14,42 +14,65 @@ Digitaria is a programming term learning web application built with React, TypeS
 
 ## Components
 
+### AdminLayout.tsx
+
+Layout wrapper for the admin panel with sidebar navigation.
+
+- Location: `src/components/AdminLayout.tsx`
+- Features: Sidebar with Dashboard/Users/Analytics navigation, back-to-app link, dark theme
+
+### AdminLayout.tsx
+
+Admin panel layout with sidebar navigation.
+
+- Location: `src/components/AdminLayout.tsx`
+- Features: Dashboard/Users/Analytics navigation, dark theme sidebar, back-to-app link
+
 ### AuthForm.tsx
 
 Authentication form component for user login and registration.
 
 - Location: `src/components/AuthForm.tsx`
-- Features: Email/password authentication, form validation
+- Features: Email/password authentication, form validation, loading state
 
 ### ChapterCard.tsx
 
 Displays chapter information in a card format.
 
 - Location: `src/components/ChapterCard.tsx`
-- Props: chapter data, progress, lock state
-- Features: Progress indicator, special styling for story chapters
+- Props: chapter data, progress, lock state, isSpecial
+- Features: Progress indicator, special styling for epilogue, category icons
 
-### FlashCard.tsx
+### InlineTermCard.tsx
 
-Interactive flip card for learning programming terms.
+Expanded term card shown inline within the story teleprompter.
 
-- Location: `src/components/FlashCard.tsx`
-- Props: term data, onFlip callback, difficulty
-- Features: Front/back display, difficulty stars, analogy, pitfall, related terms
+- Location: `src/components/InlineTermCard.tsx`
+- Props: term data, isCollected, saving state, onClose, onGotIt
+- Features: Definition, mechanism, analogy, pitfall, related terms, butterfly collection button
 
 ### Layout.tsx
 
 Main layout wrapper component with navigation.
 
 - Location: `src/components/Layout.tsx`
-- Features: Header, navigation, responsive design
+- Features: Header, desktop + mobile navigation, user profile display
+
+### StoryTeleprompter.tsx
+
+Auto-scrolling story reader with TTS (text-to-speech) support.
+
+- Location: `src/components/StoryTeleprompter.tsx`
+- Props: scenes, chapterTitle, terms
+- Features: Auto-scroll with speed control, keyboard navigation, inline term cards, Gemini TTS playback, progress tracking, butterfly collection
 
 ### TermCard.tsx
 
-Displays term information in a compact card format.
+Expandable term card for term list pages.
 
 - Location: `src/components/TermCard.tsx`
-- Features: Term name, description, chapter reference
+- Props: term data, isExpanded, onToggle
+- Features: Difficulty stars, definition, mechanism, analogy, pitfall, related terms
 
 ## Hooks
 
@@ -83,7 +106,31 @@ Hooks for fetching and searching programming terms.
   - `useSearchTerms(query)`: Searches terms with 300ms debounce
   - `useQuizTerms(chapterId, count)`: Fetches random terms for quiz
 
+### useStoryScenes.ts
+
+Hook for fetching story scenes by chapter.
+
+- Location: `src/hooks/useStoryScenes.ts`
+- Exports:
+  - `useStoryScenes(chapterId)`: Fetches all scenes for a chapter, ordered by scene_number
+
+### useTts.ts
+
+Hook for text-to-speech playback of story scenes via Gemini TTS.
+
+- Location: `src/hooks/useTts.ts`
+- Exports:
+  - `useTts(scenes)`: Returns status, currentSceneIndex, play/pause/stop controls
+- Features: Sequential scene playback, AbortController cleanup, object URL memory management
+
 ## Lib (Utilities)
+
+### api.ts
+
+API functions for all Supabase data access.
+
+- Location: `src/lib/api.ts`
+- Key functions: getChapters, getTermsByChapter, searchTerms, saveTermProgress, getUserCollectedTerms
 
 ### constants.ts
 
@@ -94,33 +141,50 @@ Shared constants for the application.
   - `STORAGE_URL`: Base URL for Supabase Storage
   - `ASSETS`: Object containing all asset URLs (images, videos)
 
+### geminiTts.ts
+
+Client-side TTS helper that calls the Supabase Edge Function.
+
+- Location: `src/lib/geminiTts.ts`
+- Exports:
+  - `generateSpeech(text, options)`: Returns a WAV Blob from PCM audio via Edge Function
+
 ## Directory Structure
 
 ```
 src/
 ├── components/
+│   ├── AdminLayout.tsx
 │   ├── AuthForm.tsx
 │   ├── ChapterCard.tsx
-│   ├── FlashCard.tsx
+│   ├── InlineTermCard.tsx
 │   ├── Layout.tsx
+│   ├── StoryTeleprompter.tsx
+│   └── TermCard.tsx
 │   └── TermCard.tsx
 ├── hooks/
 │   ├── useChapters.ts
 │   ├── useCharacters.ts
-│   └── useTerms.ts
+│   ├── useStoryScenes.ts
+│   ├── useTerms.ts
+│   ├── useTts.ts
+│   └── index.ts
 ├── lib/
 │   ├── api.ts
 │   ├── constants.ts
 │   ├── database.types.ts
+│   ├── geminiTts.ts
 │   └── supabase.ts
 ├── pages/
 │   ├── LandingPage.tsx
 │   ├── HomePage.tsx
 │   ├── ChapterPage.tsx
-│   ├── FlashcardPage.tsx
 │   ├── TermListPage.tsx
 │   ├── MyFolderPage.tsx
-│   └── SearchPage.tsx
+│   ├── SearchPage.tsx
+│   └── index.ts
+├── contexts/
+│   └── AuthContext.tsx
 └── test/
     ├── setup.ts
     └── test-utils.tsx
