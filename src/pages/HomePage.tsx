@@ -142,7 +142,7 @@ export function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
                 <ChapterCard
                   chapter={epilogue}
                   onClick={() => navigate(`/chapter/${epilogue.id}`)}
