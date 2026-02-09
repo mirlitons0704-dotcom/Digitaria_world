@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, User, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, User, Lock, Loader2, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { translateAuthError, isRateLimitError } from '../lib/authErrors';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -16,9 +17,41 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
+  const startCooldown = useCallback((seconds: number) => {
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    setCooldown(seconds);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          cooldownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  function handleError(msg: string) {
+    const translated = translateAuthError(msg);
+    setError(translated);
+    if (isRateLimitError(msg)) {
+      startCooldown(60);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (cooldown > 0) return;
     setLoading(true);
     setError(null);
 
@@ -26,7 +59,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
       if (showResetForm) {
         const { error } = await resetPassword(email);
         if (error) {
-          setError(error.message);
+          handleError(error.message);
         } else {
           setResetSent(true);
         }
@@ -35,26 +68,26 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
       if (mode === 'register') {
         if (!username.trim()) {
-          setError('Username is required');
+          setError('ユーザー名を入力してください。');
           setLoading(false);
           return;
         }
         const { error } = await signUp(email, password, username);
         if (error) {
-          setError(error.message);
+          handleError(error.message);
         } else {
           onSuccess?.();
         }
       } else {
         const { error } = await signIn(email, password);
         if (error) {
-          setError(error.message);
+          handleError(error.message);
         } else {
           onSuccess?.();
         }
       }
     } catch (_err) {
-      setError('An unexpected error occurred');
+      setError('予期しないエラーが発生しました。');
     } finally {
       setLoading(false);
     }
@@ -171,7 +204,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || cooldown > 0}
         className="w-full py-2.5 px-4 rounded-lg font-medium text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         style={{
           fontFamily: '"Raleway", sans-serif',
@@ -179,7 +212,12 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        {loading ? (
+        {cooldown > 0 ? (
+          <>
+            <Clock size={18} />
+            <span>{cooldown}秒後に再試行できます</span>
+          </>
+        ) : loading ? (
           <>
             <Loader2 className="animate-spin" size={18} />
             <span>
