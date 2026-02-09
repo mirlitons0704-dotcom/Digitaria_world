@@ -79,7 +79,7 @@ export function ChapterCard({
         relative w-full text-left rounded-2xl p-5 transition-all duration-300
         ${
           isSpecial
-            ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border border-amber-200/60'
+            ? 'overflow-hidden bg-amber-50 border border-amber-200/60'
             : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-slate-100 border border-slate-200/60'
         }
         ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-1.5 cursor-pointer'}
@@ -89,7 +89,13 @@ export function ChapterCard({
         boxShadow: isSpecial
           ? '0 4px 12px rgba(251,191,36,0.15), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)'
           : '0 4px 12px rgba(100,116,139,0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
-        ...(isLocked ? {} : {}),
+        ...(isSpecial
+          ? {
+              backgroundImage: 'url(/memorygarden.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : {}),
       }}
       onMouseEnter={(e) => {
         if (!isLocked) {
@@ -104,6 +110,9 @@ export function ChapterCard({
           : '0 4px 12px rgba(100,116,139,0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)';
       }}
     >
+      {isSpecial && (
+        <div className="absolute inset-0 bg-white/40 pointer-events-none" />
+      )}
       <div
         className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
         style={{
@@ -121,7 +130,7 @@ export function ChapterCard({
 
       <div className="relative flex items-start gap-3 mb-3">
         <div
-          className={`p-2 rounded-xl ${isSpecial ? 'bg-amber-100/60' : 'bg-white/70'} backdrop-blur-sm ${iconColor}`}
+          className={`p-2 rounded-xl ${isSpecial ? 'bg-white/80' : 'bg-white/70'} backdrop-blur-sm ${iconColor}`}
         >
           <Icon size={24} />
         </div>

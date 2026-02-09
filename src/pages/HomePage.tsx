@@ -126,12 +126,14 @@ export function HomePage() {
               <span className="text-sm text-gray-500 font-titillium-light">Memory Garden</span>
             </div>
 
-            <div className="max-w-sm">
-              <ChapterCard
-                chapter={epilogue}
-                onClick={() => navigate(`/chapter/${epilogue.id}`)}
-                isSpecial
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="sm:col-span-2">
+                <ChapterCard
+                  chapter={epilogue}
+                  onClick={() => navigate(`/chapter/${epilogue.id}`)}
+                  isSpecial
+                />
+              </div>
             </div>
           </section>
         )}
