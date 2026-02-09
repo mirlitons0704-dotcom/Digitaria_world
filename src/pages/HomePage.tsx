@@ -51,7 +51,14 @@ export function HomePage() {
         <header className="mb-12">
           <div className="flex items-center justify-center gap-4 md:gap-6">
             <div className="w-20 md:w-28 flex-shrink-0">
-              <img className="w-full h-auto rounded-lg" src={ASSETS.bitKun} alt="ビットくん" />
+              <video
+                className="w-full h-auto rounded-lg"
+                src={ASSETS.bitKunHappy}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
             </div>
 
             <div className="text-center flex-1">
@@ -81,7 +88,14 @@ export function HomePage() {
             </div>
 
             <div className="w-20 md:w-28 flex-shrink-0">
-              <img className="w-full h-auto rounded-lg" src={ASSETS.byteSan} alt="バイトさん" />
+              <video
+                className="w-full h-auto rounded-lg"
+                src={ASSETS.byteSanEncourage}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
             </div>
           </div>
 
