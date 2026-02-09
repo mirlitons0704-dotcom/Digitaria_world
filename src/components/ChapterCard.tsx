@@ -22,6 +22,7 @@ interface ChapterCardProps {
   isSpecial?: boolean;
   isLocked?: boolean;
   progress?: number;
+  chapterIndex?: number;
 }
 
 const categoryIcons: Record<string, typeof BookOpen> = {
@@ -60,15 +61,63 @@ const categoryIconColors: Record<string, string> = {
   epilogue: 'text-amber-600',
 };
 
+function lerp(a: number, b: number, t: number): number {
+  return Math.round(a + (b - a) * t);
+}
+
+function getChapterTheme(index: number) {
+  const t = Math.max(0, Math.min(1, (index - 1) / 15));
+
+  const from = [lerp(248, 255, t), lerp(250, 252, t), lerp(252, 237, t)];
+  const via = [lerp(239, 254, t), lerp(246, 248, t), lerp(255, 215, t)];
+  const to = [lerp(241, 252, t), lerp(245, 247, t), lerp(249, 222, t)];
+  const shadow = [lerp(100, 165, t), lerp(116, 150, t), lerp(139, 95, t)];
+  const overlay = [lerp(148, 230, t), lerp(163, 205, t), lerp(184, 95, t)];
+  const border = [lerp(226, 235, t), lerp(232, 225, t), lerp(240, 185, t)];
+  const borderHover = [border[0] - 15, border[1] - 15, border[2] - 15];
+  const badgeFrom = [lerp(241, 254, t), lerp(245, 249, t), lerp(249, 230, t)];
+  const badgeTo = [lerp(239, 255, t), lerp(246, 252, t), lerp(255, 237, t)];
+  const badgeBorder = [lerp(226, 234, t), lerp(232, 225, t), lerp(240, 190, t)];
+  const progressTrack = [lerp(226, 235, t), lerp(232, 228, t), lerp(240, 198, t)];
+
+  return {
+    background: `linear-gradient(to bottom right, rgb(${from.join(',')}), rgba(${via.join(',')},0.5), rgb(${to.join(',')}))`,
+    boxShadow: `0 4px 12px rgba(${shadow.join(',')},0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)`,
+    hoverBoxShadow: `0 12px 28px rgba(${shadow.join(',')},0.2), 0 4px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)`,
+    overlay: `linear-gradient(45deg, transparent 40%, rgba(${overlay.join(',')},0.2) 50%, transparent 60%)`,
+    borderColor: `rgba(${border.join(',')},0.6)`,
+    hoverBorderColor: `rgba(${borderHover.join(',')},0.8)`,
+    badgeBackground: `linear-gradient(to right, rgba(${badgeFrom.join(',')},0.8), rgba(${badgeTo.join(',')},0.8))`,
+    badgeBorderColor: `rgba(${badgeBorder.join(',')},0.5)`,
+    progressTrackColor: `rgba(${progressTrack.join(',')},0.6)`,
+  };
+}
+
 export function ChapterCard({
   chapter,
   onClick,
   isSpecial,
   isLocked,
   progress = 0,
+  chapterIndex,
 }: ChapterCardProps) {
   const Icon = categoryIcons[chapter.category_icon] || BookOpen;
   const iconColor = categoryIconColors[chapter.category] || 'text-slate-500';
+  const theme = chapterIndex && !isSpecial ? getChapterTheme(chapterIndex) : null;
+
+  const shadows = theme
+    ? { rest: theme.boxShadow, hover: theme.hoverBoxShadow }
+    : isSpecial
+      ? {
+          rest: '0 4px 12px rgba(251,191,36,0.15), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)',
+          hover:
+            '0 12px 28px rgba(251,191,36,0.25), 0 4px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+        }
+      : {
+          rest: '0 4px 12px rgba(100,116,139,0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+          hover:
+            '0 12px 28px rgba(100,116,139,0.2), 0 4px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+        };
 
   return (
     <button
@@ -76,19 +125,20 @@ export function ChapterCard({
       disabled={isLocked}
       aria-disabled={isLocked || undefined}
       className={`
-        relative w-full text-left rounded-2xl p-5 transition-all duration-300
+        relative w-full text-left rounded-2xl p-5 transition-all duration-300 border
         ${
           isSpecial
-            ? 'overflow-hidden bg-amber-50 border border-amber-200/60'
-            : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-slate-100 border border-slate-200/60'
+            ? 'overflow-hidden bg-amber-50 border-amber-200/60'
+            : theme
+              ? ''
+              : 'bg-gradient-to-br from-slate-50 via-blue-50/50 to-slate-100 border-slate-200/60'
         }
         ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-1.5 cursor-pointer'}
-        ${isSpecial ? 'ring-1 ring-amber-300/50 hover:ring-amber-400/60' : 'hover:border-slate-300/80'}
+        ${isSpecial ? 'ring-1 ring-amber-300/50 hover:ring-amber-400/60' : !theme ? 'hover:border-slate-300/80' : ''}
       `}
       style={{
-        boxShadow: isSpecial
-          ? '0 4px 12px rgba(251,191,36,0.15), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)'
-          : '0 4px 12px rgba(100,116,139,0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+        boxShadow: shadows.rest,
+        ...(theme ? { background: theme.background, borderColor: theme.borderColor } : {}),
         ...(isSpecial
           ? {
               backgroundImage: 'url(/memorygarden.png)',
@@ -99,26 +149,28 @@ export function ChapterCard({
       }}
       onMouseEnter={(e) => {
         if (!isLocked) {
-          e.currentTarget.style.boxShadow = isSpecial
-            ? '0 12px 28px rgba(251,191,36,0.25), 0 4px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)'
-            : '0 12px 28px rgba(100,116,139,0.2), 0 4px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)';
+          e.currentTarget.style.boxShadow = shadows.hover;
+          if (theme) {
+            e.currentTarget.style.borderColor = theme.hoverBorderColor;
+          }
         }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = isSpecial
-          ? '0 4px 12px rgba(251,191,36,0.15), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)'
-          : '0 4px 12px rgba(100,116,139,0.12), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)';
+        e.currentTarget.style.boxShadow = shadows.rest;
+        if (theme) {
+          e.currentTarget.style.borderColor = theme.borderColor;
+        }
       }}
     >
-      {isSpecial && (
-        <div className="absolute inset-0 bg-white/40 pointer-events-none" />
-      )}
+      {isSpecial && <div className="absolute inset-0 bg-white/40 pointer-events-none" />}
       <div
         className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
         style={{
           background: isSpecial
             ? 'linear-gradient(45deg, transparent 40%, rgba(251,191,36,0.15) 50%, transparent 60%)'
-            : 'linear-gradient(45deg, transparent 40%, rgba(148,163,184,0.2) 50%, transparent 60%)',
+            : theme
+              ? theme.overlay
+              : 'linear-gradient(45deg, transparent 40%, rgba(148,163,184,0.2) 50%, transparent 60%)',
         }}
       />
 
@@ -163,14 +215,19 @@ export function ChapterCard({
 
       <div className="relative flex items-center gap-2">
         <div
-          className={`flex-1 h-1.5 rounded-full overflow-hidden ${isSpecial ? 'bg-amber-200/50' : 'bg-slate-200/60'}`}
+          className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+            isSpecial ? 'bg-amber-200/50' : !theme ? 'bg-slate-200/60' : ''
+          }`}
+          style={theme ? { backgroundColor: theme.progressTrackColor } : undefined}
         >
           <div
             className={`h-full rounded-full transition-all duration-500 ${isSpecial ? 'bg-gradient-to-r from-amber-400 to-yellow-500' : 'bg-gradient-to-r from-blue-400 to-teal-400'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className={`text-xs font-medium ${isSpecial ? 'text-amber-600' : 'text-slate-500'}`}>
+        <span
+          className={`text-xs font-medium ${isSpecial ? 'text-amber-600' : 'text-slate-500'}`}
+        >
           {progress}%
         </span>
       </div>
@@ -178,13 +235,20 @@ export function ChapterCard({
       <div className="relative mt-3 flex items-center gap-2">
         <span
           className={`
-          text-xs px-2.5 py-0.5 rounded-full backdrop-blur-sm
+          text-xs px-2.5 py-0.5 rounded-full backdrop-blur-sm border
           ${
             isSpecial
-              ? 'bg-gradient-to-r from-amber-100/80 to-yellow-100/80 text-amber-700 border border-amber-200/50'
-              : 'bg-gradient-to-r from-slate-100/80 to-blue-50/80 text-slate-600 border border-slate-200/50'
+              ? 'bg-gradient-to-r from-amber-100/80 to-yellow-100/80 text-amber-700 border-amber-200/50'
+              : theme
+                ? 'text-slate-600'
+                : 'bg-gradient-to-r from-slate-100/80 to-blue-50/80 text-slate-600 border-slate-200/50'
           }
         `}
+          style={
+            theme
+              ? { background: theme.badgeBackground, borderColor: theme.badgeBorderColor }
+              : undefined
+          }
         >
           {chapter.category_name}
         </span>

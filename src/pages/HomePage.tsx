@@ -112,6 +112,7 @@ export function HomePage() {
               <ChapterCard
                 key={chapter.id}
                 chapter={chapter}
+                chapterIndex={chapter.id}
                 onClick={() => navigate(`/chapter/${chapter.id}`)}
               />
             ))}

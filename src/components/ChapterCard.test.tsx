@@ -89,4 +89,38 @@ describe('ChapterCard', () => {
     const button = container.querySelector('button');
     expect(button?.className).toContain('amber');
   });
+
+  it('applies themed background when chapterIndex is provided', () => {
+    const { container } = render(
+      <ChapterCard chapter={mockChapter} onClick={mockOnClick} chapterIndex={8} />
+    );
+
+    const button = container.querySelector('button');
+    expect(button?.style.background).toContain('linear-gradient');
+  });
+
+  it('applies different themes for early and late chapters', () => {
+    const { container: early } = render(
+      <ChapterCard chapter={mockChapter} onClick={mockOnClick} chapterIndex={1} />
+    );
+    const { container: late } = render(
+      <ChapterCard chapter={mockChapter} onClick={mockOnClick} chapterIndex={16} />
+    );
+
+    const earlyBg = early.querySelector('button')?.style.background;
+    const lateBg = late.querySelector('button')?.style.background;
+    expect(earlyBg).toContain('linear-gradient');
+    expect(lateBg).toContain('linear-gradient');
+    expect(earlyBg).not.toBe(lateBg);
+  });
+
+  it('falls back to default slate theme when no chapterIndex', () => {
+    const { container } = render(
+      <ChapterCard chapter={mockChapter} onClick={mockOnClick} />
+    );
+
+    const button = container.querySelector('button');
+    expect(button?.className).toContain('slate');
+    expect(button?.style.background).toBe('');
+  });
 });
