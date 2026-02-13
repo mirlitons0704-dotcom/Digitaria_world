@@ -37,6 +37,11 @@ const ERROR_MAP: Array<{ pattern: RegExp; message: string }> = [
     message:
       'メール送信の上限に達しました。しばらく時間をおいてから再度お試しください。',
   },
+  {
+    pattern: /error sending recovery email/i,
+    message:
+      'リカバリーメールの送信に失敗しました。しばらく時間をおいてから再度お試しください。',
+  },
 ];
 
 export function translateAuthError(message: string): string {
