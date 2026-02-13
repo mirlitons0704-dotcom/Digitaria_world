@@ -1,29 +1,11 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-// ---------------------------------------------------------------------------
-// CORS – restrict to the production domain (fall back to '*' in development)
-// Set ALLOWED_ORIGIN via `supabase secrets set ALLOWED_ORIGIN=https://your-app.com`
-// ---------------------------------------------------------------------------
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') || '*';
-if (ALLOWED_ORIGIN === '*') {
-  console.warn(
-    '[TTS] ALLOWED_ORIGIN is not set — CORS allows all origins. Set ALLOWED_ORIGIN for production.'
-  );
-}
-
-function corsHeaders(origin?: string | null) {
-  // If ALLOWED_ORIGIN is '*' (dev), allow everything.
-  // Otherwise allow only the configured origin.
-  const allowedOrigin =
-    ALLOWED_ORIGIN === '*' ? '*' : origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '';
-
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
-  };
-}
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
+};
 
 // ---------------------------------------------------------------------------
 // Simple in-memory rate limiter (per-user, per Edge Function instance)
@@ -53,17 +35,14 @@ const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent`;
 
 Deno.serve(async (req: Request) => {
-  const origin = req.headers.get('Origin');
-  const headers = corsHeaders(origin);
-
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { ...headers, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -83,7 +62,7 @@ Deno.serve(async (req: Request) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -91,7 +70,7 @@ Deno.serve(async (req: Request) => {
     if (isRateLimited(user.id)) {
       return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment.' }), {
         status: 429,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -100,7 +79,7 @@ Deno.serve(async (req: Request) => {
     if (!geminiApiKey) {
       return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }), {
         status: 500,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -112,7 +91,7 @@ Deno.serve(async (req: Request) => {
     if (!text || typeof text !== 'string') {
       return new Response(JSON.stringify({ error: 'text field is required' }), {
         status: 400,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -120,7 +99,7 @@ Deno.serve(async (req: Request) => {
     if (text.length > 5000) {
       return new Response(JSON.stringify({ error: 'Text too long (max 5000 characters)' }), {
         status: 400,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -150,7 +129,7 @@ Deno.serve(async (req: Request) => {
         }),
         {
           status: geminiRes.status,
-          headers: { ...headers, 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -161,19 +140,18 @@ Deno.serve(async (req: Request) => {
     if (!audioData) {
       return new Response(JSON.stringify({ error: 'No audio data in Gemini response' }), {
         status: 502,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Return the base64 PCM audio data
     return new Response(JSON.stringify({ audioData }), {
-      headers: { ...headers, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    const origin = req.headers.get('Origin');
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
-      headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

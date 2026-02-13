@@ -1,20 +1,11 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-// CORS – restrict to the production domain (fall back to '*' in development)
-// Set ALLOWED_ORIGIN via `supabase secrets set ALLOWED_ORIGIN=https://your-app.com`
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') || '*';
-
-function corsHeaders(origin?: string | null) {
-  const allowedOrigin =
-    ALLOWED_ORIGIN === '*' ? '*' : origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '';
-
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
-  };
-}
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
+};
 
 interface TermData {
   id: string;
@@ -49,11 +40,8 @@ interface ChapterData {
 }
 
 Deno.serve(async (req: Request) => {
-  const origin = req.headers.get('Origin');
-  const headers = corsHeaders(origin);
-
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
@@ -66,7 +54,7 @@ Deno.serve(async (req: Request) => {
     if (!chapterData || !chapterData.terms) {
       return new Response(JSON.stringify({ error: 'Invalid chapter data' }), {
         status: 400,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -94,7 +82,7 @@ Deno.serve(async (req: Request) => {
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -104,13 +92,12 @@ Deno.serve(async (req: Request) => {
         message: `Seeded ${termsToInsert.length} terms for chapter ${chapterData.chapter.id}`,
         count: termsToInsert.length,
       }),
-      { headers: { ...headers, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
-    const origin = req.headers.get('Origin');
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
-      headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
