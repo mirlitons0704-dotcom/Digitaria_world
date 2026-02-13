@@ -6,3 +6,4 @@ export { MyFolderPage } from './MyFolderPage';
 export { SearchPage } from './SearchPage';
 export { TermsPage } from './TermsPage';
 export { PrivacyPage } from './PrivacyPage';
+export { ResetPasswordPage } from './ResetPasswordPage';

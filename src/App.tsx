@@ -9,6 +9,7 @@ import {
   SearchPage,
   TermsPage,
   PrivacyPage,
+  ResetPasswordPage,
 } from './pages';
 import {
   AdminDashboardPage,
@@ -16,6 +17,16 @@ import {
   AdminUserDetailPage,
   AdminAnalyticsPage,
 } from './pages/admin';
+
+function RecoveryRedirect({ children }: { children: React.ReactNode }) {
+  const { isRecovery, loading } = useAuth();
+
+  if (!loading && isRecovery) {
+    return <Navigate to="/reset-password" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -61,7 +72,15 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/"
+          element={
+            <RecoveryRedirect>
+              <LandingPage />
+            </RecoveryRedirect>
+          }
+        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           path="/home"
           element={
