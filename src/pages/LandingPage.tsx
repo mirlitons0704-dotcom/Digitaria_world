@@ -10,6 +10,7 @@ export function LandingPage() {
   const { user, profile, loading, signOut } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
@@ -153,7 +154,7 @@ export function LandingPage() {
 
       <main className="relative flex flex-col items-center px-4 pb-12">
         <div
-          className="mt-4 inline-block p-1.5 rounded-xl"
+          className={`mt-4 inline-block p-1.5 rounded-xl transition-opacity duration-500 ${videoReady ? 'opacity-100' : 'opacity-0'}`}
           style={{
             background: 'linear-gradient(135deg, #BFCFFF 0%, #8BA3E6 50%, #BFCFFF 100%)',
             boxShadow: `
@@ -180,6 +181,7 @@ export function LandingPage() {
               muted
               playsInline
               preload="auto"
+              onLoadedMetadata={() => setVideoReady(true)}
             />
           </div>
         </div>
