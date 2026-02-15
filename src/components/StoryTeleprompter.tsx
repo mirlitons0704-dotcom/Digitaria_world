@@ -37,6 +37,26 @@ const SPEED_OPTIONS = [
 
 const MANUAL_SCROLL_STEP = 200;
 
+const IMAGE_MARKER_RE = /\{\{image:([^}]+)\}\}/;
+
+function splitContentByImages(content: string) {
+  const segments: (string | { src: string })[] = [];
+  let remaining = content;
+  while (remaining) {
+    const match = IMAGE_MARKER_RE.exec(remaining);
+    if (!match) {
+      segments.push(remaining);
+      break;
+    }
+    if (match.index > 0) {
+      segments.push(remaining.slice(0, match.index));
+    }
+    segments.push({ src: match[1] });
+    remaining = remaining.slice(match.index + match[0].length);
+  }
+  return segments;
+}
+
 export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTeleprompterProps) {
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -479,7 +499,20 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                 )}
 
                 <div className="text-gray-700 text-lg leading-loose whitespace-pre-line">
-                  {scene.content}
+                  {splitContentByImages(scene.content).map((segment, i) =>
+                    typeof segment === 'string' ? (
+                      segment
+                    ) : (
+                      <span key={i} className="flex justify-center my-8">
+                        <img
+                          src={segment.src}
+                          alt=""
+                          className="w-72 object-contain drop-shadow-lg"
+                          loading="lazy"
+                        />
+                      </span>
+                    )
+                  )}
                 </div>
 
                 {scene.terms_introduced.length > 0 && (

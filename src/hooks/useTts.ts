@@ -56,7 +56,8 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
 
       try {
         const scene = scenes[index];
-        const textToSpeak = [scene.title, scene.content].filter(Boolean).join('\n\n');
+        const rawText = [scene.title, scene.content].filter(Boolean).join('\n\n');
+        const textToSpeak = rawText.replace(/\{\{image:[^}]+\}\}/g, '');
 
         const wavBlob = await generateSpeech(textToSpeak, {
           signal: controller.signal,
