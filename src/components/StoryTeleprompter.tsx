@@ -37,13 +37,15 @@ const SPEED_OPTIONS = [
 
 const MANUAL_SCROLL_STEP = 200;
 
-const IMAGE_MARKER_RE = /\{\{image:([^}]+)\}\}/;
+const MEDIA_MARKER_RE = /\{\{(image|video):([^}]+)\}\}/;
 
-function splitContentByImages(content: string) {
-  const segments: (string | { src: string })[] = [];
+type MediaSegment = { type: 'image' | 'video'; src: string };
+
+function splitContentByMedia(content: string) {
+  const segments: (string | MediaSegment)[] = [];
   let remaining = content;
   while (remaining) {
-    const match = IMAGE_MARKER_RE.exec(remaining);
+    const match = MEDIA_MARKER_RE.exec(remaining);
     if (!match) {
       segments.push(remaining);
       break;
@@ -51,7 +53,7 @@ function splitContentByImages(content: string) {
     if (match.index > 0) {
       segments.push(remaining.slice(0, match.index));
     }
-    segments.push({ src: match[1] });
+    segments.push({ type: match[1] as 'image' | 'video', src: match[2] });
     remaining = remaining.slice(match.index + match[0].length);
   }
   return segments;
@@ -499,9 +501,20 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                 )}
 
                 <div className="text-gray-700 text-lg leading-loose whitespace-pre-line">
-                  {splitContentByImages(scene.content).map((segment, i) =>
+                  {splitContentByMedia(scene.content).map((segment, i) =>
                     typeof segment === 'string' ? (
                       segment
+                    ) : segment.type === 'video' ? (
+                      <span key={i} className="flex justify-center my-8">
+                        <video
+                          src={segment.src}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-72 rounded-lg drop-shadow-lg"
+                        />
+                      </span>
                     ) : (
                       <span key={i} className="flex justify-center my-8">
                         <img
