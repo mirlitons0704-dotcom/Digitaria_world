@@ -494,7 +494,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                     <img
                       src={scene.image_url}
                       alt={scene.title || 'シーン画像'}
-                      className="w-56 h-56 object-contain drop-shadow-lg"
+                      className="w-[336px] h-[336px] object-contain drop-shadow-lg"
                       loading="lazy"
                     />
                   </div>
