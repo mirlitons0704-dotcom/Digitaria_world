@@ -504,23 +504,12 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                   {splitContentByMedia(scene.content).map((segment, i) =>
                     typeof segment === 'string' ? (
                       segment
-                    ) : segment.type === 'video' ? (
-                      <span key={i} className="flex justify-center my-8">
-                        <video
-                          src={segment.src}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="w-72 rounded-lg drop-shadow-lg"
-                        />
-                      </span>
                     ) : (
                       <span key={i} className="flex justify-center my-8">
                         <img
                           src={segment.src}
                           alt=""
-                          className="w-72 object-contain drop-shadow-lg"
+                          className="w-[60%] object-contain drop-shadow-lg"
                           loading="lazy"
                         />
                       </span>
