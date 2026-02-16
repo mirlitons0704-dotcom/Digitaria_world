@@ -509,7 +509,9 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                         <img
                           src={segment.src}
                           alt=""
-                          className="w-[42%] object-contain drop-shadow-lg"
+                          className={`object-contain drop-shadow-lg ${
+                            segment.src.includes('memorygarden') ? 'w-[60%]' : 'w-[42%]'
+                          }`}
                           loading="lazy"
                         />
                       </span>
