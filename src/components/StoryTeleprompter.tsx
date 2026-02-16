@@ -509,7 +509,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                         <img
                           src={segment.src}
                           alt=""
-                          className="w-[60%] object-contain drop-shadow-lg"
+                          className="w-[42%] object-contain drop-shadow-lg"
                           loading="lazy"
                         />
                       </span>
