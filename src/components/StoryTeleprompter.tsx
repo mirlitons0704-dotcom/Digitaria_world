@@ -66,7 +66,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
   const lastTimeRef = useRef<number>(0);
 
   const [isAutoScroll, setIsAutoScroll] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(1);
+  const [speedIndex, setSpeedIndex] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
