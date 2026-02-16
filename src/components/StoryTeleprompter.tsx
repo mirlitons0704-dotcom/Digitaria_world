@@ -64,6 +64,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
+  const subPixelRef = useRef<number>(0);
 
   const [isAutoScroll, setIsAutoScroll] = useState(false);
   const [speedIndex, setSpeedIndex] = useState(0);
@@ -144,8 +145,12 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
       const delta = timestamp - lastTimeRef.current;
       lastTimeRef.current = timestamp;
 
-      const px = speed * (delta / 16);
-      scrollRef.current.scrollTop += px;
+      subPixelRef.current += speed * (delta / 16);
+      const whole = Math.floor(subPixelRef.current);
+      if (whole >= 1) {
+        scrollRef.current.scrollTop += whole;
+        subPixelRef.current -= whole;
+      }
 
       const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
       if (scrollTop + clientHeight >= scrollHeight - 2) {
@@ -161,6 +166,7 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
   const startAutoScroll = useCallback(() => {
     setIsAutoScroll(true);
     lastTimeRef.current = 0;
+    subPixelRef.current = 0;
     animFrameRef.current = requestAnimationFrame(tick);
   }, [tick]);
 
