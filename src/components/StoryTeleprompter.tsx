@@ -510,7 +510,11 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
                           src={segment.src}
                           alt=""
                           className={`object-contain drop-shadow-lg ${
-                            segment.src.includes('memorygarden') ? 'w-[60%]' : 'w-[42%]'
+                            segment.src.includes('bits.png')
+                              ? 'w-full'
+                              : segment.src.includes('memorygarden')
+                                ? 'w-[60%]'
+                                : 'w-[42%]'
                           }`}
                           loading="lazy"
                         />
