@@ -14,6 +14,8 @@ import {
   ToggleRight,
   Loader2,
   Square,
+  ArrowRight,
+  Home,
 } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
 import { InlineTermCard } from './InlineTermCard';
@@ -25,6 +27,9 @@ interface StoryTeleprompterProps {
   scenes: StoryScene[];
   chapterTitle: string;
   terms?: Term[];
+  onNextChapter?: () => void;
+  isLastChapter?: boolean;
+  onBackToHome?: () => void;
 }
 
 const SPEED_OPTIONS = [
@@ -59,7 +64,14 @@ function splitContentByMedia(content: string) {
   return segments;
 }
 
-export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTeleprompterProps) {
+export function StoryTeleprompter({
+  scenes,
+  chapterTitle,
+  terms = [],
+  onNextChapter,
+  isLastChapter,
+  onBackToHome,
+}: StoryTeleprompterProps) {
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -570,12 +582,34 @@ export function StoryTeleprompter({ scenes, chapterTitle, terms = [] }: StoryTel
               </div>
             ))}
 
-            <div className="text-center py-8">
+            <div className="flex flex-col items-center gap-6 py-12">
               <div className="inline-flex items-center gap-2 text-gray-300">
                 <div className="h-px w-12 bg-gray-200" />
                 <ChevronsDown size={16} />
                 <div className="h-px w-12 bg-gray-200" />
               </div>
+
+              {isLastChapter ? (
+                onBackToHome && (
+                  <button
+                    onClick={onBackToHome}
+                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    <Home size={16} />
+                    Back to Home
+                  </button>
+                )
+              ) : (
+                onNextChapter && (
+                  <button
+                    onClick={onNextChapter}
+                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    <ArrowRight size={16} />
+                    Go Next Chapter
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>

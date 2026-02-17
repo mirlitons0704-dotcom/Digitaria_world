@@ -77,7 +77,14 @@ export function ChapterPage() {
         </div>
 
         <div className="flex-1 min-h-0 relative flex flex-col">
-          <StoryTeleprompter scenes={scenes} chapterTitle={chapter.title} terms={terms} />
+          <StoryTeleprompter
+            scenes={scenes}
+            chapterTitle={chapter.title}
+            terms={terms}
+            isLastChapter={chapter.id >= 17}
+            onNextChapter={() => navigate(`/chapter/${chapter.id + 1}`)}
+            onBackToHome={() => navigate('/home')}
+          />
 
           <button
             onClick={() => navigate(`/chapter/${chapter.id}/terms`)}
