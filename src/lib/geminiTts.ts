@@ -1,13 +1,9 @@
 import { supabase } from './supabase';
 
-// Gemini TTS outputs PCM: 24kHz, 16-bit, mono
 const SAMPLE_RATE = 24000;
 const BITS_PER_SAMPLE = 16;
 const NUM_CHANNELS = 1;
 
-/**
- * Convert raw PCM (16-bit LE, 24kHz, mono) to a playable WAV Blob.
- */
 function pcmToWavBlob(pcmBase64: string): Blob {
   const raw = atob(pcmBase64);
   const pcmBytes = new Uint8Array(raw.length);
@@ -23,26 +19,22 @@ function pcmToWavBlob(pcmBase64: string): Blob {
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
 
-  // RIFF header
   writeString(view, 0, 'RIFF');
   view.setUint32(4, fileSize, true);
   writeString(view, 8, 'WAVE');
 
-  // fmt sub-chunk
   writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true); // sub-chunk size
-  view.setUint16(20, 1, true); // PCM format
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
   view.setUint16(22, NUM_CHANNELS, true);
   view.setUint32(24, SAMPLE_RATE, true);
   view.setUint32(28, byteRate, true);
   view.setUint16(32, blockAlign, true);
   view.setUint16(34, BITS_PER_SAMPLE, true);
 
-  // data sub-chunk
   writeString(view, 36, 'data');
   view.setUint32(40, dataSize, true);
 
-  // Copy PCM data
   const wavBytes = new Uint8Array(buffer);
   wavBytes.set(pcmBytes, 44);
 
@@ -55,25 +47,48 @@ function writeString(view: DataView, offset: number, str: string) {
   }
 }
 
+const audioCache = new Map<string, Blob>();
+const MAX_CACHE_ENTRIES = 50;
+
+function getCacheKey(text: string, voiceName: string): string {
+  return `${voiceName}:${text}`;
+}
+
+function addToCache(key: string, blob: Blob) {
+  if (audioCache.size >= MAX_CACHE_ENTRIES) {
+    const firstKey = audioCache.keys().next().value;
+    if (firstKey) audioCache.delete(firstKey);
+  }
+  audioCache.set(key, blob);
+}
+
 export interface TtsOptions {
   voiceName?: string;
   signal?: AbortSignal;
 }
 
-/**
- * Generate speech audio from text via Supabase Edge Function.
- * The Edge Function proxies the Gemini TTS API and keeps the API key server-side.
- * Returns a WAV Blob ready for playback.
- */
+async function getAccessToken(): Promise<string> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.access_token) return session.access_token;
+
+  const { data: refreshData, error } = await supabase.auth.refreshSession();
+  if (error || !refreshData.session?.access_token) {
+    throw new Error('Authentication required for TTS');
+  }
+  return refreshData.session.access_token;
+}
+
 export async function generateSpeech(text: string, options: TtsOptions = {}): Promise<Blob> {
   const { voiceName = 'Kore', signal } = options;
 
-  const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-  const accessToken = refreshData.session?.access_token;
+  const cacheKey = getCacheKey(text, voiceName);
+  const cached = audioCache.get(cacheKey);
+  if (cached) return cached;
 
-  if (refreshError || !accessToken) {
-    throw new Error('Authentication required for TTS');
-  }
+  const accessToken = await getAccessToken();
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const res = await fetch(`${supabaseUrl}/functions/v1/text-to-speech`, {
@@ -98,5 +113,7 @@ export async function generateSpeech(text: string, options: TtsOptions = {}): Pr
     throw new Error('No audio data in TTS response');
   }
 
-  return pcmToWavBlob(audioData);
+  const blob = pcmToWavBlob(audioData);
+  addToCache(cacheKey, blob);
+  return blob;
 }
