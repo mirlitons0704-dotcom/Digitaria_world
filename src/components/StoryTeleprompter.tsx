@@ -99,28 +99,6 @@ export function StoryTeleprompter({
     sceneRefs.current = sceneRefs.current.slice(0, scenes.length);
   }, [scenes.length]);
 
-  useEffect(() => {
-    if (tts.currentSceneIndex !== prevSceneIndexRef.current) {
-      userScrolledRef.current = false;
-      prevSceneIndexRef.current = tts.currentSceneIndex;
-    }
-
-    if (
-      (tts.status !== 'loading' && tts.status !== 'playing') ||
-      userScrolledRef.current
-    )
-      return;
-
-    const el = sceneRefs.current[tts.currentSceneIndex];
-    const container = scrollRef.current;
-    if (!el || !container) return;
-
-    if (isAutoScroll) stopAutoScroll();
-
-    const targetTop = el.offsetTop - 20;
-    container.scrollTo({ top: targetTop, behavior: 'smooth' });
-  }, [tts.currentSceneIndex, tts.status, isAutoScroll, stopAutoScroll]);
-
   // Auto-dismiss save error after 3 seconds
   useEffect(() => {
     if (!saveError) return;
@@ -175,6 +153,28 @@ export function StoryTeleprompter({
       animFrameRef.current = 0;
     }
   }, []);
+
+  useEffect(() => {
+    if (tts.currentSceneIndex !== prevSceneIndexRef.current) {
+      userScrolledRef.current = false;
+      prevSceneIndexRef.current = tts.currentSceneIndex;
+    }
+
+    if (
+      (tts.status !== 'loading' && tts.status !== 'playing') ||
+      userScrolledRef.current
+    )
+      return;
+
+    const el = sceneRefs.current[tts.currentSceneIndex];
+    const container = scrollRef.current;
+    if (!el || !container) return;
+
+    if (isAutoScroll) stopAutoScroll();
+
+    const targetTop = el.offsetTop - 20;
+    container.scrollTo({ top: targetTop, behavior: 'smooth' });
+  }, [tts.currentSceneIndex, tts.status, isAutoScroll, stopAutoScroll]);
 
   const tick = useCallback(
     (timestamp: number) => {
