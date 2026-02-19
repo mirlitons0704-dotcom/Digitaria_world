@@ -68,17 +68,19 @@ export interface TtsOptions {
 export async function generateSpeech(text: string, options: TtsOptions = {}): Promise<Blob> {
   const { voiceName = 'Kore', signal } = options;
 
-  // Get the current session token for auth
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+  const accessToken = refreshData.session?.access_token;
+
+  if (refreshError || !accessToken) {
+    throw new Error('Authentication required for TTS');
+  }
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const res = await fetch(`${supabaseUrl}/functions/v1/text-to-speech`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${accessToken}`,
       apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({ text, voiceName }),

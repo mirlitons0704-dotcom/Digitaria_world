@@ -47,10 +47,11 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // ------ Authenticate the caller ------
     const authHeader = req.headers.get('Authorization') ?? '';
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    console.log('TTS request received, auth header present:', !!authHeader);
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const token = authHeader.replace(/^Bearer\s+/i, '');
@@ -60,11 +61,14 @@ Deno.serve(async (req: Request) => {
     } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
+      console.log('Auth failed:', authError?.message ?? 'No user returned');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    console.log('Auth OK, user:', user.id);
 
     // ------ Rate limit ------
     if (isRateLimited(user.id)) {
