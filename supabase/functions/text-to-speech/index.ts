@@ -47,27 +47,36 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // ------ Authenticate the caller ------
+    // ------ Authenticate the caller (optional) ------
     const authHeader = req.headers.get('Authorization') ?? '';
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const token = authHeader.replace(/^Bearer\s+/i, '');
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    let userId = 'anonymous';
+
+    // Try to authenticate, but allow anonymous access
+    if (token && !token.includes('anon')) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser(token);
+
+      if (user) {
+        userId = user.id;
+      }
+    }
+
+    // Use IP address for anonymous rate limiting
+    if (userId === 'anonymous') {
+      const forwardedFor = req.headers.get('x-forwarded-for');
+      const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown';
+      userId = `anon_${ip}`;
     }
 
     // ------ Rate limit ------
-    if (isRateLimited(user.id)) {
+    if (isRateLimited(userId)) {
       return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment.' }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -104,24 +113,33 @@ Deno.serve(async (req: Request) => {
     }
 
     // ------ Call Gemini TTS API ------
+    // The TTS model requires explicit instruction to read the text aloud.
+    const ttsPrompt = `Read the following text aloud in a natural, expressive voice:\n\n${text}`;
+    const requestBody = {
+      contents: [{ parts: [{ text: ttsPrompt }] }],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName },
+          },
+        },
+      },
+    };
+
+    console.log('[TTS] Calling Gemini API with voiceName:', voiceName, 'text length:', text.length);
+
     const geminiRes = await fetch(`${TTS_ENDPOINT}?key=${geminiApiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text }] }],
-        generationConfig: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName },
-            },
-          },
-        },
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log('[TTS] Gemini API response status:', geminiRes.status);
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text().catch(() => 'Unknown error');
+      console.error('[TTS] Gemini API error:', geminiRes.status, errText);
       return new Response(
         JSON.stringify({
           error: `Gemini API error (${geminiRes.status})`,
@@ -135,6 +153,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const geminiJson = await geminiRes.json();
+    console.log('[TTS] Gemini response structure:', JSON.stringify(Object.keys(geminiJson)));
+
     const audioData = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
     if (!audioData) {

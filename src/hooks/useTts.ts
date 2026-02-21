@@ -27,6 +27,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const statusRef = useRef<TtsStatus>('idle');
 
   // Cleanup object URL to avoid memory leaks
   const revokeUrl = useCallback(() => {
@@ -36,22 +37,29 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
     }
   }, []);
 
+  // Keep statusRef in sync
+  const updateStatus = useCallback((newStatus: TtsStatus) => {
+    statusRef.current = newStatus;
+    setStatus(newStatus);
+  }, []);
+
   // Generate and play audio for a given scene index
   const playScene = useCallback(
     async (index: number) => {
       if (index >= scenes.length) {
-        setStatus('idle');
+        updateStatus('idle');
         setCurrentSceneIndex(0);
         return;
       }
 
-      // Abort any ongoing request
+      // Abort any ongoing request and create a fresh controller
       abortRef.current?.abort();
+      abortRef.current = null;
       const controller = new AbortController();
       abortRef.current = controller;
 
       setCurrentSceneIndex(index);
-      setStatus('loading');
+      updateStatus('loading');
       setErrorMessage(null);
 
       try {
@@ -84,28 +92,31 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
         };
 
         await audio.play();
-        setStatus('playing');
+        updateStatus('playing');
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
+        // If stop() was called while we were loading, don't overwrite 'idle' with 'error'
+        if (statusRef.current === 'idle') return;
         const msg = err instanceof Error ? err.message : 'TTS generation failed';
-        setStatus('error');
+        updateStatus('error');
         setErrorMessage(msg);
       }
     },
-    [scenes, revokeUrl]
+    [scenes, revokeUrl, updateStatus]
   );
 
   const play = useCallback(() => {
-    if (status === 'paused' && audioRef.current) {
+    const currentStatus = statusRef.current;
+    if (currentStatus === 'paused' && audioRef.current) {
       audioRef.current.play();
-      setStatus('playing');
+      updateStatus('playing');
       return;
     }
 
-    if (status === 'idle' || status === 'error') {
+    if (currentStatus === 'idle' || currentStatus === 'error') {
       playScene(currentSceneIndex);
     }
-  }, [status, currentSceneIndex, playScene]);
+  }, [currentSceneIndex, playScene, updateStatus]);
 
   const pause = useCallback(() => {
     if (audioRef.current && status === 'playing') {
@@ -116,6 +127,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
+    abortRef.current = null;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.onended = null;
@@ -123,10 +135,10 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
       audioRef.current = null;
     }
     revokeUrl();
-    setStatus('idle');
+    updateStatus('idle');
     setCurrentSceneIndex(0);
     setErrorMessage(null);
-  }, [revokeUrl]);
+  }, [revokeUrl, updateStatus]);
 
   // Cleanup on unmount or scenes change
   useEffect(() => {
