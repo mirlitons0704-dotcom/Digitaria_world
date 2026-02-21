@@ -5,18 +5,17 @@ import type { StoryScene } from '../lib/database.types';
 export type TtsStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
 interface UseTtsReturn {
-  /** Current playback status */
   status: TtsStatus;
-  /** Index of the scene currently being played / loaded */
   currentSceneIndex: number;
-  /** Error message if status is 'error' */
   errorMessage: string | null;
-  /** Start or resume playback */
   play: () => void;
-  /** Pause playback */
   pause: () => void;
-  /** Stop playback and reset */
   stop: () => void;
+}
+
+function sceneToText(scene: StoryScene): string {
+  const rawText = [scene.title, scene.content].filter(Boolean).join('\n\n');
+  return rawText.replace(/\{\{image:[^}]+\}\}/g, '');
 }
 
 export function useTts(scenes: StoryScene[]): UseTtsReturn {
@@ -28,8 +27,8 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
   const abortRef = useRef<AbortController | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const statusRef = useRef<TtsStatus>('idle');
+  const prefetchRef = useRef<AbortController | null>(null);
 
-  // Cleanup object URL to avoid memory leaks
   const revokeUrl = useCallback(() => {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
@@ -43,7 +42,19 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
     setStatus(newStatus);
   }, []);
 
-  // Generate and play audio for a given scene index
+  const prefetchScene = useCallback(
+    (index: number) => {
+      if (index >= scenes.length) return;
+
+      prefetchRef.current?.abort();
+      const controller = new AbortController();
+      prefetchRef.current = controller;
+
+      const text = sceneToText(scenes[index]);
+      generateSpeech(text, { signal: controller.signal }).catch(() => {});
+    },
+    [scenes]
+  );
   const playScene = useCallback(
     async (index: number) => {
       if (index >= scenes.length) {
@@ -63,16 +74,15 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
       setErrorMessage(null);
 
       try {
-        const scene = scenes[index];
-        const rawText = [scene.title, scene.content].filter(Boolean).join('\n\n');
-        const textToSpeak = rawText.replace(/\{\{image:[^}]+\}\}/g, '');
+        const text = sceneToText(scenes[index]);
 
-        const wavBlob = await generateSpeech(textToSpeak, {
+        const wavBlob = await generateSpeech(text, {
           signal: controller.signal,
         });
 
-        // If aborted while waiting, bail out
         if (controller.signal.aborted) return;
+
+        prefetchScene(index + 1);
 
         revokeUrl();
         const url = URL.createObjectURL(wavBlob);
@@ -82,7 +92,6 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
         audioRef.current = audio;
 
         audio.onended = () => {
-          // Automatically advance to next scene
           playScene(index + 1);
         };
 
@@ -102,7 +111,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
         setErrorMessage(msg);
       }
     },
-    [scenes, revokeUrl, updateStatus]
+    [scenes, revokeUrl, updateStatus, prefetchScene]
   );
 
   const play = useCallback(() => {
@@ -128,6 +137,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
   const stop = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    prefetchRef.current?.abort();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.onended = null;
@@ -140,10 +150,10 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
     setErrorMessage(null);
   }, [revokeUrl, updateStatus]);
 
-  // Cleanup on unmount or scenes change
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
+      prefetchRef.current?.abort();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.onended = null;
@@ -155,7 +165,6 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
     };
   }, []);
 
-  // Reset when scenes change
   useEffect(() => {
     stop();
   }, [scenes, stop]);

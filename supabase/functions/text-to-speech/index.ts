@@ -52,6 +52,8 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
+    console.log('TTS request received, auth header present:', !!authHeader);
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const token = authHeader.replace(/^Bearer\s+/i, '');
 
@@ -74,6 +76,8 @@ Deno.serve(async (req: Request) => {
       const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown';
       userId = `anon_${ip}`;
     }
+
+    console.log('Auth OK, userId:', userId);
 
     // ------ Rate limit ------
     if (isRateLimited(userId)) {

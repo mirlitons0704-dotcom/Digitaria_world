@@ -91,6 +91,14 @@ export function StoryTeleprompter({
 
   const tts = useTts(scenes);
 
+  const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const userScrolledRef = useRef(false);
+  const prevSceneIndexRef = useRef(0);
+
+  useEffect(() => {
+    sceneRefs.current = sceneRefs.current.slice(0, scenes.length);
+  }, [scenes.length]);
+
   // Auto-dismiss save error after 3 seconds
   useEffect(() => {
     if (!saveError) return;
@@ -145,6 +153,24 @@ export function StoryTeleprompter({
       animFrameRef.current = 0;
     }
   }, []);
+
+  useEffect(() => {
+    if (tts.currentSceneIndex !== prevSceneIndexRef.current) {
+      userScrolledRef.current = false;
+      prevSceneIndexRef.current = tts.currentSceneIndex;
+    }
+
+    if ((tts.status !== 'loading' && tts.status !== 'playing') || userScrolledRef.current) return;
+
+    const el = sceneRefs.current[tts.currentSceneIndex];
+    const container = scrollRef.current;
+    if (!el || !container) return;
+
+    if (isAutoScroll) stopAutoScroll();
+
+    const targetTop = el.offsetTop - 20;
+    container.scrollTo({ top: targetTop, behavior: 'smooth' });
+  }, [tts.currentSceneIndex, tts.status, isAutoScroll, stopAutoScroll]);
 
   const tick = useCallback(
     (timestamp: number) => {
@@ -216,6 +242,9 @@ export function StoryTeleprompter({
 
     const handleWheel = () => {
       if (isAutoScroll) stopAutoScroll();
+      if (tts.status === 'playing' || tts.status === 'loading') {
+        userScrolledRef.current = true;
+      }
     };
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -224,7 +253,12 @@ export function StoryTeleprompter({
 
     const handleTouchMove = (e: TouchEvent) => {
       const delta = Math.abs(e.touches[0].clientY - touchStartY);
-      if (delta > 5 && isAutoScroll) stopAutoScroll();
+      if (delta > 5) {
+        if (isAutoScroll) stopAutoScroll();
+        if (tts.status === 'playing' || tts.status === 'loading') {
+          userScrolledRef.current = true;
+        }
+      }
     };
 
     el.addEventListener('wheel', handleWheel, { passive: true });
@@ -236,7 +270,7 @@ export function StoryTeleprompter({
       el.removeEventListener('touchstart', handleTouchStart);
       el.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [isAutoScroll, stopAutoScroll]);
+  }, [isAutoScroll, stopAutoScroll, tts.status]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -494,6 +528,9 @@ export function StoryTeleprompter({
             {scenes.map((scene, index) => (
               <div
                 key={scene.id}
+                ref={(el) => {
+                  sceneRefs.current[index] = el;
+                }}
                 className="scene-enter mb-12"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -589,27 +626,25 @@ export function StoryTeleprompter({
                 <div className="h-px w-12 bg-gray-200" />
               </div>
 
-              {isLastChapter ? (
-                onBackToHome && (
-                  <button
-                    onClick={onBackToHome}
-                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-                  >
-                    <Home size={16} />
-                    Back to Home
-                  </button>
-                )
-              ) : (
-                onNextChapter && (
-                  <button
-                    onClick={onNextChapter}
-                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-                  >
-                    <ArrowRight size={16} />
-                    Go Next Chapter
-                  </button>
-                )
-              )}
+              {isLastChapter
+                ? onBackToHome && (
+                    <button
+                      onClick={onBackToHome}
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                    >
+                      <Home size={16} />
+                      Back to Home
+                    </button>
+                  )
+                : onNextChapter && (
+                    <button
+                      onClick={onNextChapter}
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                    >
+                      <ArrowRight size={16} />
+                      Go Next Chapter
+                    </button>
+                  )}
             </div>
           </div>
         </div>
