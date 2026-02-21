@@ -64,7 +64,7 @@ let bgRemovalModule: typeof import('@imgly/background-removal') | null = null;
 
 async function removeBackground(blob: Blob): Promise<Blob> {
   if (!bgRemovalModule) {
-    bgRemovalModule = await import('@imgly/background-removal');
+    bgRemovalModule = await import(/* @vite-ignore */ '@imgly/background-removal');
   }
   return bgRemovalModule.removeBackground(blob);
 }
