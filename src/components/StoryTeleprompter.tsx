@@ -18,6 +18,7 @@ import {
   Home,
 } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
+import { splitContentByMedia } from '../lib/mediaMarker';
 import { InlineTermCard } from './InlineTermCard';
 import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
@@ -41,28 +42,6 @@ const SPEED_OPTIONS = [
 ] as const;
 
 const MANUAL_SCROLL_STEP = 200;
-
-const MEDIA_MARKER_RE = /\{\{(image|video):([^}]+)\}\}/;
-
-type MediaSegment = { type: 'image' | 'video'; src: string };
-
-function splitContentByMedia(content: string) {
-  const segments: (string | MediaSegment)[] = [];
-  let remaining = content;
-  while (remaining) {
-    const match = MEDIA_MARKER_RE.exec(remaining);
-    if (!match) {
-      segments.push(remaining);
-      break;
-    }
-    if (match.index > 0) {
-      segments.push(remaining.slice(0, match.index));
-    }
-    segments.push({ type: match[1] as 'image' | 'video', src: match[2] });
-    remaining = remaining.slice(match.index + match[0].length);
-  }
-  return segments;
-}
 
 export function StoryTeleprompter({
   scenes,
@@ -239,6 +218,7 @@ export function StoryTeleprompter({
     if (!el) return;
 
     let touchStartY = 0;
+    let touchMoved = false;
 
     const handleWheel = () => {
       if (isAutoScroll) stopAutoScroll();
@@ -249,11 +229,13 @@ export function StoryTeleprompter({
 
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY;
+      touchMoved = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       const delta = Math.abs(e.touches[0].clientY - touchStartY);
       if (delta > 5) {
+        touchMoved = true;
         if (isAutoScroll) stopAutoScroll();
         if (tts.status === 'playing' || tts.status === 'loading') {
           userScrolledRef.current = true;
@@ -261,14 +243,30 @@ export function StoryTeleprompter({
       }
     };
 
+    const handleClick = (e: MouseEvent) => {
+      if (!isAutoScroll) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, select, input, textarea')) return;
+      stopAutoScroll();
+    };
+
+    const handleTouchEnd = () => {
+      if (!isAutoScroll || touchMoved) return;
+      stopAutoScroll();
+    };
+
     el.addEventListener('wheel', handleWheel, { passive: true });
     el.addEventListener('touchstart', handleTouchStart, { passive: true });
     el.addEventListener('touchmove', handleTouchMove, { passive: true });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+    el.addEventListener('click', handleClick);
 
     return () => {
       el.removeEventListener('wheel', handleWheel);
       el.removeEventListener('touchstart', handleTouchStart);
       el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+      el.removeEventListener('click', handleClick);
     };
   }, [isAutoScroll, stopAutoScroll, tts.status]);
 

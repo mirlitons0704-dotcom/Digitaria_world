@@ -16,6 +16,7 @@ import {
   AdminUsersPage,
   AdminUserDetailPage,
   AdminAnalyticsPage,
+  AdminIllustrationsPage,
 } from './pages/admin';
 
 function RecoveryRedirect({ children }: { children: React.ReactNode }) {
@@ -151,6 +152,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminAnalyticsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/illustrations"
+          element={
+            <AdminRoute>
+              <AdminIllustrationsPage />
             </AdminRoute>
           }
         />

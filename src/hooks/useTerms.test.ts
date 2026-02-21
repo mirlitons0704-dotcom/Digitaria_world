@@ -4,6 +4,11 @@ import { useTermsByChapter, useTerm, useSearchTerms, useQuizTerms } from './useT
 import * as api from '../lib/api';
 import { createMockTerm, createMockTerms } from '../test/test-utils';
 
+// Mock the Supabase client to prevent createClient error in test env
+vi.mock('../lib/supabase', () => ({
+  supabase: {},
+}));
+
 // Mock the API module
 vi.mock('../lib/api');
 

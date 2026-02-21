@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -331,4 +334,92 @@ export async function getTopLearners(
     display_name: string | null;
     total_butterflies: number;
   }[];
+}
+
+// ---------------------------------------------------------------------------
+// Illustration management helpers
+// ---------------------------------------------------------------------------
+
+export interface IllustrationScene {
+  id: string;
+  chapter_id: number;
+  scene_number: number;
+  title: string | null;
+  image_url: string | null;
+  inline_image_count: number;
+  inline_image_urls: string[];
+  content: string;
+}
+
+async function callManageIllustration(body: Record<string, unknown>) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const token = session?.access_token;
+  if (!token) throw new Error('Authentication required');
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-illustration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+  return json;
+}
+
+export async function getIllustrationScenes(chapterId?: number): Promise<IllustrationScene[]> {
+  const body: Record<string, unknown> = { action: 'list' };
+  if (chapterId) body.chapterId = chapterId;
+  const { scenes } = await callManageIllustration(body);
+  return scenes;
+}
+
+export async function uploadIllustration(
+  base64: string,
+  filename: string
+): Promise<{ path: string; publicUrl: string }> {
+  return callManageIllustration({
+    action: 'upload',
+    base64,
+    filename,
+  });
+}
+
+export async function setSceneImageUrl(sceneId: string, url: string | null): Promise<void> {
+  await callManageIllustration({
+    action: 'set-image-url',
+    sceneId,
+    url,
+  });
+}
+
+export async function insertInlineImage(
+  sceneId: string,
+  url: string,
+  paragraphIndex: number
+): Promise<{ content: string }> {
+  return callManageIllustration({
+    action: 'insert-inline',
+    sceneId,
+    url,
+    paragraphIndex,
+  });
+}
+
+export async function removeInlineImage(
+  sceneId: string,
+  imageUrl: string
+): Promise<{ content: string }> {
+  return callManageIllustration({
+    action: 'remove-image',
+    sceneId,
+    imageUrl,
+  });
 }

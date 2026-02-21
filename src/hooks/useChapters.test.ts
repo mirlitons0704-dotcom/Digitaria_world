@@ -4,6 +4,11 @@ import { useChapters, useChapter, useChapterWithGuide } from './useChapters';
 import * as api from '../lib/api';
 import { createMockChapter, createMockCharacter } from '../test/test-utils';
 
+// Mock the Supabase client to prevent createClient error in test env
+vi.mock('../lib/supabase', () => ({
+  supabase: {},
+}));
+
 // Mock the API module
 vi.mock('../lib/api');
 

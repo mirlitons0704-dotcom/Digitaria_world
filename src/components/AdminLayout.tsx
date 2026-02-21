@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Users,
   BarChart3,
+  Image,
   ArrowLeft,
   LogOut,
   Shield,
@@ -16,6 +17,7 @@ const adminNavItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+  { path: '/admin/illustrations', icon: Image, label: 'Illustrations' },
 ];
 
 function SidebarContent({ onNavigate }: { onNavigate: (path: string) => void }) {
