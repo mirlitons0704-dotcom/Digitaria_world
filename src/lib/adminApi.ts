@@ -351,13 +351,23 @@ export interface IllustrationScene {
   content: string;
 }
 
-async function callManageIllustration(body: Record<string, unknown>) {
+async function getAccessToken(): Promise<string> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const token = session?.access_token;
-  if (!token) throw new Error('Authentication required');
+  if (session?.access_token) return session.access_token;
+
+  // Session may be stale — attempt refresh
+  const { data: refreshData, error } = await supabase.auth.refreshSession();
+  if (error || !refreshData.session?.access_token) {
+    throw new Error('Authentication required');
+  }
+  return refreshData.session.access_token;
+}
+
+async function callManageIllustration(body: Record<string, unknown>) {
+  const token = await getAccessToken();
 
   const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-illustration`, {
     method: 'POST',
@@ -369,8 +379,8 @@ async function callManageIllustration(body: Record<string, unknown>) {
     body: JSON.stringify(body),
   });
 
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || json.msg || `Request failed (${res.status})`);
   return json;
 }
 
