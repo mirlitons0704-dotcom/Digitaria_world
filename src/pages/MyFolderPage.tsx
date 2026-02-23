@@ -352,8 +352,16 @@ export function MyFolderPage() {
               </div>
             </div>
 
-            {/* Spacer to balance layout (mirrors character width) */}
-            <div className="w-20 md:w-24 shrink-0" />
+            <div className="w-20 md:w-24 shrink-0">
+              <video
+                className="w-full h-auto rounded-lg"
+                src={ASSETS.byteSanProud}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            </div>
           </div>
         </header>
 

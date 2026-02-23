@@ -16,6 +16,7 @@ export const ASSETS = {
   bitKunProud: `${STORAGE_URL}/c1_proud.mp4`,
   bitKunThink: `${STORAGE_URL}/c1_think.mp4`,
   byteSanEncourage: `${STORAGE_URL}/c2_encourage.mp4`,
+  byteSanProud: `${STORAGE_URL}/c2_proud.mp4`,
 
   // Butterfly images
   butterflyBlue: `${STORAGE_URL}/c3_bfb.png`,
