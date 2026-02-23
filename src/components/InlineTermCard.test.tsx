@@ -120,7 +120,7 @@ describe('InlineTermCard', () => {
       <InlineTermCard term={mockTerm} onClose={mockOnClose} onGotIt={mockOnGotIt} isCollected />
     );
 
-    expect(screen.getByText('My Folder に追加済み')).toBeInTheDocument();
+    expect(screen.getByText('My Folder に追加済み 🦋')).toBeInTheDocument();
     expect(screen.queryByText('理解した！')).not.toBeInTheDocument();
   });
 

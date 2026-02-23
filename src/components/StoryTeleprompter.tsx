@@ -12,6 +12,7 @@ import {
   ChevronsUp,
   ToggleLeft,
   ToggleRight,
+  Check,
   Loader2,
   Square,
   ArrowRight,
@@ -582,6 +583,7 @@ export function StoryTeleprompter({
                       {scene.terms_introduced.map((termId) => {
                         const term = termMap.get(termId);
                         const isExpanded = expandedTermId === termId;
+                        const isCollected = collectedTermIds.has(termId);
                         return (
                           <button
                             key={termId}
@@ -589,15 +591,36 @@ export function StoryTeleprompter({
                             className={`term-toggle-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300 ${
                               isExpanded
                                 ? 'term-toggle-pill-active text-white shadow-md'
-                                : 'term-toggle-pill-inactive text-emerald-700 hover:shadow-sm'
+                                : isCollected
+                                  ? 'term-toggle-pill-collected text-emerald-400'
+                                  : 'term-toggle-pill-inactive text-emerald-700 hover:shadow-sm'
                             }`}
                           >
-                            {isExpanded ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
+                            {isExpanded ? (
+                              <ToggleRight size={13} />
+                            ) : isCollected ? (
+                              <Check size={13} />
+                            ) : (
+                              <ToggleLeft size={13} />
+                            )}
                             {term ? term.term : termId}
                           </button>
                         );
                       })}
                     </div>
+                    {/* Hint: show when scene has uncollected terms and no card is open */}
+                    {!expandedTermId &&
+                      scene.terms_introduced.some((tid) => !collectedTermIds.has(tid)) && (
+                        <p className="mt-2 text-[11px] text-emerald-600/70 flex items-center gap-1">
+                          <span>👆</span>
+                          <span>
+                            タップで用語カードを開こう →{' '}
+                            <span className="inline-flex items-center gap-0.5">
+                              🦋 バタフライをゲット！
+                            </span>
+                          </span>
+                        </p>
+                      )}
                     {scene.terms_introduced.map((termId) => {
                       const term = termMap.get(termId);
                       if (!term || expandedTermId !== termId) return null;

@@ -124,7 +124,7 @@ export function InlineTermCard({
           {isCollected ? (
             <div className="flex items-center justify-center gap-1.5 py-1.5 text-emerald-600">
               <Sparkles size={13} />
-              <span className="text-xs font-medium">My Folder に追加済み</span>
+              <span className="text-xs font-medium">My Folder に追加済み 🦋</span>
             </div>
           ) : confirming ? (
             <div className="flex items-center gap-2">
@@ -150,16 +150,21 @@ export function InlineTermCard({
               </button>
             </div>
           ) : (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setConfirming(true);
-              }}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm"
-            >
-              <ArrowRight size={14} />
-              理解した！
-            </button>
+            <div className="space-y-1.5">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirming(true);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm"
+              >
+                <ArrowRight size={14} />
+                理解した！
+              </button>
+              <p className="text-center text-[10px] text-emerald-600/60">
+                🦋 My Folder にバタフライが追加されます
+              </p>
+            </div>
           )}
         </div>
       )}

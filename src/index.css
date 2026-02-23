@@ -184,13 +184,45 @@
 }
 
 .term-toggle-pill-inactive {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  animation: term-pill-glow 2s ease-in-out infinite;
+}
+
+.term-toggle-pill-inactive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(16, 185, 129, 0.12) 40%,
+    rgba(16, 185, 129, 0.25) 50%,
+    rgba(16, 185, 129, 0.12) 60%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  animation: gradient-button-shine 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .term-toggle-pill-inactive:hover {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.2) 100%);
-  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.22) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+@keyframes term-pill-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(16, 185, 129, 0.35),
+      0 0 4px rgba(16, 185, 129, 0.2);
+  }
 }
 
 .term-toggle-pill-active {
@@ -198,22 +230,9 @@
   border: 1px solid rgba(16, 185, 129, 0.6);
 }
 
-.term-toggle-pill-active::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 40%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.15) 60%,
-    transparent 100%
-  );
-  background-size: 300% 100%;
-  animation: gradient-button-shine 3s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 1;
+.term-toggle-pill-collected {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
 }
 
 @keyframes inline-term-card-enter {
