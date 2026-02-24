@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   Lightbulb,
@@ -30,12 +29,11 @@ export function InlineTermCard({
   onGotIt,
 }: InlineTermCardProps) {
   const [confirming, setConfirming] = useState(false);
-  const { t } = useTranslation();
 
   return (
     <div
       role="region"
-      aria-label={t('termCard.cardAria', { term: term.term })}
+      aria-label={`${term.term} の用語カード`}
       className="inline-term-card mt-3 mb-2 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 backdrop-blur-md border border-emerald-200/50 shadow-lg shadow-emerald-100/30 overflow-hidden"
     >
       <div className="px-5 pt-4 pb-3">
@@ -69,9 +67,7 @@ export function InlineTermCard({
               <div className="flex items-start gap-2">
                 <Cog size={15} className="text-gray-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">
-                    {t('termCard.howItWorks')}
-                  </p>
+                  <p className="text-xs text-gray-500 font-medium mb-1">How it works</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{term.mechanism}</p>
                 </div>
               </div>
@@ -83,7 +79,7 @@ export function InlineTermCard({
               <div className="flex items-start gap-2">
                 <Lightbulb size={15} className="text-amber-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-amber-600 font-medium mb-1">{t('termCard.analogy')}</p>
+                  <p className="text-xs text-amber-600 font-medium mb-1">Analogy</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{term.analogy}</p>
                 </div>
               </div>
@@ -95,7 +91,7 @@ export function InlineTermCard({
               <div className="flex items-start gap-2">
                 <AlertTriangle size={15} className="text-rose-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-rose-600 font-medium mb-1">{t('termCard.watchOut')}</p>
+                  <p className="text-xs text-rose-600 font-medium mb-1">Watch out</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{term.pitfall}</p>
                 </div>
               </div>
@@ -106,7 +102,7 @@ export function InlineTermCard({
             <div className="flex items-start gap-2 pt-1">
               <Link2 size={15} className="text-gray-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-gray-500 mb-1.5">{t('termCard.related')}</p>
+                <p className="text-xs text-gray-500 mb-1.5">Related</p>
                 <div className="flex flex-wrap gap-1.5">
                   {term.related_terms.map((relatedId) => (
                     <span
@@ -128,7 +124,7 @@ export function InlineTermCard({
           {isCollected ? (
             <div className="flex items-center justify-center gap-1.5 py-1.5 text-emerald-600">
               <Sparkles size={13} />
-              <span className="text-xs font-medium">{t('termCard.addedToFolder')}</span>
+              <span className="text-xs font-medium">My Folder に追加済み 🦋</span>
             </div>
           ) : confirming ? (
             <div className="flex items-center gap-2">
@@ -139,7 +135,7 @@ export function InlineTermCard({
                 }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-all"
               >
-                {t('termCard.cancel')}
+                キャンセル
               </button>
               <button
                 onClick={(e) => {
@@ -150,7 +146,7 @@ export function InlineTermCard({
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all disabled:opacity-60 shadow-sm"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                {saving ? t('termCard.saving') : t('termCard.addToFolder')}
+                {saving ? '保存中...' : 'My Folderに追加'}
               </button>
             </div>
           ) : (
@@ -163,10 +159,10 @@ export function InlineTermCard({
                 className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm"
               >
                 <ArrowRight size={14} />
-                {t('termCard.gotIt')}
+                理解した！
               </button>
               <p className="text-center text-[10px] text-emerald-600/60">
-                {t('termCard.butterflyHint')}
+                🦋 My Folder にバタフライが追加されます
               </p>
             </div>
           )}

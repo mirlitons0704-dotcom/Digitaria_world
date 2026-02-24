@@ -1,25 +1,50 @@
-import i18n from '../i18n';
-
-const ERROR_MAP: Array<{ pattern: RegExp; key: string }> = [
-  { pattern: /email rate limit exceeded/i, key: 'authErrors.emailRateLimit' },
-  { pattern: /invalid login credentials/i, key: 'authErrors.invalidCredentials' },
-  { pattern: /user already registered/i, key: 'authErrors.userAlreadyRegistered' },
-  { pattern: /password should be at least/i, key: 'authErrors.passwordTooShort' },
-  { pattern: /unable to validate email address/i, key: 'authErrors.invalidEmail' },
-  { pattern: /signup requires a valid password/i, key: 'authErrors.invalidPassword' },
-  { pattern: /email not confirmed/i, key: 'authErrors.emailNotConfirmed' },
+const ERROR_MAP: Array<{ pattern: RegExp; message: string }> = [
+  {
+    pattern: /email rate limit exceeded/i,
+    message: 'メール送信の上限に達しました。しばらく時間をおいてから再度お試しください。',
+  },
+  {
+    pattern: /invalid login credentials/i,
+    message: 'メールアドレスまたはパスワードが正しくありません。',
+  },
+  {
+    pattern: /user already registered/i,
+    message: 'このメールアドレスは既に登録されています。',
+  },
+  {
+    pattern: /password should be at least/i,
+    message: 'パスワードは6文字以上で入力してください。',
+  },
+  {
+    pattern: /unable to validate email address/i,
+    message: 'メールアドレスの形式が正しくありません。',
+  },
+  {
+    pattern: /signup requires a valid password/i,
+    message: '有効なパスワードを入力してください。',
+  },
+  {
+    pattern: /email not confirmed/i,
+    message: 'メールアドレスが確認されていません。メールをご確認ください。',
+  },
   {
     pattern: /for security purposes.*request this after (\d+) seconds/i,
-    key: 'authErrors.securityWait',
+    message: 'セキュリティのため、しばらくお待ちいただいてから再度お試しください。',
   },
-  { pattern: /over_(email|sms)_send_rate_limit/i, key: 'authErrors.sendRateLimit' },
-  { pattern: /error sending recovery email/i, key: 'authErrors.recoveryEmailFailed' },
+  {
+    pattern: /over_(email|sms)_send_rate_limit/i,
+    message: 'メール送信の上限に達しました。しばらく時間をおいてから再度お試しください。',
+  },
+  {
+    pattern: /error sending recovery email/i,
+    message: 'リカバリーメールの送信に失敗しました。しばらく時間をおいてから再度お試しください。',
+  },
 ];
 
 export function translateAuthError(message: string): string {
-  for (const { pattern, key } of ERROR_MAP) {
+  for (const { pattern, message: translated } of ERROR_MAP) {
     if (pattern.test(message)) {
-      return i18n.t(key);
+      return translated;
     }
   }
   return message;

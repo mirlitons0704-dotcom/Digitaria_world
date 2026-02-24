@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthForm } from '../components/AuthForm';
 import { ASSETS, TOTAL_TERMS } from '../lib/constants';
@@ -8,7 +7,6 @@ import { LogOut, User, Sparkles } from 'lucide-react';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { user, profile, loading, signOut } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -87,7 +85,7 @@ export function LandingPage() {
               }}
             >
               <LogOut size={16} />
-              <span>{t('landing.logout')}</span>
+              <span>Logout</span>
             </button>
           </div>
         ) : (
@@ -109,7 +107,7 @@ export function LandingPage() {
                   : 'text-gray-300 hover:text-white'
               }`}
             >
-              {t('landing.login')}
+              Login
             </button>
             <button
               onClick={(e) => {
@@ -123,7 +121,7 @@ export function LandingPage() {
                   : 'text-gray-300 hover:text-white'
               }`}
             >
-              {t('landing.register')}
+              Register
             </button>
           </div>
         )}
@@ -150,7 +148,7 @@ export function LandingPage() {
           className="tracking-wide text-center px-4"
           style={{ color: '#605c5c', fontFamily: '"Titillium Web", sans-serif', fontWeight: 300 }}
         >
-          {t('landing.tagline', { count: TOTAL_TERMS })}
+          The code journey through {TOTAL_TERMS} programming terms
         </p>
       </header>
 
@@ -199,7 +197,7 @@ export function LandingPage() {
           >
             <span className="relative z-10 flex items-center gap-3">
               <Sparkles size={20} className="group-hover:animate-pulse" />
-              {t('landing.startJourney')}
+              Start Your Journey
               <Sparkles size={20} className="group-hover:animate-pulse" />
             </span>
           </button>
@@ -208,7 +206,7 @@ export function LandingPage() {
             className="mt-8 text-gray-500 text-lg"
             style={{ fontFamily: '"Titillium Web", sans-serif', fontWeight: 600 }}
           >
-            {t('landing.signInPrompt')}
+            Sign in to start your adventure
           </p>
         )}
       </main>
@@ -224,7 +222,7 @@ export function LandingPage() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          aria-label={authMode === 'login' ? t('landing.loginAria') : t('landing.registerAria')}
+          aria-label={authMode === 'login' ? 'ログイン' : 'アカウント作成'}
           onClick={(e) => {
             if (e.target === e.currentTarget) closeModal();
           }}
@@ -240,7 +238,7 @@ export function LandingPage() {
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label={t('common.close')}
+              aria-label="閉じる"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -271,7 +269,7 @@ export function LandingPage() {
                       : 'text-gray-300 hover:text-white'
                   }`}
                 >
-                  {t('landing.login')}
+                  Login
                 </button>
                 <button
                   onClick={() => setAuthMode('register')}
@@ -281,13 +279,13 @@ export function LandingPage() {
                       : 'text-gray-300 hover:text-white'
                   }`}
                 >
-                  {t('landing.register')}
+                  Register
                 </button>
               </div>
             </div>
 
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 font-display">
-              {authMode === 'login' ? t('landing.welcomeBack') : t('landing.createAccount')}
+              {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
 
             <AuthForm mode={authMode} onSuccess={closeModal} />

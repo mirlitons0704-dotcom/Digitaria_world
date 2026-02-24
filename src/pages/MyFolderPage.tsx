@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useChapters } from '../hooks/useChapters';
 import { Layout } from '../components/Layout';
@@ -58,7 +57,6 @@ function diffColor(d: number) {
 
 /** Expanded term detail panel (mini version of InlineTermCard) */
 function TermDetail({ term, onClose }: { term: Term; onClose: () => void }) {
-  const { t } = useTranslation();
   return (
     <div className="mt-2 rounded-xl bg-white/90 backdrop-blur-sm border border-gray-200/60 shadow-sm overflow-hidden animate-[inline-term-card-enter_0.2s_ease-out]">
       <div className="px-4 pt-3 pb-2">
@@ -86,9 +84,7 @@ function TermDetail({ term, onClose }: { term: Term; onClose: () => void }) {
               <div className="flex items-start gap-2">
                 <Cog size={13} className="text-gray-400 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-gray-500 font-medium mb-0.5">
-                    {t('termCard.howItWorks')}
-                  </p>
+                  <p className="text-[10px] text-gray-500 font-medium mb-0.5">How it works</p>
                   <p className="text-xs text-gray-600 leading-relaxed">{term.mechanism}</p>
                 </div>
               </div>
@@ -99,9 +95,7 @@ function TermDetail({ term, onClose }: { term: Term; onClose: () => void }) {
               <div className="flex items-start gap-2">
                 <Lightbulb size={13} className="text-amber-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-amber-600 font-medium mb-0.5">
-                    {t('termCard.analogy')}
-                  </p>
+                  <p className="text-[10px] text-amber-600 font-medium mb-0.5">Analogy</p>
                   <p className="text-xs text-gray-600 leading-relaxed">{term.analogy}</p>
                 </div>
               </div>
@@ -112,9 +106,7 @@ function TermDetail({ term, onClose }: { term: Term; onClose: () => void }) {
               <div className="flex items-start gap-2">
                 <AlertTriangle size={13} className="text-rose-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-rose-600 font-medium mb-0.5">
-                    {t('termCard.watchOut')}
-                  </p>
+                  <p className="text-[10px] text-rose-600 font-medium mb-0.5">Watch out</p>
                   <p className="text-xs text-gray-600 leading-relaxed">{term.pitfall}</p>
                 </div>
               </div>
@@ -198,7 +190,6 @@ function ButterflyRow({
 
 export function MyFolderPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { user } = useAuth();
   const { chapters } = useChapters();
   const [collections, setCollections] = useState<ChapterCollection[]>([]);
@@ -314,7 +305,7 @@ export function MyFolderPage() {
             onClick={() => window.location.reload()}
             className="text-teal-500 hover:text-teal-600"
           >
-            {t('myFolder.reload')}
+            Reload
           </button>
         </div>
       </Layout>
@@ -339,10 +330,10 @@ export function MyFolderPage() {
             </div>
 
             <div className="text-center flex-1">
-              <h1 className="text-2xl md:text-3xl text-gray-800 font-display mb-1">
-                {t('myFolder.title')}
-              </h1>
-              <p className="text-gray-500 text-sm md:text-base mb-4">{t('myFolder.subtitle')}</p>
+              <h1 className="text-2xl md:text-3xl text-gray-800 font-display mb-1">My Folder</h1>
+              <p className="text-gray-500 text-sm md:text-base mb-4">
+                Your collection of Code Butterflies
+              </p>
 
               {/* Badge + progress */}
               <div className="inline-flex flex-col items-center gap-2">
@@ -357,9 +348,7 @@ export function MyFolderPage() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500">
-                  {pct}% {t('myFolder.complete')}
-                </p>
+                <p className="text-xs text-gray-500">{pct}% complete</p>
               </div>
             </div>
 
@@ -380,14 +369,16 @@ export function MyFolderPage() {
           /* ── Empty state ── */
           <div className="text-center py-16">
             <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-medium text-gray-600 mb-2">{t('myFolder.emptyTitle')}</h2>
-            <p className="text-gray-500 mb-6">{t('myFolder.emptyMessage')}</p>
+            <h2 className="text-xl font-medium text-gray-600 mb-2">No butterflies yet</h2>
+            <p className="text-gray-500 mb-6">
+              Start learning to collect your first Code Butterfly!
+            </p>
             <button
               onClick={() => navigate('/home')}
               className="inline-flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors"
             >
               <ArrowRight size={16} />
-              {t('myFolder.startLearning')}
+              Start Learning
             </button>
           </div>
         ) : (
@@ -397,9 +388,7 @@ export function MyFolderPage() {
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
                   <Clock size={16} className="text-gray-400" />
-                  <h2 className="text-sm font-semibold text-gray-600">
-                    {t('myFolder.recentlyCollected')}
-                  </h2>
+                  <h2 className="text-sm font-semibold text-gray-600">Recently Collected</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
                   {recentTerms.map((term) => {
@@ -431,7 +420,7 @@ export function MyFolderPage() {
 
             {/* ── View toggle ── */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-gray-600">{t('myFolder.byChapter')}</h2>
+              <h2 className="text-sm font-semibold text-gray-600">By Chapter</h2>
               <div className="flex rounded-lg bg-white/70 backdrop-blur-sm border border-gray-200/50 p-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -441,7 +430,7 @@ export function MyFolderPage() {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {t('myFolder.grid')}
+                  Grid
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
@@ -451,7 +440,7 @@ export function MyFolderPage() {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {t('myFolder.list')}
+                  List
                 </button>
               </div>
             </div>
@@ -556,9 +545,7 @@ export function MyFolderPage() {
 
             {totalButterflies >= 500 && (
               <div className="mt-6 text-center">
-                <p className="text-amber-600 font-medium text-sm">
-                  {t('myFolder.memoryGardenUnlocked')}
-                </p>
+                <p className="text-amber-600 font-medium text-sm">✨ Memory Garden unlocked!</p>
               </div>
             )}
           </>

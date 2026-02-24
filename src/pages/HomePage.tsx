@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useChapters } from '../hooks/useChapters';
 import { ChapterCard } from '../components/ChapterCard';
@@ -9,7 +8,6 @@ import { Loader2, BookOpen, Folder, Search } from 'lucide-react';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { chapters, loading, error, retry } = useChapters();
 
@@ -32,12 +30,12 @@ export function HomePage() {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-          <p className="text-red-500">{t('home.loadError')}</p>
+          <p className="text-red-500">Failed to load chapters</p>
           <button
             onClick={retry}
             className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm"
           >
-            {t('common.retry')}
+            Retry
           </button>
         </div>
       </Layout>
@@ -65,10 +63,10 @@ export function HomePage() {
 
             <div className="text-center flex-1">
               <h1 className="text-2xl md:text-4xl text-gray-800 font-display mb-2">
-                {t('home.title')}
+                Your Journey Awaits
               </h1>
               <p className="text-gray-600 font-titillium-light text-sm md:text-lg">
-                {t('home.subtitle', { count: TOTAL_TERMS })}
+                Explore {TOTAL_TERMS} programming terms across 17 chapters
               </p>
 
               <div className="flex flex-wrap justify-center gap-4 mt-6">
@@ -77,45 +75,15 @@ export function HomePage() {
                   className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                 >
                   <Folder className="w-5 h-5 text-amber-500" />
-                  <span className="font-titillium-semibold text-gray-700">
-                    {t('home.myFolder')}
-                  </span>
+                  <span className="font-titillium-semibold text-gray-700">My Folder</span>
                 </button>
                 <button
                   onClick={() => navigate('/search')}
                   className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                 >
                   <Search className="w-5 h-5 text-teal-500" />
-                  <span className="font-titillium-semibold text-gray-700">
-                    {t('home.searchTerms')}
-                  </span>
+                  <span className="font-titillium-semibold text-gray-700">Search Terms</span>
                 </button>
-              </div>
-
-              {/* Language toggle */}
-              <div className="mt-4 flex justify-center">
-                <div className="inline-flex rounded-full bg-white/60 backdrop-blur-sm border border-gray-200/50 p-1 text-xs">
-                  <button
-                    onClick={() => i18n.changeLanguage('ja')}
-                    className={`px-3 py-1 rounded-full transition-all ${
-                      i18n.language === 'ja'
-                        ? 'bg-teal-500 text-white shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    🇯🇵 日本語
-                  </button>
-                  <button
-                    onClick={() => i18n.changeLanguage('en')}
-                    className={`px-3 py-1 rounded-full transition-all ${
-                      i18n.language === 'en'
-                        ? 'bg-teal-500 text-white shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    🇬🇧 English
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -135,10 +103,12 @@ export function HomePage() {
           <div className="mt-6 overflow-hidden">
             <div className="animate-marquee whitespace-nowrap">
               <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                {t('home.marquee')}
+                ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ!
+                さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって!!
               </span>
               <span className="text-teal-600 font-titillium-semibold text-sm mx-4">
-                {t('home.marquee')}
+                ビットくんとバイトさんが、あなたのプログラミング用語習得の旅を応援するよ!
+                さあ、用語の理解で、世界が開けていく感覚を思いっきり味わって!!
               </span>
             </div>
           </div>
@@ -147,10 +117,8 @@ export function HomePage() {
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-6">
             <BookOpen className="w-6 h-6 text-teal-600" />
-            <h2 className="text-xl font-titillium-semibold text-gray-800">{t('home.mainStory')}</h2>
-            <span className="text-sm text-gray-500 font-titillium-light">
-              {t('home.chapters', { count: 16 })}
-            </span>
+            <h2 className="text-xl font-titillium-semibold text-gray-800">Main Story</h2>
+            <span className="text-sm text-gray-500 font-titillium-light">16 Chapters</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -169,12 +137,8 @@ export function HomePage() {
           <section>
             <div className="flex items-center gap-3 mb-6">
               <span className="text-2xl">🦋</span>
-              <h2 className="text-xl font-titillium-semibold text-gray-800">
-                {t('home.epilogue')}
-              </h2>
-              <span className="text-sm text-gray-500 font-titillium-light">
-                {t('home.memoryGarden')}
-              </span>
+              <h2 className="text-xl font-titillium-semibold text-gray-800">Epilogue</h2>
+              <span className="text-sm text-gray-500 font-titillium-light">Memory Garden</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

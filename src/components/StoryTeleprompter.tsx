@@ -24,7 +24,6 @@ import { InlineTermCard } from './InlineTermCard';
 import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
 import { useTts } from '../hooks/useTts';
-import { useTranslation } from 'react-i18next';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -62,7 +61,6 @@ export function StoryTeleprompter({
   onBackToHome,
 }: StoryTeleprompterProps) {
   const { user } = useAuth();
-  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -557,7 +555,7 @@ export function StoryTeleprompter({
                   <div className="scene-image-enter flex justify-center my-6">
                     <img
                       src={scene.image_url}
-                      alt={scene.title || t('story.sceneImageAlt')}
+                      alt={scene.title || 'シーン画像'}
                       className={`${SIZE_CLASS['md']} object-contain drop-shadow-lg`}
                       loading="lazy"
                     />
@@ -616,7 +614,13 @@ export function StoryTeleprompter({
                     {!expandedTermId &&
                       scene.terms_introduced.some((tid) => !collectedTermIds.has(tid)) && (
                         <p className="mt-2 text-[11px] text-emerald-600/70 flex items-center gap-1">
-                          <span>{t('story.termHint')}</span>
+                          <span>👆</span>
+                          <span>
+                            タップで用語カードを開こう →{' '}
+                            <span className="inline-flex items-center gap-0.5">
+                              🦋 バタフライをゲット！
+                            </span>
+                          </span>
                         </p>
                       )}
                     {scene.terms_introduced.map((termId) => {
@@ -652,7 +656,7 @@ export function StoryTeleprompter({
                       className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                     >
                       <Home size={16} />
-                      {t('story.backToHome')}
+                      Back to Home
                     </button>
                   )
                 : onNextChapter && (
@@ -661,7 +665,7 @@ export function StoryTeleprompter({
                       className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-gray-700 text-gray-100 text-sm font-semibold shadow-lg hover:bg-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                     >
                       <ArrowRight size={16} />
-                      {t('story.goNextChapter')}
+                      Go Next Chapter
                     </button>
                   )}
             </div>
