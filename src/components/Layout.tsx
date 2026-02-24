@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { Home, Folder, Search, LogOut, User, Shield, WifiOff } from 'lucide-react';
@@ -11,13 +12,14 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const { user, profile, isAdmin, signOut } = useAuth();
   const isOnline = useOnlineStatus();
 
   const navItems = [
-    { path: '/home', icon: Home, label: 'Home' },
-    { path: '/my-folder', icon: Folder, label: 'My Folder' },
-    { path: '/search', icon: Search, label: 'Search' },
+    { path: '/home', icon: Home, label: t('nav.home') },
+    { path: '/my-folder', icon: Folder, label: t('nav.myFolder') },
+    { path: '/search', icon: Search, label: t('nav.search') },
   ];
 
   return (
@@ -31,7 +33,7 @@ export function Layout({ children }: LayoutProps) {
             <button
               onClick={() => navigate('/')}
               className="font-display font-bold text-xl text-gray-800 hover:text-teal-600 transition-colors"
-              aria-label="DIGITARIA ホームへ"
+              aria-label={t('nav.homeAria')}
             >
               DIGITARIA
             </button>
@@ -72,8 +74,8 @@ export function Layout({ children }: LayoutProps) {
                   <button
                     onClick={() => signOut()}
                     className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Sign out"
-                    aria-label="サインアウト"
+                    title={t('nav.signOut')}
+                    aria-label={t('nav.signOut')}
                   >
                     <LogOut size={18} />
                   </button>
@@ -115,7 +117,7 @@ export function Layout({ children }: LayoutProps) {
       {!isOnline && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm flex items-center justify-center gap-2">
           <WifiOff size={16} />
-          <span>You are offline. Some features may not work.</span>
+          <span>{t('common.offline')}</span>
         </div>
       )}
 
@@ -129,14 +131,21 @@ export function Layout({ children }: LayoutProps) {
             onClick={() => navigate('/terms')}
             className="hover:text-gray-600 transition-colors"
           >
-            利用規約
+            {t('footer.terms')}
           </button>
           <span>|</span>
           <button
             onClick={() => navigate('/privacy')}
             className="hover:text-gray-600 transition-colors"
           >
-            プライバシーポリシー
+            {t('footer.privacy')}
+          </button>
+          <span>|</span>
+          <button
+            onClick={() => i18n.changeLanguage(i18n.language === 'ja' ? 'en' : 'ja')}
+            className="hover:text-gray-600 transition-colors"
+          >
+            {t('footer.language')}
           </button>
         </div>
       </footer>

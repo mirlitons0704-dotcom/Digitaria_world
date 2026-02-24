@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, Clock } from 'lucide-react';
 import { translateAuthError, isRateLimitError } from '../lib/authErrors';
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, loading, updatePassword, clearRecovery } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,12 +51,12 @@ export function ResetPasswordPage() {
     setError(null);
 
     if (newPassword.length < 6) {
-      setError('パスワードは6文字以上で入力してください。');
+      setError(t('resetPassword.passwordTooShort'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('パスワードが一致しません。');
+      setError(t('resetPassword.passwordMismatch'));
       return;
     }
 
@@ -71,7 +73,7 @@ export function ResetPasswordPage() {
         setSuccess(true);
       }
     } catch {
-      setError('予期しないエラーが発生しました。');
+      setError(t('auth.unexpectedError'));
     } finally {
       setSubmitting(false);
     }
@@ -115,7 +117,7 @@ export function ResetPasswordPage() {
           <div className="space-y-6">
             <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
               <CheckCircle2 size={20} className="shrink-0" />
-              <span className="text-sm">パスワードが正常に変更されました。</span>
+              <span className="text-sm">{t('resetPassword.success')}</span>
             </div>
             <button
               onClick={handleGoHome}
@@ -126,7 +128,7 @@ export function ResetPasswordPage() {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               }}
             >
-              ホームに戻る
+              {t('resetPassword.goHome')}
             </button>
           </div>
         ) : (
@@ -135,7 +137,7 @@ export function ResetPasswordPage() {
               className="text-lg font-semibold text-gray-700 text-center mb-6"
               style={{ fontFamily: '"Titillium Web", sans-serif' }}
             >
-              新しいパスワードを設定
+              {t('resetPassword.title')}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,7 +157,7 @@ export function ResetPasswordPage() {
                   className="block text-sm font-medium text-gray-700"
                   style={{ fontFamily: '"Raleway", sans-serif' }}
                 >
-                  新しいパスワード
+                  {t('resetPassword.newPassword')}
                 </label>
                 <div className="relative">
                   <Lock
@@ -171,14 +173,18 @@ export function ResetPasswordPage() {
                     minLength={6}
                     className="w-full pl-10 pr-12 py-2.5 rounded-lg border border-gray-300 bg-white/80 backdrop-blur-sm focus:border-gray-500 focus:ring-2 focus:ring-gray-200 outline-none transition-all"
                     style={{ fontFamily: '"Raleway", sans-serif' }}
-                    placeholder="6文字以上"
+                    placeholder={t('resetPassword.newPasswordPlaceholder')}
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label={showPassword ? 'パスワードを隠す' : 'パスワードを表示'}
+                    aria-label={
+                      showPassword
+                        ? t('resetPassword.hidePassword')
+                        : t('resetPassword.showPassword')
+                    }
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -191,7 +197,7 @@ export function ResetPasswordPage() {
                   className="block text-sm font-medium text-gray-700"
                   style={{ fontFamily: '"Raleway", sans-serif' }}
                 >
-                  パスワードの確認
+                  {t('resetPassword.confirmPassword')}
                 </label>
                 <div className="relative">
                   <Lock
@@ -207,7 +213,7 @@ export function ResetPasswordPage() {
                     minLength={6}
                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 bg-white/80 backdrop-blur-sm focus:border-gray-500 focus:ring-2 focus:ring-gray-200 outline-none transition-all"
                     style={{ fontFamily: '"Raleway", sans-serif' }}
-                    placeholder="もう一度入力"
+                    placeholder={t('resetPassword.confirmPlaceholder')}
                   />
                 </div>
               </div>
@@ -225,15 +231,15 @@ export function ResetPasswordPage() {
                 {cooldown > 0 ? (
                   <>
                     <Clock size={18} />
-                    <span>{cooldown}秒後に再試行できます</span>
+                    <span>{t('auth.cooldown', { seconds: cooldown })}</span>
                   </>
                 ) : submitting ? (
                   <>
                     <Loader2 className="animate-spin" size={18} />
-                    <span>変更中...</span>
+                    <span>{t('resetPassword.submitting')}</span>
                   </>
                 ) : (
-                  <span>パスワードを変更</span>
+                  <span>{t('resetPassword.submit')}</span>
                 )}
               </button>
             </form>
