@@ -122,6 +122,15 @@ Hook for monitoring browser online/offline status.
 - Exports:
   - `useOnlineStatus()`: Returns boolean `isOnline` state, listens to browser online/offline events
 
+### useStoryLanguage.ts
+
+Hook for switching story content between Japanese and English.
+
+- Location: `src/hooks/useStoryLanguage.ts`
+- Exports:
+  - `useStoryLanguage()`: Returns `{ storyLang, setStoryLang }` using localStorage (`digitaria-story-lang` key)
+- Features: Cross-component sync via pub/sub pattern, defaults to `ja`
+
 ### useTts.ts
 
 Hook for text-to-speech playback of story scenes via Gemini TTS.
@@ -174,6 +183,7 @@ src/
 │   ├── useChapters.ts
 │   ├── useCharacters.ts
 │   ├── useOnlineStatus.ts
+│   ├── useStoryLanguage.ts
 │   ├── useStoryScenes.ts
 │   ├── useTerms.ts
 │   ├── useTts.ts
