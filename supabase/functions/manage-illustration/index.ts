@@ -142,7 +142,7 @@ Deno.serve(async (req: Request) => {
 
     // ==================== INSERT-INLINE ====================
     if (action === 'insert-inline') {
-      const { sceneId, url, paragraphIndex } = body;
+      const { sceneId, url, paragraphIndex, size } = body;
       if (!sceneId || !url || paragraphIndex === undefined) {
         return errorResponse('sceneId, url, and paragraphIndex are required');
       }
@@ -159,7 +159,9 @@ Deno.serve(async (req: Request) => {
 
       // Split by double-newline (paragraph boundary)
       const paragraphs = scene.content.split(/\n\n/);
-      const marker = `{{image:${url}}}`;
+      const validSizes = ['sm', 'md', 'lg', 'full'];
+      const sizeSuffix = size && validSizes.includes(size) ? `|size=${size}` : '';
+      const marker = `{{image:${url}${sizeSuffix}}}`;
 
       // Insert after the specified paragraph index
       const insertIdx = Math.min(paragraphIndex + 1, paragraphs.length);
@@ -206,12 +208,17 @@ Deno.serve(async (req: Request) => {
       if (fetchError) return errorResponse(fetchError.message, 500);
       if (!scene) return errorResponse('Scene not found', 404);
 
-      // Build the exact marker string to remove
-      const markerToRemove = `{{image:${imageUrl}}}`;
-      let newContent = scene.content.replace(markerToRemove, '');
-      // Also try video marker
-      const videoMarker = `{{video:${imageUrl}}}`;
-      newContent = newContent.replace(videoMarker, '');
+      // Build marker patterns to remove (with or without |size=...)
+      const imageMarkerRe = new RegExp(
+        `\\{\\{image:${imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\|size=\\w+)?\\}\\}`,
+        'g'
+      );
+      const videoMarkerRe = new RegExp(
+        `\\{\\{video:${imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\|size=\\w+)?\\}\\}`,
+        'g'
+      );
+      let newContent = scene.content.replace(imageMarkerRe, '');
+      newContent = newContent.replace(videoMarkerRe, '');
       // Clean up leftover triple+ newlines
       newContent = newContent.replace(/\n{3,}/g, '\n\n');
 

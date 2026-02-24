@@ -413,14 +413,17 @@ export async function setSceneImageUrl(sceneId: string, url: string | null): Pro
 export async function insertInlineImage(
   sceneId: string,
   url: string,
-  paragraphIndex: number
+  paragraphIndex: number,
+  size?: 'sm' | 'md' | 'lg' | 'full'
 ): Promise<{ content: string }> {
-  return callManageIllustration({
+  const body: Record<string, unknown> = {
     action: 'insert-inline',
     sceneId,
     url,
     paragraphIndex,
-  });
+  };
+  if (size) body.size = size;
+  return callManageIllustration(body);
 }
 
 export async function removeInlineImage(

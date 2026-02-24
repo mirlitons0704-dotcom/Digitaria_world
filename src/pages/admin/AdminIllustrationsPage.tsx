@@ -157,6 +157,7 @@ function SceneDetailModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inlineFileInputRef = useRef<HTMLInputElement>(null);
   const [inlineParagraphIdx, setInlineParagraphIdx] = useState<number | null>(null);
+  const [inlineSize, setInlineSize] = useState<'sm' | 'md' | 'lg' | 'full'>('md');
 
   const paragraphs = contentToParagraphs(scene.content);
 
@@ -196,7 +197,12 @@ function SceneDetailModal({
           await setSceneImageUrl(scene.id, publicUrl);
           onUpdated({ ...scene, image_url: publicUrl });
         } else if (paragraphIndex !== undefined) {
-          const { content } = await insertInlineImage(scene.id, publicUrl, paragraphIndex);
+          const { content } = await insertInlineImage(
+            scene.id,
+            publicUrl,
+            paragraphIndex,
+            inlineSize
+          );
           onUpdated({
             ...scene,
             content,
@@ -437,7 +443,7 @@ function SceneDetailModal({
                       </p>
                     )}
                     {/* "+" button to insert inline image after this paragraph */}
-                    <div className="flex justify-center py-0.5">
+                    <div className="flex justify-center items-center gap-2 py-0.5">
                       <button
                         onClick={() => handleInsertInlineClick(idx)}
                         className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-600 hover:text-teal-400 hover:bg-teal-500/5 rounded-full transition-all"
@@ -447,6 +453,19 @@ function SceneDetailModal({
                         <Plus size={12} />
                         <span>image</span>
                       </button>
+                      <select
+                        value={inlineSize}
+                        onChange={(e) =>
+                          setInlineSize(e.target.value as 'sm' | 'md' | 'lg' | 'full')
+                        }
+                        className="text-[10px] bg-gray-800 border border-gray-700 text-gray-400 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
+                        title="Image size"
+                      >
+                        <option value="sm">sm (35%)</option>
+                        <option value="md">md (50%)</option>
+                        <option value="lg">lg (75%)</option>
+                        <option value="full">full (100%)</option>
+                      </select>
                     </div>
                   </div>
                 );

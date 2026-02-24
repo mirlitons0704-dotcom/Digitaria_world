@@ -79,4 +79,54 @@ describe('splitContentByMedia', () => {
 
     expect(result).toEqual(['leading text', { type: 'image', src: 'end.png' }]);
   });
+
+  // --------------- Size hint tests ---------------
+
+  it('parses |size=sm hint', () => {
+    const input = '{{image:icon.png|size=sm}}';
+    const result = splitContentByMedia(input);
+
+    expect(result).toEqual([{ type: 'image', src: 'icon.png', size: 'sm' }]);
+  });
+
+  it('parses |size=lg hint', () => {
+    const input = 'before{{image:https://example.com/img.png|size=lg}}after';
+    const result = splitContentByMedia(input);
+
+    expect(result).toEqual([
+      'before',
+      { type: 'image', src: 'https://example.com/img.png', size: 'lg' },
+      'after',
+    ]);
+  });
+
+  it('parses |size=full hint', () => {
+    const input = '{{image:table.png|size=full}}';
+    const result = splitContentByMedia(input);
+
+    expect(result).toEqual([{ type: 'image', src: 'table.png', size: 'full' }]);
+  });
+
+  it('ignores invalid size value and keeps full raw as src', () => {
+    const input = '{{image:pic.png|size=huge}}';
+    const result = splitContentByMedia(input);
+
+    expect(result).toEqual([{ type: 'image', src: 'pic.png|size=huge' }]);
+  });
+
+  it('returns no size property when size is not specified (backward compat)', () => {
+    const input = '{{image:old.png}}';
+    const result = splitContentByMedia(input);
+    const segment = result[0] as { type: string; src: string; size?: string };
+
+    expect(segment.src).toBe('old.png');
+    expect(segment).not.toHaveProperty('size');
+  });
+
+  it('handles size hint on video markers', () => {
+    const input = '{{video:clip.mp4|size=lg}}';
+    const result = splitContentByMedia(input);
+
+    expect(result).toEqual([{ type: 'video', src: 'clip.mp4', size: 'lg' }]);
+  });
 });

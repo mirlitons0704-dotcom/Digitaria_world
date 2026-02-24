@@ -19,7 +19,7 @@ import {
   Home,
 } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
-import { splitContentByMedia } from '../lib/mediaMarker';
+import { splitContentByMedia, type MediaSize } from '../lib/mediaMarker';
 import { InlineTermCard } from './InlineTermCard';
 import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
@@ -43,6 +43,14 @@ const SPEED_OPTIONS = [
 ] as const;
 
 const MANUAL_SCROLL_STEP = 200;
+
+/** Map media size hint to Tailwind width class. */
+const SIZE_CLASS: Record<MediaSize, string> = {
+  sm: 'w-[35%]',
+  md: 'w-[50%]',
+  lg: 'w-[75%]',
+  full: 'w-full',
+};
 
 export function StoryTeleprompter({
   scenes,
@@ -548,7 +556,7 @@ export function StoryTeleprompter({
                     <img
                       src={scene.image_url}
                       alt={scene.title || 'シーン画像'}
-                      className="w-[336px] h-[336px] object-contain drop-shadow-lg"
+                      className={`${SIZE_CLASS['md']} object-contain drop-shadow-lg`}
                       loading="lazy"
                     />
                   </div>
@@ -559,17 +567,11 @@ export function StoryTeleprompter({
                     typeof segment === 'string' ? (
                       segment
                     ) : (
-                      <span key={i} className="flex justify-center my-8">
+                      <span key={i} className="flex justify-center my-6">
                         <img
                           src={segment.src}
                           alt=""
-                          className={`object-contain drop-shadow-lg ${
-                            segment.src.includes('bits.png')
-                              ? 'w-full'
-                              : segment.src.includes('memorygarden')
-                                ? 'w-[60%]'
-                                : 'w-[42%]'
-                          }`}
+                          className={`${SIZE_CLASS[segment.size ?? 'md']} object-contain drop-shadow-lg`}
                           loading="lazy"
                         />
                       </span>
