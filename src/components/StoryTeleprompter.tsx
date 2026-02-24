@@ -25,6 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
 import { useTts } from '../hooks/useTts';
 import { useStoryLanguage } from '../hooks/useStoryLanguage';
+import { Globe } from 'lucide-react';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -62,7 +63,7 @@ export function StoryTeleprompter({
   onBackToHome,
 }: StoryTeleprompterProps) {
   const { user } = useAuth();
-  const { storyLang } = useStoryLanguage();
+  const { storyLang, toggleStoryLang } = useStoryLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -447,6 +448,16 @@ export function StoryTeleprompter({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleStoryLang}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-medium transition-all"
+              title={storyLang === 'ja' ? 'Switch to English' : '日本語に切り替え'}
+              aria-label={storyLang === 'ja' ? 'Switch to English' : '日本語に切り替え'}
+            >
+              <Globe size={12} />
+              <span>{storyLang === 'ja' ? 'EN' : 'JA'}</span>
+            </button>
+
             <span className="text-xs text-gray-500 tabular-nums hidden sm:inline">
               {Math.round(scrollProgress * 100)}%
             </span>

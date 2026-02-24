@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { useStoryLanguage } from '../hooks/useStoryLanguage';
 import { Home, Folder, Search, LogOut, User, Shield, WifiOff } from 'lucide-react';
 
 interface LayoutProps {
@@ -14,7 +13,6 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { user, profile, isAdmin, signOut } = useAuth();
   const isOnline = useOnlineStatus();
-  const { storyLang, toggleStoryLang } = useStoryLanguage();
 
   const navItems = [
     { path: '/home', icon: Home, label: 'Home' },
@@ -139,14 +137,6 @@ export function Layout({ children }: LayoutProps) {
             className="hover:text-gray-600 transition-colors"
           >
             プライバシーポリシー
-          </button>
-          <span>|</span>
-          <button
-            onClick={toggleStoryLang}
-            className="hover:text-gray-600 transition-colors"
-            title="Switch story language"
-          >
-            {storyLang === 'ja' ? '🇬🇧 English' : '🇯🇵 日本語'}
           </button>
         </div>
       </footer>
