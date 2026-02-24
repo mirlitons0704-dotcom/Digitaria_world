@@ -145,6 +145,7 @@ export interface Database {
           scene_number: number;
           title: string | null;
           content: string;
+          content_en: string | null;
           terms_introduced: string[];
           character_ids: string[];
           image_url: string | null;
@@ -156,6 +157,7 @@ export interface Database {
           scene_number: number;
           title?: string | null;
           content: string;
+          content_en?: string | null;
           terms_introduced?: string[];
           character_ids?: string[];
           image_url?: string | null;
@@ -167,6 +169,7 @@ export interface Database {
           scene_number?: number;
           title?: string | null;
           content?: string;
+          content_en?: string | null;
           terms_introduced?: string[];
           character_ids?: string[];
           image_url?: string | null;

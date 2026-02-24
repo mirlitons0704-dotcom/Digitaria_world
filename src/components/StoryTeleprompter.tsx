@@ -24,6 +24,7 @@ import { InlineTermCard } from './InlineTermCard';
 import { useAuth } from '../contexts/AuthContext';
 import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
 import { useTts } from '../hooks/useTts';
+import { useStoryLanguage } from '../hooks/useStoryLanguage';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -61,6 +62,7 @@ export function StoryTeleprompter({
   onBackToHome,
 }: StoryTeleprompterProps) {
   const { user } = useAuth();
+  const { storyLang } = useStoryLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -563,7 +565,9 @@ export function StoryTeleprompter({
                 )}
 
                 <div className="text-gray-700 text-lg leading-loose whitespace-pre-line">
-                  {splitContentByMedia(scene.content).map((segment, i) =>
+                  {splitContentByMedia(
+                    storyLang === 'en' && scene.content_en ? scene.content_en : scene.content
+                  ).map((segment, i) =>
                     typeof segment === 'string' ? (
                       segment
                     ) : (
