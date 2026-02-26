@@ -96,9 +96,7 @@ export async function getCharacters(): Promise<Character[]> {
 export async function getStoryScenes(chapterId: number): Promise<StoryScene[]> {
   const { data, error } = await supabase
     .from('story_scenes')
-    .select(
-      'id, chapter_id, scene_number, title, content, content_en, terms_introduced, character_ids, image_url, created_at'
-    )
+    .select('*')
     .eq('chapter_id', chapterId)
     .order('scene_number');
 
