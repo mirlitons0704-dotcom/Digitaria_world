@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { generateSpeech } from '../lib/geminiTts';
 import type { StoryScene } from '../lib/database.types';
+import type { StoryLang } from './useStoryLanguage';
 
 export type TtsStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
@@ -13,12 +14,14 @@ interface UseTtsReturn {
   stop: () => void;
 }
 
-function sceneToText(scene: StoryScene): string {
-  const rawText = [scene.title, scene.content].filter(Boolean).join('\n\n');
+function sceneToText(scene: StoryScene, lang: StoryLang): string {
+  const title = lang === 'en' && scene.title_en ? scene.title_en : scene.title;
+  const content = lang === 'en' && scene.content_en ? scene.content_en : scene.content;
+  const rawText = [title, content].filter(Boolean).join('\n\n');
   return rawText.replace(/\{\{image:[^}]+\}\}/g, '');
 }
 
-export function useTts(scenes: StoryScene[]): UseTtsReturn {
+export function useTts(scenes: StoryScene[], lang: StoryLang = 'ja'): UseTtsReturn {
   const [status, setStatus] = useState<TtsStatus>('idle');
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -50,10 +53,10 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
       const controller = new AbortController();
       prefetchRef.current = controller;
 
-      const text = sceneToText(scenes[index]);
+      const text = sceneToText(scenes[index], lang);
       generateSpeech(text, { signal: controller.signal }).catch(() => {});
     },
-    [scenes]
+    [scenes, lang]
   );
   const playScene = useCallback(
     async (index: number) => {
@@ -74,7 +77,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
       setErrorMessage(null);
 
       try {
-        const text = sceneToText(scenes[index]);
+        const text = sceneToText(scenes[index], lang);
 
         const wavBlob = await generateSpeech(text, {
           signal: controller.signal,
@@ -167,7 +170,7 @@ export function useTts(scenes: StoryScene[]): UseTtsReturn {
 
   useEffect(() => {
     stop();
-  }, [scenes, stop]);
+  }, [scenes, lang, stop]);
 
   return {
     status,

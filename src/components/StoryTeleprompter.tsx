@@ -80,7 +80,7 @@ export function StoryTeleprompter({
   const [savingTermId, setSavingTermId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const tts = useTts(scenes);
+  const tts = useTts(scenes, storyLang);
 
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
   const userScrolledRef = useRef(false);
