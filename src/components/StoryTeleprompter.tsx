@@ -554,11 +554,11 @@ export function StoryTeleprompter({
                 className="scene-enter mb-12"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                {scene.title && (
+                {(scene.title || scene.title_en) && (
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
                     <span className="text-sm font-semibold text-gray-500 tracking-wide whitespace-nowrap">
-                      {scene.title}
+                      {storyLang === 'en' && scene.title_en ? scene.title_en : scene.title}
                     </span>
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
                   </div>

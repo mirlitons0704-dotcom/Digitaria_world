@@ -8,7 +8,9 @@ export function createMockChapter(overrides: Partial<Chapter> = {}): Chapter {
   return {
     id: 1,
     title: 'コンピュータの世界へ',
+    title_en: null,
     subtitle: '0と1の冒険のはじまり',
+    subtitle_en: null,
     category: 'basics',
     category_name: '基礎概念',
     category_icon: 'cpu',

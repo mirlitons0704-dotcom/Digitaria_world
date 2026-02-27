@@ -41,7 +41,9 @@ export interface Database {
         Row: {
           id: number;
           title: string;
+          title_en: string | null;
           subtitle: string | null;
+          subtitle_en: string | null;
           category: string;
           category_name: string;
           category_icon: string;
@@ -54,7 +56,9 @@ export interface Database {
         Insert: {
           id: number;
           title: string;
+          title_en?: string | null;
           subtitle?: string | null;
+          subtitle_en?: string | null;
           category: string;
           category_name: string;
           category_icon?: string;
@@ -67,7 +71,9 @@ export interface Database {
         Update: {
           id?: number;
           title?: string;
+          title_en?: string | null;
           subtitle?: string | null;
+          subtitle_en?: string | null;
           category?: string;
           category_name?: string;
           category_icon?: string;
@@ -144,6 +150,7 @@ export interface Database {
           chapter_id: number;
           scene_number: number;
           title: string | null;
+          title_en: string | null;
           content: string;
           content_en: string | null;
           terms_introduced: string[];
@@ -156,6 +163,7 @@ export interface Database {
           chapter_id: number;
           scene_number: number;
           title?: string | null;
+          title_en?: string | null;
           content: string;
           content_en?: string | null;
           terms_introduced?: string[];
@@ -168,6 +176,7 @@ export interface Database {
           chapter_id?: number;
           scene_number?: number;
           title?: string | null;
+          title_en?: string | null;
           content?: string;
           content_en?: string | null;
           terms_introduced?: string[];

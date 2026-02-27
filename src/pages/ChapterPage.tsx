@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useChapterWithGuide } from '../hooks/useChapters';
 import { useTermsByChapter } from '../hooks/useTerms';
 import { useStoryScenes } from '../hooks/useStoryScenes';
+import { useStoryLanguage } from '../hooks/useStoryLanguage';
 import { Layout } from '../components/Layout';
 import { StoryTeleprompter } from '../components/StoryTeleprompter';
 import { Loader2, ArrowLeft, BookOpen, Sparkles } from 'lucide-react';
@@ -13,6 +14,7 @@ export function ChapterPage() {
   const { chapter, loading: chapterLoading } = useChapterWithGuide(chapterId);
   const { terms, loading: termsLoading } = useTermsByChapter(chapterId);
   const { scenes, loading: scenesLoading } = useStoryScenes(chapterId);
+  const { storyLang } = useStoryLanguage();
 
   const loading = chapterLoading || termsLoading || scenesLoading;
 
@@ -54,10 +56,12 @@ export function ChapterPage() {
             <span className="shrink-0 px-2.5 py-0.5 bg-teal-50 text-teal-600 rounded-full text-sm font-semibold">
               {chapter.id === 17 ? 'Epilogue' : `Ch.${chapter.id}`}
             </span>
-            <h1 className="text-base font-bold text-gray-800 truncate">{chapter.title}</h1>
-            {chapter.subtitle && (
+            <h1 className="text-base font-bold text-gray-800 truncate">
+              {storyLang === 'en' && chapter.title_en ? chapter.title_en : chapter.title}
+            </h1>
+            {(chapter.subtitle || chapter.subtitle_en) && (
               <span className="hidden md:inline text-sm text-gray-500 truncate">
-                {chapter.subtitle}
+                {storyLang === 'en' && chapter.subtitle_en ? chapter.subtitle_en : chapter.subtitle}
               </span>
             )}
           </div>
@@ -79,7 +83,7 @@ export function ChapterPage() {
         <div className="flex-1 min-h-0 relative flex flex-col">
           <StoryTeleprompter
             scenes={scenes}
-            chapterTitle={chapter.title}
+            chapterTitle={storyLang === 'en' && chapter.title_en ? chapter.title_en : chapter.title}
             terms={terms}
             isLastChapter={chapter.id >= 17}
             onNextChapter={() => navigate(`/chapter/${chapter.id + 1}`)}
