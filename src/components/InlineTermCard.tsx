@@ -12,6 +12,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import type { Term } from '../lib/database.types';
+import type { StoryLang } from '../hooks/useStoryLanguage';
+import { t } from '../lib/i18n';
 
 interface InlineTermCardProps {
   term: Term;
@@ -19,6 +21,7 @@ interface InlineTermCardProps {
   saving?: boolean;
   onClose: () => void;
   onGotIt?: () => void;
+  storyLang?: StoryLang;
 }
 
 export function InlineTermCard({
@@ -27,7 +30,14 @@ export function InlineTermCard({
   saving,
   onClose,
   onGotIt,
+  storyLang = 'ja',
 }: InlineTermCardProps) {
+  const isEn = storyLang === 'en';
+  const oneLiner = isEn && term.one_liner_en ? term.one_liner_en : term.one_liner;
+  const definition = isEn && term.definition_en ? term.definition_en : term.definition;
+  const mechanism = isEn && term.mechanism_en ? term.mechanism_en : term.mechanism;
+  const analogy = isEn && term.analogy_en ? term.analogy_en : term.analogy;
+  const pitfall = isEn && term.pitfall_en ? term.pitfall_en : term.pitfall;
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -40,7 +50,7 @@ export function InlineTermCard({
         <div className="flex items-start justify-between mb-3">
           <div>
             <h4 className="text-lg font-bold text-gray-800">{term.term}</h4>
-            <p className="text-sm text-teal-700 font-medium mt-1">{term.one_liner}</p>
+            <p className="text-sm text-teal-700 font-medium mt-1">{oneLiner}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs text-gray-500">{term.term_ja}</span>
@@ -58,41 +68,47 @@ export function InlineTermCard({
 
         <div className="flex items-start gap-2 mb-4">
           <BookOpen size={15} className="text-gray-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-gray-600 leading-relaxed">{term.definition}</p>
+          <p className="text-sm text-gray-600 leading-relaxed">{definition}</p>
         </div>
 
         <div className="space-y-3">
-          {term.mechanism && (
+          {mechanism && (
             <div className="bg-white/50 rounded-xl p-3">
               <div className="flex items-start gap-2">
                 <Cog size={15} className="text-gray-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">How it works</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{term.mechanism}</p>
+                  <p className="text-xs text-gray-500 font-medium mb-1">
+                    {t('term.howItWorks', storyLang)}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{mechanism}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {term.analogy && (
+          {analogy && (
             <div className="bg-white/50 rounded-xl p-3">
               <div className="flex items-start gap-2">
                 <Lightbulb size={15} className="text-amber-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-amber-600 font-medium mb-1">Analogy</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{term.analogy}</p>
+                  <p className="text-xs text-amber-600 font-medium mb-1">
+                    {t('term.analogy', storyLang)}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{analogy}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {term.pitfall && (
+          {pitfall && (
             <div className="bg-white/50 rounded-xl p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle size={15} className="text-rose-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-rose-600 font-medium mb-1">Watch out</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{term.pitfall}</p>
+                  <p className="text-xs text-rose-600 font-medium mb-1">
+                    {t('term.watchOut', storyLang)}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{pitfall}</p>
                 </div>
               </div>
             </div>
@@ -102,7 +118,7 @@ export function InlineTermCard({
             <div className="flex items-start gap-2 pt-1">
               <Link2 size={15} className="text-gray-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-gray-500 mb-1.5">Related</p>
+                <p className="text-xs text-gray-500 mb-1.5">{t('term.related', storyLang)}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {term.related_terms.map((relatedId) => (
                     <span
@@ -124,7 +140,7 @@ export function InlineTermCard({
           {isCollected ? (
             <div className="flex items-center justify-center gap-1.5 py-1.5 text-emerald-600">
               <Sparkles size={13} />
-              <span className="text-xs font-medium">My Folder に追加済み 🦋</span>
+              <span className="text-xs font-medium">{t('term.addedToFolder', storyLang)}</span>
             </div>
           ) : confirming ? (
             <div className="flex items-center gap-2">
@@ -135,7 +151,7 @@ export function InlineTermCard({
                 }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-all"
               >
-                キャンセル
+                {t('term.cancel', storyLang)}
               </button>
               <button
                 onClick={(e) => {
@@ -146,7 +162,7 @@ export function InlineTermCard({
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all disabled:opacity-60 shadow-sm"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                {saving ? '保存中...' : 'My Folderに追加'}
+                {saving ? t('term.saving', storyLang) : t('term.addToFolder', storyLang)}
               </button>
             </div>
           ) : (
@@ -159,10 +175,10 @@ export function InlineTermCard({
                 className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-sm font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-sm"
               >
                 <ArrowRight size={14} />
-                理解した！
+                {t('term.gotIt', storyLang)}
               </button>
               <p className="text-center text-[10px] text-emerald-600/60">
-                🦋 My Folder にバタフライが追加されます
+                {t('term.butterflyHint', storyLang)}
               </p>
             </div>
           )}

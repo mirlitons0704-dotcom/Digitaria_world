@@ -631,9 +631,11 @@ export function StoryTeleprompter({
                         <p className="mt-2 text-[11px] text-emerald-600/70 flex items-center gap-1">
                           <span>👆</span>
                           <span>
-                            タップで用語カードを開こう →{' '}
+                            {storyLang === 'en'
+                              ? 'Tap to open a term card →'
+                              : 'タップで用語カードを開こう →'}{' '}
                             <span className="inline-flex items-center gap-0.5">
-                              🦋 バタフライをゲット！
+                              🦋 {storyLang === 'en' ? 'Earn a butterfly!' : 'バタフライをゲット！'}
                             </span>
                           </span>
                         </p>
@@ -645,6 +647,7 @@ export function StoryTeleprompter({
                         <InlineTermCard
                           key={`card-${termId}`}
                           term={term}
+                          storyLang={storyLang}
                           isCollected={collectedTermIds.has(termId)}
                           saving={savingTermId === termId}
                           onClose={() => setExpandedTermId(null)}

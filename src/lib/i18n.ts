@@ -30,11 +30,29 @@ const ui = {
     en: "This chapter's story is coming soon...",
   },
 
-  // ── Term card hints (will be used in ③ term card work) ──
+  // ── Term card / Term list ──
   'term.tapHint': {
     ja: 'タップで用語カードを開こう → 🦋 バタフライをゲット！',
     en: 'Tap to open term card → 🦋 Get a butterfly!',
   },
+  'term.howItWorks': { ja: '仕組み', en: 'How it works' },
+  'term.analogy': { ja: 'たとえ', en: 'Analogy' },
+  'term.pitfall': { ja: 'よくある間違い', en: 'Common mistake' },
+  'term.watchOut': { ja: '注意', en: 'Watch out' },
+  'term.related': { ja: '関連用語', en: 'Related terms' },
+  'term.gotIt': { ja: '理解した！', en: 'Got it!' },
+  'term.addToFolder': { ja: 'My Folderに追加', en: 'Add to My Folder' },
+  'term.saving': { ja: '保存中...', en: 'Saving...' },
+  'term.cancel': { ja: 'キャンセル', en: 'Cancel' },
+  'term.addedToFolder': {
+    ja: 'My Folder に追加済み 🦋',
+    en: 'Added to My Folder 🦋',
+  },
+  'term.butterflyHint': {
+    ja: '🦋 My Folder にバタフライが追加されます',
+    en: '🦋 A butterfly will be added to My Folder',
+  },
+  'term.terms': { ja: '用語', en: 'terms' },
 } as const;
 
 // ── Derived types ──

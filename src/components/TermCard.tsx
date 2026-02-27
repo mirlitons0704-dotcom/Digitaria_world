@@ -1,13 +1,22 @@
 import { Term } from '../lib/database.types';
+import type { StoryLang } from '../hooks/useStoryLanguage';
+import { t } from '../lib/i18n';
 import { ChevronDown, Lightbulb, BookOpen, AlertTriangle, Cog } from 'lucide-react';
 
 interface TermCardProps {
   term: Term;
   isExpanded: boolean;
   onToggle: () => void;
+  storyLang?: StoryLang;
 }
 
-export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
+export function TermCard({ term, isExpanded, onToggle, storyLang = 'ja' }: TermCardProps) {
+  const isEn = storyLang === 'en';
+  const oneLiner = isEn && term.one_liner_en ? term.one_liner_en : term.one_liner;
+  const definition = isEn && term.definition_en ? term.definition_en : term.definition;
+  const mechanism = isEn && term.mechanism_en ? term.mechanism_en : term.mechanism;
+  const analogy = isEn && term.analogy_en ? term.analogy_en : term.analogy;
+  const pitfall = isEn && term.pitfall_en ? term.pitfall_en : term.pitfall;
   const difficultyStars = Array(3)
     .fill(0)
     .map((_, i) => i < term.difficulty);
@@ -42,9 +51,7 @@ export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <p className="hidden sm:block text-sm text-gray-500 max-w-xs truncate">
-            {term.one_liner}
-          </p>
+          <p className="hidden sm:block text-sm text-gray-500 max-w-xs truncate">{oneLiner}</p>
           <ChevronDown
             size={20}
             className={`text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -55,46 +62,52 @@ export function TermCard({ term, isExpanded, onToggle }: TermCardProps) {
       {isExpanded && (
         <div className="px-4 pb-4 space-y-4 border-t border-gray-100 pt-4">
           <div>
-            <p className="font-medium text-teal-700 mb-2">{term.one_liner}</p>
+            <p className="font-medium text-teal-700 mb-2">{oneLiner}</p>
             <div className="flex items-start gap-2">
               <BookOpen size={16} className="text-gray-500 mt-1 shrink-0" />
-              <p className="text-gray-600 text-sm">{term.definition}</p>
+              <p className="text-gray-600 text-sm">{definition}</p>
             </div>
           </div>
 
-          {term.mechanism && (
+          {mechanism && (
             <div className="flex items-start gap-2 bg-gray-50 rounded-lg p-3">
               <Cog size={16} className="text-gray-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-gray-500 font-medium mb-1">How it works</p>
-                <p className="text-gray-600 text-sm">{term.mechanism}</p>
+                <p className="text-xs text-gray-500 font-medium mb-1">
+                  {t('term.howItWorks', storyLang)}
+                </p>
+                <p className="text-gray-600 text-sm">{mechanism}</p>
               </div>
             </div>
           )}
 
-          {term.analogy && (
+          {analogy && (
             <div className="flex items-start gap-2 bg-amber-50 rounded-lg p-3">
               <Lightbulb size={16} className="text-amber-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-amber-600 font-medium mb-1">Analogy</p>
-                <p className="text-gray-600 text-sm">{term.analogy}</p>
+                <p className="text-xs text-amber-600 font-medium mb-1">
+                  {t('term.analogy', storyLang)}
+                </p>
+                <p className="text-gray-600 text-sm">{analogy}</p>
               </div>
             </div>
           )}
 
-          {term.pitfall && (
+          {pitfall && (
             <div className="flex items-start gap-2 bg-rose-50 rounded-lg p-3">
               <AlertTriangle size={16} className="text-rose-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-rose-600 font-medium mb-1">Common mistake</p>
-                <p className="text-gray-600 text-sm">{term.pitfall}</p>
+                <p className="text-xs text-rose-600 font-medium mb-1">
+                  {t('term.pitfall', storyLang)}
+                </p>
+                <p className="text-gray-600 text-sm">{pitfall}</p>
               </div>
             </div>
           )}
 
           {term.related_terms && term.related_terms.length > 0 && (
             <div>
-              <p className="text-xs text-gray-500 mb-2">Related terms</p>
+              <p className="text-xs text-gray-500 mb-2">{t('term.related', storyLang)}</p>
               <div className="flex flex-wrap gap-2">
                 {term.related_terms.map((relatedId) => (
                   <span
