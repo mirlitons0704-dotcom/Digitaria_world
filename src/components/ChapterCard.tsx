@@ -1,5 +1,6 @@
 import { Chapter } from '../lib/database.types';
 import type { StoryLang } from '../hooks/useStoryLanguage';
+import { categoryName } from '../lib/i18n';
 import {
   BookOpen,
   Cpu,
@@ -16,26 +17,6 @@ import {
   Sparkles,
   Lock,
 } from 'lucide-react';
-
-const categoryNameEnMap: Record<string, string> = {
-  basics: 'Basic Concepts',
-  fileTypes: 'File Types',
-  dataTypes: 'Data Types & Structures',
-  programming: 'Programming Basics',
-  htmlCss: 'HTML & CSS',
-  networking: 'URL & HTTP',
-  javascript: 'JavaScript & TypeScript',
-  react: 'React',
-  uiComponents: 'UI Components',
-  uiux: 'UI/UX & Design',
-  cssFrameworks: 'CSS Frameworks',
-  devTools: 'Dev Tools',
-  packageManagement: 'Environment & Packages',
-  git: 'Git & Version Control',
-  backend: 'Backend',
-  api: 'API',
-  epilogue: 'Epilogue',
-};
 
 interface ChapterCardProps {
   chapter: Chapter;
@@ -272,9 +253,7 @@ export function ChapterCard({
               : undefined
           }
         >
-          {isEn
-            ? categoryNameEnMap[chapter.category] || chapter.category_name
-            : chapter.category_name}
+          {categoryName(storyLang, chapter.category, chapter.category_name)}
         </span>
       </div>
     </button>

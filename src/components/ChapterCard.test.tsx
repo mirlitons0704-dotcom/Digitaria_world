@@ -99,6 +99,45 @@ describe('ChapterCard', () => {
     expect(button?.style.background).toContain('linear-gradient');
   });
 
+  it('shows English title when storyLang is "en"', () => {
+    const chapter = createMockChapter({
+      title: 'コンピュータの世界へ',
+      title_en: 'Into the World of Computers',
+    });
+    render(<ChapterCard chapter={chapter} onClick={mockOnClick} storyLang="en" />);
+
+    expect(screen.getByText('Into the World of Computers')).toBeInTheDocument();
+    expect(screen.queryByText('コンピュータの世界へ')).not.toBeInTheDocument();
+  });
+
+  it('shows Japanese title when storyLang is "ja"', () => {
+    const chapter = createMockChapter({
+      title: 'コンピュータの世界へ',
+      title_en: 'Into the World of Computers',
+    });
+    render(<ChapterCard chapter={chapter} onClick={mockOnClick} storyLang="ja" />);
+
+    expect(screen.getByText('コンピュータの世界へ')).toBeInTheDocument();
+    expect(screen.queryByText('Into the World of Computers')).not.toBeInTheDocument();
+  });
+
+  it('shows English category name when storyLang is "en"', () => {
+    const chapter = createMockChapter({ category: 'basics', category_name: '基礎概念' });
+    render(<ChapterCard chapter={chapter} onClick={mockOnClick} storyLang="en" />);
+
+    expect(screen.getByText('Basic Concepts')).toBeInTheDocument();
+  });
+
+  it('falls back to Japanese title when title_en is null', () => {
+    const chapter = createMockChapter({
+      title: 'コンピュータの世界へ',
+      title_en: null,
+    });
+    render(<ChapterCard chapter={chapter} onClick={mockOnClick} storyLang="en" />);
+
+    expect(screen.getByText('コンピュータの世界へ')).toBeInTheDocument();
+  });
+
   it('applies different themes for early and late chapters', () => {
     const { container: early } = render(
       <ChapterCard chapter={mockChapter} onClick={mockOnClick} chapterIndex={1} />
@@ -115,9 +154,7 @@ describe('ChapterCard', () => {
   });
 
   it('falls back to default slate theme when no chapterIndex', () => {
-    const { container } = render(
-      <ChapterCard chapter={mockChapter} onClick={mockOnClick} />
-    );
+    const { container } = render(<ChapterCard chapter={mockChapter} onClick={mockOnClick} />);
 
     const button = container.querySelector('button');
     expect(button?.className).toContain('slate');
