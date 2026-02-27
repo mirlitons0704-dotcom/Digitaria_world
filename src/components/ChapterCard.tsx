@@ -1,4 +1,5 @@
 import { Chapter } from '../lib/database.types';
+import type { StoryLang } from '../hooks/useStoryLanguage';
 import {
   BookOpen,
   Cpu,
@@ -16,6 +17,26 @@ import {
   Lock,
 } from 'lucide-react';
 
+const categoryNameEnMap: Record<string, string> = {
+  basics: 'Basic Concepts',
+  fileTypes: 'File Types',
+  dataTypes: 'Data Types & Structures',
+  programming: 'Programming Basics',
+  htmlCss: 'HTML & CSS',
+  networking: 'URL & HTTP',
+  javascript: 'JavaScript & TypeScript',
+  react: 'React',
+  uiComponents: 'UI Components',
+  uiux: 'UI/UX & Design',
+  cssFrameworks: 'CSS Frameworks',
+  devTools: 'Dev Tools',
+  packageManagement: 'Environment & Packages',
+  git: 'Git & Version Control',
+  backend: 'Backend',
+  api: 'API',
+  epilogue: 'Epilogue',
+};
+
 interface ChapterCardProps {
   chapter: Chapter;
   onClick: () => void;
@@ -23,6 +44,7 @@ interface ChapterCardProps {
   isLocked?: boolean;
   progress?: number;
   chapterIndex?: number;
+  storyLang?: StoryLang;
 }
 
 const categoryIcons: Record<string, typeof BookOpen> = {
@@ -100,7 +122,9 @@ export function ChapterCard({
   isLocked,
   progress = 0,
   chapterIndex,
+  storyLang = 'ja',
 }: ChapterCardProps) {
+  const isEn = storyLang === 'en';
   const Icon = categoryIcons[chapter.category_icon] || BookOpen;
   const iconColor = categoryIconColors[chapter.category] || 'text-slate-500';
   const theme = chapterIndex && !isSpecial ? getChapterTheme(chapterIndex) : null;
@@ -200,16 +224,16 @@ export function ChapterCard({
           <h3
             className={`font-semibold truncate mt-0.5 ${isSpecial ? 'text-amber-900' : 'text-slate-800'}`}
           >
-            {chapter.title}
+            {isEn && chapter.title_en ? chapter.title_en : chapter.title}
           </h3>
         </div>
       </div>
 
-      {chapter.subtitle && (
+      {(chapter.subtitle || (isEn && chapter.subtitle_en)) && (
         <p
           className={`relative text-sm mb-3 line-clamp-2 ${isSpecial ? 'text-amber-700' : 'text-slate-600'}`}
         >
-          {chapter.subtitle}
+          {isEn && chapter.subtitle_en ? chapter.subtitle_en : chapter.subtitle}
         </p>
       )}
 
@@ -225,9 +249,7 @@ export function ChapterCard({
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span
-          className={`text-xs font-medium ${isSpecial ? 'text-amber-600' : 'text-slate-500'}`}
-        >
+        <span className={`text-xs font-medium ${isSpecial ? 'text-amber-600' : 'text-slate-500'}`}>
           {progress}%
         </span>
       </div>
@@ -250,7 +272,9 @@ export function ChapterCard({
               : undefined
           }
         >
-          {chapter.category_name}
+          {isEn
+            ? categoryNameEnMap[chapter.category] || chapter.category_name
+            : chapter.category_name}
         </span>
       </div>
     </button>
