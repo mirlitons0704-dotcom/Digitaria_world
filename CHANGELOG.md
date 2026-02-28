@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Digitaria project are documented in this file.
+All notable changes to the Digitalia project are documented in this file.
 
 ## [Unreleased]
 

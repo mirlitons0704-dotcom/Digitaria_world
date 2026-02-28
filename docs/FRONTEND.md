@@ -2,7 +2,7 @@
 
 ## Overview
 
-Digitaria is a programming term learning web application built with React, TypeScript, and Supabase.
+Digitalia is a programming term learning web application built with React, TypeScript, and Supabase.
 
 ## Tech Stack
 
@@ -128,7 +128,7 @@ Hook for switching story content between Japanese and English.
 
 - Location: `src/hooks/useStoryLanguage.ts`
 - Exports:
-  - `useStoryLanguage()`: Returns `{ storyLang, setStoryLang }` using localStorage (`digitaria-story-lang` key)
+  - `useStoryLanguage()`: Returns `{ storyLang, setStoryLang }` using localStorage (`digitalia-story-lang` key)
 - Features: Cross-component sync via pub/sub pattern, defaults to `ja`
 
 ### useTts.ts

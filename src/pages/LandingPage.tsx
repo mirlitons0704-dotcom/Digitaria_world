@@ -141,7 +141,7 @@ export function LandingPage() {
             `,
           }}
         >
-          DIGITARIA
+          DIGITALIA
         </h1>
         <div className="w-48 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent mt-3 mb-4" />
         <p
@@ -213,7 +213,7 @@ export function LandingPage() {
 
       <footer className="relative py-6 border-t border-gray-400/30">
         <p className="text-center text-gray-500 text-sm font-display">
-          &copy; 2026 DIGITARIA. All rights reserved.
+          &copy; 2026 DIGITALIA. All rights reserved.
         </p>
       </footer>
 

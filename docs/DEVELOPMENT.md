@@ -122,7 +122,7 @@ useCharacters.ts
 ## Project Structure
 
 ```
-Digitaria_world/
+Digitalia_world/
 ├── .husky/                 # Git hooks
 │   ├── pre-commit         # Lint-staged
 │   └── pre-push           # All quality checks

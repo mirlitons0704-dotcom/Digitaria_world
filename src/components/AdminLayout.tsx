@@ -32,7 +32,7 @@ function SidebarContent({ onNavigate }: { onNavigate: (path: string) => void }) 
             <Shield size={18} className="text-teal-400" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white tracking-wide">DIGITARIA</h1>
+            <h1 className="text-sm font-semibold text-white tracking-wide">DIGITALIA</h1>
             <p className="text-xs text-gray-400">Admin Panel</p>
           </div>
         </div>

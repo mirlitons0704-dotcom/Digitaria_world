@@ -1,4 +1,4 @@
-# Digitaria Color Palette
+# Digitalia Color Palette
 
 ## Brand Colors
 

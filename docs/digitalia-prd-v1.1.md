@@ -1,4 +1,4 @@
-# 📋 DIGITARIA - 製品要件書（PRD）
+# 📋 DIGITALIA - 製品要件書（PRD）
 ## The Code Journey through 520 Programming Terms
 
 **Version**: 1.1.0  
@@ -10,7 +10,7 @@
 # 1. 製品概要
 
 ## 1.1 プロダクト名
-**DIGITARIA（デジタリア）** - The Code Journey through 520 Programming Terms
+**DIGITALIA（デジタリア）** - The Code Journey through 520 Programming Terms
 
 ## 1.2 コンセプト
 プログラミング初心者が、ファンタジー世界「デジタリア」を冒険しながら、520のプログラミング用語を**ストーリー体験型学習**で楽しく学習できるWebアプリケーション。
@@ -42,7 +42,7 @@
 # 2. 世界観・ストーリー
 
 ## 2.1 舞台設定
-- **世界名**: デジタリア（DIGITARIA）
+- **世界名**: デジタリア（DIGITALIA）
 - **コンセプト**: 0と1で構成されたデジタル世界
 - **雰囲気**: レトロフューチャー × ファンタジー × 温かみのある光
 

@@ -31,9 +31,9 @@ export function Layout({ children }: LayoutProps) {
             <button
               onClick={() => navigate('/')}
               className="font-display font-bold text-xl text-gray-800 hover:text-teal-600 transition-colors"
-              aria-label="DIGITARIA ホームへ"
+              aria-label="DIGITALIA ホームへ"
             >
-              DIGITARIA
+              DIGITALIA
             </button>
 
             <div className="hidden md:flex items-center gap-1">

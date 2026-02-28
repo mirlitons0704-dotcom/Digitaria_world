@@ -107,7 +107,7 @@ export function ResetPasswordPage() {
             textShadow: '1px 1px 0 #BFCFFF, 2px 2px 0 #BFCFFF',
           }}
         >
-          DIGITARIA
+          DIGITALIA
         </h1>
         <div className="w-24 h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent mx-auto mb-6" />
 

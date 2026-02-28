@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useStoryLanguage } from './useStoryLanguage';
 
-const STORAGE_KEY = 'digitaria-story-lang';
+const STORAGE_KEY = 'digitalia-story-lang';
 
 describe('useStoryLanguage', () => {
   beforeEach(() => {

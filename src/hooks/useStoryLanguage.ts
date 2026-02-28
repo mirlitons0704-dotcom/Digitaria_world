@@ -2,7 +2,7 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 export type StoryLang = 'ja' | 'en';
 
-const STORAGE_KEY = 'digitaria-story-lang';
+const STORAGE_KEY = 'digitalia-story-lang';
 
 /** Read the persisted preference (default: 'ja'). */
 function getStoredLang(): StoryLang {

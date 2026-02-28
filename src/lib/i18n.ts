@@ -1,7 +1,7 @@
 import type { StoryLang } from '../hooks/useStoryLanguage';
 
 /**
- * Centralized UI translations for the Digitaria app.
+ * Centralized UI translations for the Digitalia app.
  *
  * Auth pages are intentionally excluded (they stay English-only).
  * Database-driven text (chapter titles, scene titles, content) is

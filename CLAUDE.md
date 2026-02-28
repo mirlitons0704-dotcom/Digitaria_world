@@ -1,8 +1,8 @@
-# CLAUDE.md — Digitaria Project Rules
+# CLAUDE.md — Digitalia Project Rules
 
 ## Project Overview
 
-Digitaria is a web app for learning 520 programming terms through a story-driven experience with 17 chapters. Built with Vite + React + TypeScript + Tailwind CSS + Supabase.
+Digitalia is a web app for learning 520 programming terms through a story-driven experience with 17 chapters. Built with Vite + React + TypeScript + Tailwind CSS + Supabase.
 
 ## Tech Stack
 

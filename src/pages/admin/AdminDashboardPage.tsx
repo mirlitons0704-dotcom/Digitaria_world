@@ -105,7 +105,7 @@ export function AdminDashboardPage() {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
-          <p className="text-sm text-gray-400">DIGITARIA overview and key metrics</p>
+          <p className="text-sm text-gray-400">DIGITALIA overview and key metrics</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

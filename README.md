@@ -1,4 +1,4 @@
-# Digitaria World
+# Digitalia World
 
 A programming term learning web application where users explore programming concepts through an immersive story.
 

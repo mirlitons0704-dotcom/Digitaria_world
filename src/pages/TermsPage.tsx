@@ -21,7 +21,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">1. サービスの概要</h2>
             <p>
-              DIGITARIA（以下「本サービス」）は、プログラミング用語の学習を目的とした
+              DIGITALIA（以下「本サービス」）は、プログラミング用語の学習を目的とした
               Webアプリケーションです。本サービスは教育目的で提供されており、
               利用者は本規約に同意の上ご利用ください。
             </p>
