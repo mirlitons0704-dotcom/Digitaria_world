@@ -21,6 +21,33 @@ function sceneToText(scene: StoryScene, lang: StoryLang): string {
   return rawText.replace(/\{\{image:[^}]+\}\}/g, '');
 }
 
+/**
+ * Try to fetch pre-cached audio from Supabase Storage.
+ * Returns a Blob if found, null otherwise.
+ */
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const TTS_CACHE_BUCKET = 'tts-cache';
+
+async function fetchCachedAudio(
+  scene: StoryScene,
+  lang: StoryLang,
+  signal?: AbortSignal
+): Promise<Blob | null> {
+  const ext = 'wav';
+  const langPrefix = lang === 'en' ? 'en' : 'ja';
+  const url = `${SUPABASE_URL}/storage/v1/object/public/${TTS_CACHE_BUCKET}/${langPrefix}/ch${scene.chapter_id}/scene${scene.scene_number}.${ext}`;
+
+  try {
+    const res = await fetch(url, { signal });
+    if (res.ok) {
+      return await res.blob();
+    }
+  } catch {
+    // Cache miss or network error — fall through
+  }
+  return null;
+}
+
 export function useTts(scenes: StoryScene[], lang: StoryLang = 'ja'): UseTtsReturn {
   const [status, setStatus] = useState<TtsStatus>('idle');
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
@@ -77,11 +104,16 @@ export function useTts(scenes: StoryScene[], lang: StoryLang = 'ja'): UseTtsRetu
       setErrorMessage(null);
 
       try {
-        const text = sceneToText(scenes[index], lang);
+        // 1) Try pre-cached audio from Supabase Storage
+        let wavBlob = await fetchCachedAudio(scenes[index], lang, controller.signal);
 
-        const wavBlob = await generateSpeech(text, {
-          signal: controller.signal,
-        });
+        // 2) Fall back to real-time TTS generation
+        if (!wavBlob) {
+          const text = sceneToText(scenes[index], lang);
+          wavBlob = await generateSpeech(text, {
+            signal: controller.signal,
+          });
+        }
 
         if (controller.signal.aborted) return;
 
