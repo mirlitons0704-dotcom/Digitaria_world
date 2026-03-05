@@ -18,7 +18,7 @@ function sceneToText(scene: StoryScene, lang: StoryLang): string {
   const title = lang === 'en' && scene.title_en ? scene.title_en : scene.title;
   const content = lang === 'en' && scene.content_en ? scene.content_en : scene.content;
   const rawText = [title, content].filter(Boolean).join('\n\n');
-  return rawText.replace(/\{\{image:[^}]+\}\}/g, '');
+  return rawText.replace(/\{\{image:[^}]+\}\}/g, '').replace(/\{\{speaker:[^}]*\}\}\n?/g, '');
 }
 
 /**

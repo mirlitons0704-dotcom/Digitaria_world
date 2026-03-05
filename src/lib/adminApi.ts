@@ -426,6 +426,12 @@ export async function insertInlineImage(
   return callManageIllustration(body);
 }
 
+export async function updateSceneContent(sceneId: string, content: string): Promise<void> {
+  const { error } = await supabase.from('story_scenes').update({ content }).eq('id', sceneId);
+
+  if (error) throw error;
+}
+
 export async function removeInlineImage(
   sceneId: string,
   imageUrl: string

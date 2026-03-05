@@ -6,6 +6,7 @@ import {
   Users,
   BarChart3,
   Image,
+  BookOpen,
   ArrowLeft,
   LogOut,
   Shield,
@@ -18,6 +19,7 @@ const adminNavItems = [
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/illustrations', icon: Image, label: 'Illustrations' },
+  { path: '/admin/stories', icon: BookOpen, label: 'Stories' },
 ];
 
 function SidebarContent({ onNavigate }: { onNavigate: (path: string) => void }) {

@@ -182,8 +182,11 @@ async function callGeminiTts(text, voiceName) {
 function sceneToText(scene) {
   const parts = [scene.title, scene.content].filter(Boolean);
   const raw = parts.join('\n\n');
-  // Strip image markers like {{image:...}}
-  return raw.replace(/\{\{image:[^}]+\}\}/g, '').trim();
+  // Strip image markers like {{image:...}} and speaker tags like {{speaker:...}}
+  return raw
+    .replace(/\{\{image:[^}]+\}\}/g, '')
+    .replace(/\{\{speaker:[^}]*\}\}\n?/g, '')
+    .trim();
 }
 
 function getVoiceForScene(scene) {

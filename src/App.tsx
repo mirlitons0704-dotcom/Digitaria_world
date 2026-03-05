@@ -44,6 +44,11 @@ const AdminIllustrationsPage = lazy(() =>
     default: m.AdminIllustrationsPage,
   }))
 );
+const AdminStoryEditorPage = lazy(() =>
+  import('./pages/admin/AdminStoryEditorPage').then((m) => ({
+    default: m.AdminStoryEditorPage,
+  }))
+);
 
 function RecoveryRedirect({ children }: { children: React.ReactNode }) {
   const { isRecovery, loading } = useAuth();
@@ -195,6 +200,14 @@ function App() {
             element={
               <AdminRoute>
                 <AdminIllustrationsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/stories"
+            element={
+              <AdminRoute>
+                <AdminStoryEditorPage />
               </AdminRoute>
             }
           />

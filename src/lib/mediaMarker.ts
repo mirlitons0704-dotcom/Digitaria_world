@@ -40,11 +40,19 @@ function parseSrcAndSize(raw: string): { src: string; size?: MediaSize } {
  * - Empty input returns an empty array.
  * - Markers may include `|size=sm|md|lg|full`; unrecognised sizes are ignored.
  */
+/**
+ * Strip {{speaker:...}} tags from content. These are metadata-only markers
+ * used for TTS voice assignment and should not be rendered.
+ */
+function stripSpeakerTags(text: string): string {
+  return text.replace(/\{\{speaker:[^}]*\}\}\n?/g, '');
+}
+
 export function splitContentByMedia(content: string): (string | MediaSegment)[] {
   if (!content) return [];
 
   const segments: (string | MediaSegment)[] = [];
-  let remaining = content;
+  let remaining = stripSpeakerTags(content);
 
   while (remaining) {
     const match = MEDIA_MARKER_RE.exec(remaining);

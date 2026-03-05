@@ -3,3 +3,4 @@ export { AdminUsersPage } from './AdminUsersPage';
 export { AdminUserDetailPage } from './AdminUserDetailPage';
 export { AdminAnalyticsPage } from './AdminAnalyticsPage';
 export { AdminIllustrationsPage } from './AdminIllustrationsPage';
+export { AdminStoryEditorPage } from './AdminStoryEditorPage';
