@@ -51,6 +51,22 @@ Main layout wrapper component with navigation.
 - Location: `src/components/Layout.tsx`
 - Features: Header, desktop + mobile navigation, user profile display
 
+### ButterflyCollection.tsx
+
+Butterfly display sub-components extracted from MyFolderPage.
+
+- Location: `src/components/ButterflyCollection.tsx`
+- Exports: ButterflyCard, ButterflyRow, TermDetail, diffColor, CollectedTerm type
+- Features: Butterfly card rendering, term detail view, difficulty color mapping
+
+### ScrollNavigator.tsx
+
+Scroll navigation buttons for the story teleprompter.
+
+- Location: `src/components/ScrollNavigator.tsx`
+- Props: isAtTop, isAtBottom, onScrollToTop, onScrollUp, onScrollDown, onScrollToBottom
+- Features: Up/down scroll buttons, top/bottom jump buttons, position-aware visibility
+
 ### StoryTeleprompter.tsx
 
 Auto-scrolling story reader with TTS (text-to-speech) support.
@@ -58,6 +74,15 @@ Auto-scrolling story reader with TTS (text-to-speech) support.
 - Location: `src/components/StoryTeleprompter.tsx`
 - Props: scenes, chapterTitle, terms
 - Features: Auto-scroll with speed control, keyboard navigation, inline term cards, Gemini TTS playback, progress tracking, butterfly collection
+- Uses: useAutoScroll, useTermCollection hooks for separation of concerns
+
+### TeleprompterControls.tsx
+
+Control bar for the story teleprompter.
+
+- Location: `src/components/TeleprompterControls.tsx`
+- Props: isAutoScroll, speedIndex, scrollProgress, storyLang, TTS state, callbacks
+- Features: Auto-scroll toggle, speed selector, language toggle, TTS play/pause/stop, progress bar
 
 ### TermCard.tsx
 
@@ -114,6 +139,15 @@ Hook for fetching story scenes by chapter.
 - Exports:
   - `useStoryScenes(chapterId)`: Fetches all scenes for a chapter, ordered by scene_number
 
+### useAutoScroll.ts
+
+Hook for managing auto-scroll behavior, keyboard shortcuts, and scroll tracking.
+
+- Location: `src/hooks/useAutoScroll.ts`
+- Exports:
+  - `useAutoScroll({ scenes, tts, sceneRefs })`: Returns scrollRef, scroll state, and control functions
+- Features: rAF-based smooth scroll, speed control, TTS sync, keyboard shortcuts (Space/Arrow/Home/End), touch/wheel interrupt handling
+
 ### useOnlineStatus.ts
 
 Hook for monitoring browser online/offline status.
@@ -130,6 +164,15 @@ Hook for switching story content between Japanese and English.
 - Exports:
   - `useStoryLanguage()`: Returns `{ storyLang, setStoryLang }` using localStorage (`digitalia-story-lang` key)
 - Features: Cross-component sync via pub/sub pattern, defaults to `ja`
+
+### useTermCollection.ts
+
+Hook for managing user's collected term state.
+
+- Location: `src/hooks/useTermCollection.ts`
+- Exports:
+  - `useTermCollection(userId)`: Returns collectedTermIds, savingTermId, saveError, handleGotIt
+- Features: Fetch collected terms on mount, save progress via Supabase, auto-dismiss error
 
 ### useTts.ts
 
@@ -173,18 +216,23 @@ src/
 ├── components/
 │   ├── AdminLayout.tsx
 │   ├── AuthForm.tsx
+│   ├── ButterflyCollection.tsx
 │   ├── ChapterCard.tsx
 │   ├── ErrorBoundary.tsx
 │   ├── InlineTermCard.tsx
 │   ├── Layout.tsx
+│   ├── ScrollNavigator.tsx
 │   ├── StoryTeleprompter.tsx
+│   ├── TeleprompterControls.tsx
 │   └── TermCard.tsx
 ├── hooks/
+│   ├── useAutoScroll.ts
 │   ├── useChapters.ts
 │   ├── useCharacters.ts
 │   ├── useOnlineStatus.ts
 │   ├── useStoryLanguage.ts
 │   ├── useStoryScenes.ts
+│   ├── useTermCollection.ts
 │   ├── useTerms.ts
 │   ├── useTts.ts
 │   └── index.ts
