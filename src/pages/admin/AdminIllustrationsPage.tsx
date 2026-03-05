@@ -6,6 +6,7 @@ import {
   setSceneImageUrl,
   insertInlineImage,
   removeInlineImage,
+  updateInlineImageSize,
   type IllustrationScene,
 } from '../../lib/adminApi';
 import {
@@ -50,10 +51,21 @@ function isMediaMarker(paragraph: string): boolean {
   return /^\{\{(image|video):[^}]+\}\}$/.test(paragraph.trim());
 }
 
-/** Extract URL from a media marker paragraph. */
-function extractMarkerUrl(paragraph: string): string | null {
+/** Extract URL and size from a media marker paragraph. */
+function extractMarkerInfo(
+  paragraph: string
+): { url: string; size: 'sm' | 'md' | 'lg' | 'full' } | null {
   const m = paragraph.trim().match(/^\{\{(?:image|video):([^}]+)\}\}$/);
-  return m ? m[1] : null;
+  if (!m) return null;
+  const raw = m[1];
+  const sizeMatch = raw.match(/\|size=(sm|md|lg|full)$/);
+  if (sizeMatch) {
+    return {
+      url: raw.slice(0, sizeMatch.index),
+      size: sizeMatch[1] as 'sm' | 'md' | 'lg' | 'full',
+    };
+  }
+  return { url: raw, size: 'md' };
 }
 
 // ---------------------------------------------------------------------------
@@ -160,6 +172,22 @@ function SceneDetailModal({
   const [inlineSize, setInlineSize] = useState<'sm' | 'md' | 'lg' | 'full'>('md');
 
   const paragraphs = contentToParagraphs(scene.content);
+  const [sizeSaving, setSizeSaving] = useState<string | null>(null);
+
+  const handleSizeChange = useCallback(
+    async (imageUrl: string, newSize: 'sm' | 'md' | 'lg' | 'full') => {
+      setSizeSaving(imageUrl);
+      try {
+        const { content } = await updateInlineImageSize(scene.id, imageUrl, newSize);
+        onUpdated({ ...scene, content });
+      } catch (err) {
+        console.error('Failed to update image size:', err);
+      } finally {
+        setSizeSaving(null);
+      }
+    },
+    [scene, onUpdated]
+  );
 
   // ---- Image processing pipeline ----
   const processAndUpload = useCallback(
@@ -411,26 +439,47 @@ function SceneDetailModal({
             <h3 className="text-sm font-semibold text-gray-300">Content & Inline Images</h3>
             <div className="space-y-1">
               {paragraphs.map((p, idx) => {
-                const markerUrl = extractMarkerUrl(p);
-                if (markerUrl) {
+                const markerInfo = extractMarkerInfo(p);
+                if (markerInfo) {
                   return (
-                    <div
-                      key={idx}
-                      className="relative group rounded-lg overflow-hidden border border-gray-800 my-2"
-                    >
-                      <img
-                        src={markerUrl}
-                        alt={`Inline ${idx}`}
-                        className="w-full max-h-48 object-contain bg-gray-950"
-                      />
-                      <button
-                        onClick={() => handleRemoveInline(markerUrl)}
-                        className="absolute top-2 right-2 p-1.5 bg-gray-900/90 rounded-lg text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove inline image"
-                        disabled={uploadState.uploading}
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                    <div key={idx} className="my-2">
+                      <div className="relative group rounded-lg overflow-hidden border border-gray-800">
+                        <img
+                          src={markerInfo.url}
+                          alt={`Inline ${idx}`}
+                          className="w-full max-h-48 object-contain bg-gray-950"
+                        />
+                        <button
+                          onClick={() => handleRemoveInline(markerInfo.url)}
+                          className="absolute top-2 right-2 p-1.5 bg-gray-900/90 rounded-lg text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remove inline image"
+                          disabled={uploadState.uploading}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 mt-1">
+                        <span className="text-[10px] text-gray-500">Image size</span>
+                        <select
+                          value={markerInfo.size}
+                          onChange={(e) =>
+                            handleSizeChange(
+                              markerInfo.url,
+                              e.target.value as 'sm' | 'md' | 'lg' | 'full'
+                            )
+                          }
+                          disabled={sizeSaving === markerInfo.url}
+                          className="text-[10px] bg-gray-800 border border-gray-700 text-gray-400 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
+                        >
+                          <option value="sm">sm (35%)</option>
+                          <option value="md">md (50%)</option>
+                          <option value="lg">lg (75%)</option>
+                          <option value="full">full (100%)</option>
+                        </select>
+                        {sizeSaving === markerInfo.url && (
+                          <Loader2 size={10} className="animate-spin text-teal-400" />
+                        )}
+                      </div>
                     </div>
                   );
                 }

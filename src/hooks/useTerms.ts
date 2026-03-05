@@ -1,100 +1,74 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getTermsByChapter, getTerm, searchTerms, getRandomTermsForQuiz } from '../lib/api';
-import type { Term } from '../lib/database.types';
 
 export function useTermsByChapter(chapterId: number | null) {
-  const [terms, setTerms] = useState<Term[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['termsByChapter', chapterId],
+    queryFn: () => getTermsByChapter(chapterId!),
+    enabled: chapterId !== null,
+  });
 
-  const fetch = useCallback(() => {
-    if (chapterId === null) {
-      setTerms([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    getTermsByChapter(chapterId)
-      .then(setTerms)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [chapterId]);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return { terms, loading, error, retry: fetch };
+  return {
+    terms: data ?? [],
+    loading: isLoading,
+    error: error as Error | null,
+    retry: refetch,
+  };
 }
 
 export function useTerm(id: string | null) {
-  const [term, setTerm] = useState<Term | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['term', id],
+    queryFn: () => getTerm(id!),
+    enabled: id !== null,
+  });
 
-  const fetch = useCallback(() => {
-    if (id === null) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    getTerm(id)
-      .then(setTerm)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return { term, loading, error, retry: fetch };
+  return {
+    term: data ?? null,
+    loading: isLoading,
+    error: error as Error | null,
+    retry: refetch,
+  };
 }
 
 export function useSearchTerms(query: string) {
-  const [results, setResults] = useState<Term[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
   useEffect(() => {
     if (!query.trim()) {
-      setResults([]);
+      setDebouncedQuery('');
       return;
     }
-
-    setLoading(true);
-    setError(null);
-    const timeoutId = setTimeout(() => {
-      searchTerms(query)
-        .then(setResults)
-        .catch(setError)
-        .finally(() => setLoading(false));
-    }, 300);
-
+    const timeoutId = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  return { results, loading, error };
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['searchTerms', debouncedQuery],
+    queryFn: () => searchTerms(debouncedQuery),
+    enabled: debouncedQuery.trim().length > 0,
+    staleTime: 30 * 1000,
+  });
+
+  return {
+    results: debouncedQuery.trim() ? (data ?? []) : [],
+    loading: isLoading && debouncedQuery.trim().length > 0,
+    error: error as Error | null,
+  };
 }
 
 export function useQuizTerms(chapterId: number | null, count: number = 10) {
-  const [terms, setTerms] = useState<Term[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['quizTerms', chapterId, count],
+    queryFn: () => getRandomTermsForQuiz(chapterId, count),
+    staleTime: 0,
+  });
 
-  const fetchQuiz = useCallback(() => {
-    setLoading(true);
-    getRandomTermsForQuiz(chapterId, count)
-      .then(setTerms)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [chapterId, count]);
-
-  useEffect(() => {
-    fetchQuiz();
-  }, [fetchQuiz]);
-
-  return { terms, loading, error, refresh: fetchQuiz };
+  return {
+    terms: data ?? [],
+    loading: isLoading,
+    error: error as Error | null,
+    refresh: refetch,
+  };
 }

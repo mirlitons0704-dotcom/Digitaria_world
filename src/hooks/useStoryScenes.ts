@@ -1,29 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getStoryScenes } from '../lib/api';
-import type { StoryScene } from '../lib/database.types';
 
 export function useStoryScenes(chapterId: number | null) {
-  const [scenes, setScenes] = useState<StoryScene[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['storyScenes', chapterId],
+    queryFn: () => getStoryScenes(chapterId!),
+    enabled: chapterId !== null,
+  });
 
-  const fetch = useCallback(() => {
-    if (chapterId === null) {
-      setScenes([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    getStoryScenes(chapterId)
-      .then(setScenes)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [chapterId]);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return { scenes, loading, error, retry: fetch };
+  return {
+    scenes: data ?? [],
+    loading: isLoading,
+    error: error as Error | null,
+    retry: refetch,
+  };
 }

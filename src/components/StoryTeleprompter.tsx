@@ -1,31 +1,15 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  ChevronDownIcon,
-  Hand,
-  ChevronsDown,
-  ChevronUp,
-  ChevronDown,
-  ChevronsUp,
-  ToggleLeft,
-  ToggleRight,
-  Check,
-  Loader2,
-  Square,
-  ArrowRight,
-  Home,
-} from 'lucide-react';
+import { ChevronsDown, ToggleLeft, ToggleRight, Check, ArrowRight, Home } from 'lucide-react';
 import type { StoryScene, Term } from '../lib/database.types';
 import { splitContentByMedia, type MediaSize } from '../lib/mediaMarker';
 import { InlineTermCard } from './InlineTermCard';
+import { TeleprompterControls } from './TeleprompterControls';
+import { ScrollNavigator } from './ScrollNavigator';
 import { useAuth } from '../contexts/AuthContext';
-import { saveTermProgress, getUserCollectedTerms } from '../lib/api';
 import { useTts } from '../hooks/useTts';
 import { useStoryLanguage } from '../hooks/useStoryLanguage';
-import { Globe } from 'lucide-react';
+import { useAutoScroll } from '../hooks/useAutoScroll';
+import { useTermCollection } from '../hooks/useTermCollection';
 
 interface StoryTeleprompterProps {
   scenes: StoryScene[];
@@ -35,14 +19,6 @@ interface StoryTeleprompterProps {
   isLastChapter?: boolean;
   onBackToHome?: () => void;
 }
-
-const SPEED_OPTIONS = [
-  { label: 'Super Slow', value: 0.25 },
-  { label: 'Slow', value: 0.5 },
-  { label: 'Normal', value: 1 },
-  { label: 'Fast', value: 2 },
-  { label: 'Turbo', value: 3.5 },
-] as const;
 
 const MANUAL_SCROLL_STEP = 200;
 
@@ -64,66 +40,32 @@ export function StoryTeleprompter({
 }: StoryTeleprompterProps) {
   const { user } = useAuth();
   const { storyLang, toggleStoryLang } = useStoryLanguage();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const animFrameRef = useRef<number>(0);
-  const lastTimeRef = useRef<number>(0);
-  const subPixelRef = useRef<number>(0);
-
-  const [isAutoScroll, setIsAutoScroll] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(0);
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const [isAtTop, setIsAtTop] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [showScrollNav, setShowScrollNav] = useState(false);
+  const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
-  const [collectedTermIds, setCollectedTermIds] = useState<Set<string>>(new Set());
-  const [savingTermId, setSavingTermId] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   const tts = useTts(scenes, storyLang);
 
-  const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const userScrolledRef = useRef(false);
-  const prevSceneIndexRef = useRef(0);
+  const {
+    scrollRef,
+    isAutoScroll,
+    speedIndex,
+    scrollProgress,
+    isAtTop,
+    isAtBottom,
+    showScrollNav,
+    toggleAutoScroll,
+    stopAutoScroll,
+    setSpeedIndex,
+    scrollBy,
+    scrollToTop,
+    scrollToBottom,
+  } = useAutoScroll({ scenes, tts, sceneRefs });
+
+  const { collectedTermIds, savingTermId, saveError, handleGotIt } = useTermCollection(user?.id);
 
   useEffect(() => {
     sceneRefs.current = sceneRefs.current.slice(0, scenes.length);
   }, [scenes.length]);
-
-  // Auto-dismiss save error after 3 seconds
-  useEffect(() => {
-    if (!saveError) return;
-    const timer = setTimeout(() => setSaveError(null), 3000);
-    return () => clearTimeout(timer);
-  }, [saveError]);
-
-  useEffect(() => {
-    if (!user) return;
-    getUserCollectedTerms(user.id)
-      .then((progress) => {
-        setCollectedTermIds(new Set(progress.map((p) => p.term_id)));
-      })
-      .catch(() => {
-        // Non-critical: collected status will just not show
-      });
-  }, [user]);
-
-  const handleGotIt = useCallback(
-    async (termId: string) => {
-      if (!user) return;
-      setSavingTermId(termId);
-      setSaveError(null);
-      try {
-        await saveTermProgress(user.id, termId, 3, 'butterfly');
-        setCollectedTermIds((prev) => new Set([...prev, termId]));
-      } catch {
-        setSaveError('Failed to save progress. Please try again.');
-      } finally {
-        setSavingTermId(null);
-      }
-    },
-    [user]
-  );
 
   const termMap = useMemo(() => {
     const map = new Map<string, Term>();
@@ -134,171 +76,6 @@ export function StoryTeleprompter({
   const toggleTerm = useCallback((termId: string) => {
     setExpandedTermId((prev) => (prev === termId ? null : termId));
   }, []);
-
-  const speed = SPEED_OPTIONS[speedIndex].value;
-
-  const stopAutoScroll = useCallback(() => {
-    setIsAutoScroll(false);
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = 0;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (tts.currentSceneIndex !== prevSceneIndexRef.current) {
-      userScrolledRef.current = false;
-      prevSceneIndexRef.current = tts.currentSceneIndex;
-    }
-
-    if ((tts.status !== 'loading' && tts.status !== 'playing') || userScrolledRef.current) return;
-
-    const el = sceneRefs.current[tts.currentSceneIndex];
-    const container = scrollRef.current;
-    if (!el || !container) return;
-
-    if (isAutoScroll) stopAutoScroll();
-
-    const targetTop = el.offsetTop - 20;
-    container.scrollTo({ top: targetTop, behavior: 'smooth' });
-  }, [tts.currentSceneIndex, tts.status, isAutoScroll, stopAutoScroll]);
-
-  const tick = useCallback(
-    (timestamp: number) => {
-      if (!scrollRef.current) return;
-
-      if (lastTimeRef.current === 0) {
-        lastTimeRef.current = timestamp;
-      }
-
-      const delta = timestamp - lastTimeRef.current;
-      lastTimeRef.current = timestamp;
-
-      subPixelRef.current += speed * (delta / 16);
-      const whole = Math.floor(subPixelRef.current);
-      if (whole >= 1) {
-        scrollRef.current.scrollTop += whole;
-        subPixelRef.current -= whole;
-      }
-
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      if (scrollTop + clientHeight >= scrollHeight - 2) {
-        stopAutoScroll();
-        return;
-      }
-
-      animFrameRef.current = requestAnimationFrame(tick);
-    },
-    [speed, stopAutoScroll]
-  );
-
-  const startAutoScroll = useCallback(() => {
-    setIsAutoScroll(true);
-    lastTimeRef.current = 0;
-    subPixelRef.current = 0;
-    animFrameRef.current = requestAnimationFrame(tick);
-  }, [tick]);
-
-  const toggleAutoScroll = useCallback(() => {
-    if (isAutoScroll) {
-      stopAutoScroll();
-    } else {
-      startAutoScroll();
-    }
-  }, [isAutoScroll, stopAutoScroll, startAutoScroll]);
-
-  useEffect(() => {
-    if (isAutoScroll) {
-      lastTimeRef.current = 0;
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-      animFrameRef.current = requestAnimationFrame(tick);
-    }
-  }, [speed, isAutoScroll, tick]);
-
-  useEffect(() => {
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let touchStartY = 0;
-    let touchMoved = false;
-
-    const handleWheel = () => {
-      if (isAutoScroll) stopAutoScroll();
-      if (tts.status === 'playing' || tts.status === 'loading') {
-        userScrolledRef.current = true;
-      }
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-      touchMoved = false;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const delta = Math.abs(e.touches[0].clientY - touchStartY);
-      if (delta > 5) {
-        touchMoved = true;
-        if (isAutoScroll) stopAutoScroll();
-        if (tts.status === 'playing' || tts.status === 'loading') {
-          userScrolledRef.current = true;
-        }
-      }
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      if (!isAutoScroll) return;
-      const target = e.target as HTMLElement;
-      if (target.closest('button, a, select, input, textarea')) return;
-      stopAutoScroll();
-    };
-
-    const handleTouchEnd = () => {
-      if (!isAutoScroll || touchMoved) return;
-      stopAutoScroll();
-    };
-
-    el.addEventListener('wheel', handleWheel, { passive: true });
-    el.addEventListener('touchstart', handleTouchStart, { passive: true });
-    el.addEventListener('touchmove', handleTouchMove, { passive: true });
-    el.addEventListener('touchend', handleTouchEnd, { passive: true });
-    el.addEventListener('click', handleClick);
-
-    return () => {
-      el.removeEventListener('wheel', handleWheel);
-      el.removeEventListener('touchstart', handleTouchStart);
-      el.removeEventListener('touchmove', handleTouchMove);
-      el.removeEventListener('touchend', handleTouchEnd);
-      el.removeEventListener('click', handleClick);
-    };
-  }, [isAutoScroll, stopAutoScroll, tts.status]);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      const maxScroll = scrollHeight - clientHeight;
-      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 10);
-      setIsAtTop(scrollTop <= 10);
-      setScrollProgress(maxScroll > 0 ? scrollTop / maxScroll : 0);
-      setShowScrollNav(maxScroll > 100);
-    };
-
-    handleScroll();
-    el.addEventListener('scroll', handleScroll, { passive: true });
-    return () => el.removeEventListener('scroll', handleScroll);
-  }, [scenes]);
 
   const handleAudioClick = () => {
     if (tts.status === 'playing') {
@@ -311,67 +88,6 @@ export function StoryTeleprompter({
       tts.play();
     }
   };
-
-  const scrollBy = useCallback(
-    (amount: number) => {
-      if (!scrollRef.current) return;
-      if (isAutoScroll) stopAutoScroll();
-      scrollRef.current.scrollBy({ top: amount, behavior: 'smooth' });
-    },
-    [isAutoScroll, stopAutoScroll]
-  );
-
-  const scrollToTop = useCallback(() => {
-    if (!scrollRef.current) return;
-    if (isAutoScroll) stopAutoScroll();
-    scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [isAutoScroll, stopAutoScroll]);
-
-  const scrollToBottom = useCallback(() => {
-    if (!scrollRef.current) return;
-    if (isAutoScroll) stopAutoScroll();
-    scrollRef.current.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, [isAutoScroll, stopAutoScroll]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLSelectElement
-      )
-        return;
-
-      switch (e.key) {
-        case ' ':
-          e.preventDefault();
-          toggleAutoScroll();
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          scrollBy(MANUAL_SCROLL_STEP);
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          scrollBy(-MANUAL_SCROLL_STEP);
-          break;
-        case 'Home':
-          e.preventDefault();
-          scrollToTop();
-          break;
-        case 'End':
-          e.preventDefault();
-          scrollToBottom();
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleAutoScroll, scrollBy, scrollToTop, scrollToBottom]);
 
   if (scenes.length === 0) {
     return (
@@ -391,152 +107,21 @@ export function StoryTeleprompter({
           {saveError}
         </div>
       )}
-      <div className="relative">
-        <div className="flex items-center justify-between px-4 py-2 bg-white/60 backdrop-blur-sm border-b border-gray-200/50">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleAutoScroll}
-              aria-label={isAutoScroll ? 'オートスクロールを停止' : 'オートスクロールを開始'}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                isAutoScroll
-                  ? 'bg-teal-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {isAutoScroll ? (
-                <>
-                  <Pause size={14} />
-                  <span className="hidden sm:inline">Auto</span>
-                </>
-              ) : (
-                <>
-                  <Play size={14} />
-                  <span className="hidden sm:inline">Auto</span>
-                </>
-              )}
-            </button>
-
-            {isAutoScroll && (
-              <div className="relative flex items-center">
-                <select
-                  value={speedIndex}
-                  onChange={(e) => {
-                    setSpeedIndex(Number(e.target.value));
-                    e.target.blur();
-                  }}
-                  className="appearance-none pl-2.5 pr-6 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500/30"
-                >
-                  {SPEED_OPTIONS.map((opt, i) => (
-                    <option key={i} value={i}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDownIcon
-                  size={12}
-                  className="absolute right-2 pointer-events-none text-gray-500"
-                />
-              </div>
-            )}
-
-            {!isAutoScroll && (
-              <span className="flex items-center gap-1 text-xs text-gray-500 ml-1">
-                <Hand size={12} />
-                <span className="hidden sm:inline">Scroll to read</span>
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleStoryLang}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-medium transition-all"
-              title={storyLang === 'ja' ? 'Switch to English' : '日本語に切り替え'}
-              aria-label={storyLang === 'ja' ? 'Switch to English' : '日本語に切り替え'}
-            >
-              <Globe size={12} />
-              <span>{storyLang === 'ja' ? 'EN' : 'JA'}</span>
-            </button>
-
-            <span className="text-xs text-gray-500 tabular-nums hidden sm:inline">
-              {Math.round(scrollProgress * 100)}%
-            </span>
-
-            <div className="flex items-center gap-1.5">
-              {(tts.status === 'playing' ||
-                tts.status === 'paused' ||
-                tts.status === 'loading') && (
-                <button
-                  onClick={tts.stop}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 text-sm transition-all"
-                  title="Stop"
-                  aria-label="音声を停止"
-                >
-                  <Square size={12} />
-                </button>
-              )}
-
-              <div className="relative">
-                <button
-                  onClick={handleAudioClick}
-                  disabled={tts.status === 'loading'}
-                  aria-label={
-                    tts.status === 'playing'
-                      ? '音声を一時停止'
-                      : tts.status === 'paused'
-                        ? '音声を再開'
-                        : '音声を再生'
-                  }
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    tts.status === 'playing'
-                      ? 'bg-teal-500 text-white shadow-md'
-                      : tts.status === 'loading'
-                        ? 'bg-amber-100 text-amber-600 cursor-wait'
-                        : tts.status === 'error'
-                          ? 'bg-red-50 text-red-500 hover:bg-red-100'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {tts.status === 'loading' ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : tts.status === 'playing' ? (
-                    <Pause size={14} />
-                  ) : tts.status === 'error' ? (
-                    <VolumeX size={14} />
-                  ) : (
-                    <Volume2 size={14} />
-                  )}
-                  <span className="hidden sm:inline">
-                    {tts.status === 'loading'
-                      ? `Loading ${tts.currentSceneIndex + 1}/${scenes.length}`
-                      : tts.status === 'playing'
-                        ? `${tts.currentSceneIndex + 1}/${scenes.length}`
-                        : tts.status === 'paused'
-                          ? 'Resume'
-                          : tts.status === 'error'
-                            ? 'Retry'
-                            : 'Listen'}
-                  </span>
-                </button>
-
-                {tts.status === 'error' && tts.errorMessage && (
-                  <div className="absolute right-0 top-full mt-2 px-3 py-2 bg-red-800 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 animate-fade-in max-w-[200px] truncate">
-                    {tts.errorMessage}
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-red-800 rotate-45" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="h-[2px] bg-gray-100">
-          <div
-            className="h-full bg-gradient-to-r from-teal-400 to-teal-600 transition-all duration-150 ease-out"
-            style={{ width: `${scrollProgress * 100}%` }}
-          />
-        </div>
-      </div>
+      <TeleprompterControls
+        isAutoScroll={isAutoScroll}
+        speedIndex={speedIndex}
+        scrollProgress={scrollProgress}
+        storyLang={storyLang}
+        ttsStatus={tts.status}
+        ttsCurrentSceneIndex={tts.currentSceneIndex}
+        ttsErrorMessage={tts.errorMessage}
+        totalScenes={scenes.length}
+        onToggleAutoScroll={toggleAutoScroll}
+        onSpeedChange={setSpeedIndex}
+        onToggleLang={toggleStoryLang}
+        onAudioClick={handleAudioClick}
+        onTtsStop={tts.stop}
+      />
 
       <div className="relative flex-1 min-h-0">
         <div ref={scrollRef} className="teleprompter-container h-full overflow-y-auto">
@@ -691,56 +276,14 @@ export function StoryTeleprompter({
         </div>
 
         {showScrollNav && !isAutoScroll && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 z-20">
-            <button
-              onClick={scrollToTop}
-              disabled={isAtTop}
-              className={`p-1.5 rounded-full backdrop-blur-sm shadow-md transition-all ${
-                isAtTop
-                  ? 'bg-white/40 text-gray-300 cursor-default'
-                  : 'bg-white/80 text-gray-500 hover:bg-white hover:text-teal-600 hover:shadow-lg'
-              }`}
-              title="Scroll to top"
-            >
-              <ChevronsUp size={16} />
-            </button>
-            <button
-              onClick={() => scrollBy(-MANUAL_SCROLL_STEP)}
-              disabled={isAtTop}
-              className={`p-1.5 rounded-full backdrop-blur-sm shadow-md transition-all ${
-                isAtTop
-                  ? 'bg-white/40 text-gray-300 cursor-default'
-                  : 'bg-white/80 text-gray-500 hover:bg-white hover:text-teal-600 hover:shadow-lg'
-              }`}
-              title="Scroll up"
-            >
-              <ChevronUp size={16} />
-            </button>
-            <button
-              onClick={() => scrollBy(MANUAL_SCROLL_STEP)}
-              disabled={isAtBottom}
-              className={`p-1.5 rounded-full backdrop-blur-sm shadow-md transition-all ${
-                isAtBottom
-                  ? 'bg-white/40 text-gray-300 cursor-default'
-                  : 'bg-white/80 text-gray-500 hover:bg-white hover:text-teal-600 hover:shadow-lg'
-              }`}
-              title="Scroll down"
-            >
-              <ChevronDown size={16} />
-            </button>
-            <button
-              onClick={scrollToBottom}
-              disabled={isAtBottom}
-              className={`p-1.5 rounded-full backdrop-blur-sm shadow-md transition-all ${
-                isAtBottom
-                  ? 'bg-white/40 text-gray-300 cursor-default'
-                  : 'bg-white/80 text-gray-500 hover:bg-white hover:text-teal-600 hover:shadow-lg'
-              }`}
-              title="Scroll to bottom"
-            >
-              <ChevronsDown size={16} />
-            </button>
-          </div>
+          <ScrollNavigator
+            isAtTop={isAtTop}
+            isAtBottom={isAtBottom}
+            onScrollToTop={scrollToTop}
+            onScrollUp={() => scrollBy(-MANUAL_SCROLL_STEP)}
+            onScrollDown={() => scrollBy(MANUAL_SCROLL_STEP)}
+            onScrollToBottom={scrollToBottom}
+          />
         )}
 
         {saveError && (

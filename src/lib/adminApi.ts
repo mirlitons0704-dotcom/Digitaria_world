@@ -436,3 +436,16 @@ export async function removeInlineImage(
     imageUrl,
   });
 }
+
+export async function updateInlineImageSize(
+  sceneId: string,
+  imageUrl: string,
+  newSize: 'sm' | 'md' | 'lg' | 'full'
+): Promise<{ content: string }> {
+  return callManageIllustration({
+    action: 'update-inline-size',
+    sceneId,
+    imageUrl,
+    newSize,
+  });
+}

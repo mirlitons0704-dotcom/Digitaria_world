@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChapters, useChapter, useChapterWithGuide } from './useChapters';
 import * as api from '../lib/api';
-import { createMockChapter, createMockCharacter } from '../test/test-utils';
+import { createMockChapter, createMockCharacter, createQueryWrapper } from '../test/test-utils';
 
 // Mock the Supabase client to prevent createClient error in test env
 vi.mock('../lib/supabase', () => ({
@@ -26,7 +26,7 @@ describe('useChapters', () => {
   it('returns loading state initially', () => {
     vi.mocked(api.getChapters).mockImplementation(() => new Promise(() => {}));
 
-    const { result } = renderHook(() => useChapters());
+    const { result } = renderHook(() => useChapters(), { wrapper: createQueryWrapper() });
 
     expect(result.current.loading).toBe(true);
     expect(result.current.chapters).toEqual([]);
@@ -36,7 +36,7 @@ describe('useChapters', () => {
   it('returns chapters after successful fetch', async () => {
     vi.mocked(api.getChapters).mockResolvedValue(mockChapters);
 
-    const { result } = renderHook(() => useChapters());
+    const { result } = renderHook(() => useChapters(), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -50,7 +50,7 @@ describe('useChapters', () => {
     const mockError = new Error('Failed to fetch chapters');
     vi.mocked(api.getChapters).mockRejectedValue(mockError);
 
-    const { result } = renderHook(() => useChapters());
+    const { result } = renderHook(() => useChapters(), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -64,7 +64,8 @@ describe('useChapters', () => {
     const mockError = new Error('Network error');
     vi.mocked(api.getChapters).mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockChapters);
 
-    const { result } = renderHook(() => useChapters());
+    const wrapper = createQueryWrapper();
+    const { result } = renderHook(() => useChapters(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.error).toEqual(mockError);
@@ -92,7 +93,7 @@ describe('useChapter', () => {
   });
 
   it('returns null chapter when id is null', async () => {
-    const { result } = renderHook(() => useChapter(null));
+    const { result } = renderHook(() => useChapter(null), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -105,7 +106,7 @@ describe('useChapter', () => {
   it('fetches chapter when id is provided', async () => {
     vi.mocked(api.getChapter).mockResolvedValue(mockChapter);
 
-    const { result } = renderHook(() => useChapter(1));
+    const { result } = renderHook(() => useChapter(1), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -121,8 +122,10 @@ describe('useChapter', () => {
       .mockResolvedValueOnce(mockChapter)
       .mockResolvedValueOnce(mockChapter2);
 
+    const wrapper = createQueryWrapper();
     const { result, rerender } = renderHook(({ id }) => useChapter(id), {
       initialProps: { id: 1 as number | null },
+      wrapper,
     });
 
     await waitFor(() => {
@@ -151,7 +154,9 @@ describe('useChapterWithGuide', () => {
   });
 
   it('returns null when id is null', async () => {
-    const { result } = renderHook(() => useChapterWithGuide(null));
+    const { result } = renderHook(() => useChapterWithGuide(null), {
+      wrapper: createQueryWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -164,7 +169,7 @@ describe('useChapterWithGuide', () => {
   it('fetches chapter with guide when id is provided', async () => {
     vi.mocked(api.getChapterWithGuide).mockResolvedValue(mockChapterWithGuide);
 
-    const { result } = renderHook(() => useChapterWithGuide(1));
+    const { result } = renderHook(() => useChapterWithGuide(1), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);

@@ -178,6 +178,48 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ success: true, content: newContent });
     }
 
+    // ==================== UPDATE-INLINE-SIZE ====================
+    if (action === 'update-inline-size') {
+      const { sceneId, imageUrl, newSize } = body;
+      if (!sceneId || !imageUrl) {
+        return errorResponse('sceneId and imageUrl are required');
+      }
+
+      const validSizes = ['sm', 'md', 'lg', 'full'];
+      if (newSize && !validSizes.includes(newSize)) {
+        return errorResponse(`Invalid size: ${newSize}. Must be one of: ${validSizes.join(', ')}`);
+      }
+
+      const { data: scene, error: fetchError } = await supabase
+        .from('story_scenes')
+        .select('content')
+        .eq('id', sceneId)
+        .maybeSingle();
+
+      if (fetchError) return errorResponse(fetchError.message, 500);
+      if (!scene) return errorResponse('Scene not found', 404);
+
+      // Match the marker for this specific image URL (with or without existing size)
+      const escaped = imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const markerRe = new RegExp(`\\{\\{(image|video):${escaped}(\\|size=\\w+)?\\}\\}`);
+
+      const match = scene.content.match(markerRe);
+      if (!match) return errorResponse('Image marker not found in content', 404);
+
+      const type = match[1];
+      const sizeSuffix = newSize && newSize !== 'md' ? `|size=${newSize}` : '';
+      const newMarker = `{{${type}:${imageUrl}${sizeSuffix}}}`;
+      const newContent = scene.content.replace(markerRe, newMarker);
+
+      const { error: updateError } = await supabase
+        .from('story_scenes')
+        .update({ content: newContent })
+        .eq('id', sceneId);
+
+      if (updateError) return errorResponse(updateError.message, 500);
+      return jsonResponse({ success: true, content: newContent });
+    }
+
     // ==================== REMOVE-IMAGE ====================
     if (action === 'remove-image') {
       const { sceneId, imageUrl, target } = body;

@@ -34,7 +34,7 @@ export function HomePage() {
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <p className="text-red-500">Failed to load chapters</p>
           <button
-            onClick={retry}
+            onClick={() => retry()}
             className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm"
           >
             Retry

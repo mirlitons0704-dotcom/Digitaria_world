@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useTermsByChapter, useTerm, useSearchTerms, useQuizTerms } from './useTerms';
 import * as api from '../lib/api';
-import { createMockTerm, createMockTerms } from '../test/test-utils';
+import { createMockTerm, createMockTerms, createQueryWrapper } from '../test/test-utils';
 
 // Mock the Supabase client to prevent createClient error in test env
 vi.mock('../lib/supabase', () => ({
@@ -20,7 +20,7 @@ describe('useTermsByChapter', () => {
   });
 
   it('returns empty array when chapterId is null', async () => {
-    const { result } = renderHook(() => useTermsByChapter(null));
+    const { result } = renderHook(() => useTermsByChapter(null), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -33,7 +33,7 @@ describe('useTermsByChapter', () => {
   it('fetches terms when chapterId is provided', async () => {
     vi.mocked(api.getTermsByChapter).mockResolvedValue(mockTerms);
 
-    const { result } = renderHook(() => useTermsByChapter(1));
+    const { result } = renderHook(() => useTermsByChapter(1), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -49,8 +49,10 @@ describe('useTermsByChapter', () => {
       .mockResolvedValueOnce(mockTerms)
       .mockResolvedValueOnce(mockTermsChapter2);
 
+    const wrapper = createQueryWrapper();
     const { result, rerender } = renderHook(({ id }) => useTermsByChapter(id), {
       initialProps: { id: 1 as number | null },
+      wrapper,
     });
 
     await waitFor(() => {
@@ -68,7 +70,7 @@ describe('useTermsByChapter', () => {
     const mockError = new Error('Failed to fetch terms');
     vi.mocked(api.getTermsByChapter).mockRejectedValue(mockError);
 
-    const { result } = renderHook(() => useTermsByChapter(1));
+    const { result } = renderHook(() => useTermsByChapter(1), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -83,7 +85,8 @@ describe('useTermsByChapter', () => {
       .mockRejectedValueOnce(mockError)
       .mockResolvedValueOnce(mockTerms);
 
-    const { result } = renderHook(() => useTermsByChapter(1));
+    const wrapper = createQueryWrapper();
+    const { result } = renderHook(() => useTermsByChapter(1), { wrapper });
 
     await waitFor(() => {
       expect(result.current.error).toEqual(mockError);
@@ -110,7 +113,7 @@ describe('useTerm', () => {
   });
 
   it('returns null when id is null', async () => {
-    const { result } = renderHook(() => useTerm(null));
+    const { result } = renderHook(() => useTerm(null), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -123,7 +126,7 @@ describe('useTerm', () => {
   it('fetches term when id is provided', async () => {
     vi.mocked(api.getTerm).mockResolvedValue(mockTerm);
 
-    const { result } = renderHook(() => useTerm('binary'));
+    const { result } = renderHook(() => useTerm('binary'), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -147,7 +150,7 @@ describe('useSearchTerms', () => {
   });
 
   it('returns empty results for empty query', async () => {
-    const { result } = renderHook(() => useSearchTerms(''));
+    const { result } = renderHook(() => useSearchTerms(''), { wrapper: createQueryWrapper() });
 
     expect(result.current.results).toEqual([]);
     expect(result.current.loading).toBe(false);
@@ -155,7 +158,7 @@ describe('useSearchTerms', () => {
   });
 
   it('returns empty results for whitespace-only query', async () => {
-    const { result } = renderHook(() => useSearchTerms('   '));
+    const { result } = renderHook(() => useSearchTerms('   '), { wrapper: createQueryWrapper() });
 
     expect(result.current.results).toEqual([]);
     expect(api.searchTerms).not.toHaveBeenCalled();
@@ -164,8 +167,10 @@ describe('useSearchTerms', () => {
   it('debounces search calls', async () => {
     vi.mocked(api.searchTerms).mockResolvedValue(mockSearchResults);
 
+    const wrapper = createQueryWrapper();
     const { rerender } = renderHook(({ query }) => useSearchTerms(query), {
       initialProps: { query: 'b' },
+      wrapper,
     });
 
     // Query changes rapidly
@@ -189,19 +194,26 @@ describe('useSearchTerms', () => {
   it('returns search results after debounce', async () => {
     vi.mocked(api.searchTerms).mockResolvedValue(mockSearchResults);
 
-    const { result } = renderHook(() => useSearchTerms('binary'));
-
-    // Loading is set to true immediately when query is non-empty
-    expect(result.current.loading).toBe(true);
-
-    // Advance timers past debounce period to trigger the search
-    await act(async () => {
-      vi.advanceTimersByTime(350);
-      // Allow the promise to resolve
-      await vi.runAllTimersAsync();
+    const { result } = renderHook(() => useSearchTerms('binary'), {
+      wrapper: createQueryWrapper(),
     });
 
-    // Check results are set and loading is false
+    // Initially loading is false because debounced query is empty
+    expect(result.current.loading).toBe(false);
+
+    // Advance timers past debounce period
+    await act(async () => {
+      vi.advanceTimersByTime(350);
+    });
+
+    // Flush TanStack Query microtasks
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Check results are set
     expect(api.searchTerms).toHaveBeenCalledWith('binary');
     expect(result.current.results).toEqual(mockSearchResults);
     expect(result.current.loading).toBe(false);
@@ -218,7 +230,7 @@ describe('useQuizTerms', () => {
   it('fetches random terms on mount', async () => {
     vi.mocked(api.getRandomTermsForQuiz).mockResolvedValue(mockQuizTerms);
 
-    const { result } = renderHook(() => useQuizTerms(null, 10));
+    const { result } = renderHook(() => useQuizTerms(null, 10), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -231,7 +243,7 @@ describe('useQuizTerms', () => {
   it('fetches terms for specific chapter', async () => {
     vi.mocked(api.getRandomTermsForQuiz).mockResolvedValue(mockQuizTerms);
 
-    const { result } = renderHook(() => useQuizTerms(1, 10));
+    const { result } = renderHook(() => useQuizTerms(1, 10), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -243,7 +255,8 @@ describe('useQuizTerms', () => {
   it('refresh function fetches new terms', async () => {
     vi.mocked(api.getRandomTermsForQuiz).mockResolvedValue(mockQuizTerms);
 
-    const { result } = renderHook(() => useQuizTerms(null, 10));
+    const wrapper = createQueryWrapper();
+    const { result } = renderHook(() => useQuizTerms(null, 10), { wrapper });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -266,7 +279,7 @@ describe('useQuizTerms', () => {
   it('uses default count of 10', async () => {
     vi.mocked(api.getRandomTermsForQuiz).mockResolvedValue(mockQuizTerms);
 
-    renderHook(() => useQuizTerms(null));
+    renderHook(() => useQuizTerms(null), { wrapper: createQueryWrapper() });
 
     await waitFor(() => {
       expect(api.getRandomTermsForQuiz).toHaveBeenCalledWith(null, 10);

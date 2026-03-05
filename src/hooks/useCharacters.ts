@@ -1,39 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getCharacters, getCharacter } from '../lib/api';
 import type { Character } from '../lib/database.types';
 
 export function useCharacters() {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['characters'],
+    queryFn: getCharacters,
+  });
 
-  useEffect(() => {
-    getCharacters()
-      .then(setCharacters)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { characters, loading, error };
+  return {
+    characters: data ?? ([] as Character[]),
+    loading: isLoading,
+    error: error as Error | null,
+  };
 }
 
 export function useCharacter(id: string | null) {
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['character', id],
+    queryFn: () => getCharacter(id!),
+    enabled: id !== null,
+  });
 
-  useEffect(() => {
-    if (id === null) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    getCharacter(id)
-      .then(setCharacter)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  return { character, loading, error };
+  return {
+    character: data ?? null,
+    loading: isLoading,
+    error: error as Error | null,
+  };
 }

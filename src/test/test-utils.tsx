@@ -1,7 +1,20 @@
 import { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Chapter, Term, Character } from '../lib/database.types';
+
+// Create a QueryClient for testing (retry disabled for deterministic tests)
+export function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: Infinity,
+      },
+    },
+  });
+}
 
 // Mock data factories
 export function createMockChapter(overrides: Partial<Chapter> = {}): Chapter {
@@ -93,7 +106,20 @@ interface WrapperProps {
 }
 
 function AllProviders({ children }: WrapperProps) {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  const queryClient = createTestQueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>{children}</BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+// Wrapper for renderHook (hooks that use useQuery)
+export function createQueryWrapper() {
+  const queryClient = createTestQueryClient();
+  return function QueryWrapper({ children }: WrapperProps) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  };
 }
 
 function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
