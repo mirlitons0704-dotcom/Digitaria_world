@@ -427,9 +427,15 @@ export async function insertInlineImage(
 }
 
 export async function updateSceneContent(sceneId: string, content: string): Promise<void> {
-  const { error } = await supabase.from('story_scenes').update({ content }).eq('id', sceneId);
+  const { data, error } = await supabase
+    .from('story_scenes')
+    .update({ content })
+    .eq('id', sceneId)
+    .select('id');
 
   if (error) throw error;
+  if (!data || data.length === 0)
+    throw new Error('Update failed – you may not have admin permissions');
 }
 
 export async function removeInlineImage(

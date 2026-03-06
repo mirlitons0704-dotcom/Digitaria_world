@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { generateSpeech } from '../lib/geminiTts';
+import { generateSpeech, generateMultiSpeakerSpeech } from '../lib/geminiTts';
+import type { SpeakerConfig } from '../lib/geminiTts';
 import type { StoryScene } from '../lib/database.types';
 import type { StoryLang } from './useStoryLanguage';
 
@@ -14,11 +15,96 @@ interface UseTtsReturn {
   stop: () => void;
 }
 
-function sceneToText(scene: StoryScene, lang: StoryLang): string {
+// ─── Multi-speaker content parsing (mirrors generate-tts-cache.mjs logic) ────
+
+const NARRATOR_VOICE = 'Kore';
+
+interface TtsSegment {
+  speaker: string;
+  text: string;
+}
+
+interface TtsChunk {
+  speakers: SpeakerConfig[];
+  text: string; // For multi-speaker: "Speaker: text" format. For single: plain text.
+  isMultiSpeaker: boolean;
+}
+
+function parseContentToSegments(content: string): TtsSegment[] {
+  const cleaned = content.replace(/\{\{image:[^}]+\}\}/g, '').trim();
+  const paragraphs = cleaned.split('\n\n');
+  const segments: TtsSegment[] = [];
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) continue;
+
+    const tagMatch = trimmed.match(/^\{\{speaker:([^}]+)\}\}\n?(.*)$/s);
+    if (tagMatch) {
+      const text = tagMatch[2].trim();
+      if (text) segments.push({ speaker: tagMatch[1], text });
+    } else {
+      segments.push({ speaker: NARRATOR_VOICE, text: trimmed });
+    }
+  }
+  return segments;
+}
+
+function groupIntoChunks(segments: TtsSegment[]): TtsSegment[][] {
+  if (segments.length === 0) return [];
+
+  const chunks: TtsSegment[][] = [];
+  let currentChunk: TtsSegment[] = [];
+  let currentCharacter: string | null = null;
+
+  for (const seg of segments) {
+    if (seg.speaker === NARRATOR_VOICE) {
+      currentChunk.push(seg);
+    } else {
+      if (currentCharacter !== null && currentCharacter !== seg.speaker) {
+        const trailingNarration: TtsSegment[] = [];
+        while (
+          currentChunk.length > 0 &&
+          currentChunk[currentChunk.length - 1].speaker === NARRATOR_VOICE
+        ) {
+          trailingNarration.unshift(currentChunk.pop()!);
+        }
+        if (currentChunk.length > 0) chunks.push(currentChunk);
+        currentChunk = [...trailingNarration, seg];
+      } else {
+        currentChunk.push(seg);
+      }
+      currentCharacter = seg.speaker;
+    }
+  }
+  if (currentChunk.length > 0) chunks.push(currentChunk);
+  return chunks;
+}
+
+function prepareSceneForTts(scene: StoryScene, lang: StoryLang): TtsChunk[] {
   const title = lang === 'en' && scene.title_en ? scene.title_en : scene.title;
   const content = lang === 'en' && scene.content_en ? scene.content_en : scene.content;
-  const rawText = [title, content].filter(Boolean).join('\n\n');
-  return rawText.replace(/\{\{image:[^}]+\}\}/g, '').replace(/\{\{speaker:[^}]*\}\}\n?/g, '');
+
+  const titleSegments: TtsSegment[] = title ? [{ speaker: NARRATOR_VOICE, text: title }] : [];
+  const contentSegments = parseContentToSegments(content);
+  const allSegments = [...titleSegments, ...contentSegments];
+
+  if (allSegments.length === 0) return [];
+
+  const rawChunks = groupIntoChunks(allSegments);
+
+  return rawChunks.map((chunk) => {
+    const speakers = [...new Set(chunk.map((s) => s.speaker))];
+    const isMultiSpeaker = speakers.length >= 2;
+
+    return {
+      speakers: speakers.map((s) => ({ speaker: s, voiceName: s })),
+      text: isMultiSpeaker
+        ? chunk.map((s) => `${s.speaker}: ${s.text}`).join('\n')
+        : chunk.map((s) => s.text).join('\n'),
+      isMultiSpeaker,
+    };
+  });
 }
 
 /**
@@ -80,8 +166,21 @@ export function useTts(scenes: StoryScene[], lang: StoryLang = 'ja'): UseTtsRetu
       const controller = new AbortController();
       prefetchRef.current = controller;
 
-      const text = sceneToText(scenes[index], lang);
-      generateSpeech(text, { signal: controller.signal }).catch(() => {});
+      // Prefetch: try a simple single-speaker generation for the first chunk
+      const chunks = prepareSceneForTts(scenes[index], lang);
+      if (chunks.length > 0) {
+        const first = chunks[0];
+        if (first.isMultiSpeaker) {
+          generateMultiSpeakerSpeech(first.text, first.speakers, {
+            signal: controller.signal,
+          }).catch(() => {});
+        } else {
+          generateSpeech(first.text, {
+            voiceName: first.speakers[0]?.voiceName,
+            signal: controller.signal,
+          }).catch(() => {});
+        }
+      }
     },
     [scenes, lang]
   );
@@ -107,12 +206,79 @@ export function useTts(scenes: StoryScene[], lang: StoryLang = 'ja'): UseTtsRetu
         // 1) Try pre-cached audio from Supabase Storage
         let wavBlob = await fetchCachedAudio(scenes[index], lang, controller.signal);
 
-        // 2) Fall back to real-time TTS generation
+        // 2) Fall back to real-time TTS generation (multi-speaker aware)
         if (!wavBlob) {
-          const text = sceneToText(scenes[index], lang);
-          wavBlob = await generateSpeech(text, {
-            signal: controller.signal,
-          });
+          const chunks = prepareSceneForTts(scenes[index], lang);
+
+          if (chunks.length === 0) {
+            // Nothing to play — skip to next scene
+            playScene(index + 1);
+            return;
+          }
+
+          if (chunks.length === 1 && !chunks[0].isMultiSpeaker) {
+            // Single chunk, single speaker — use simple path
+            wavBlob = await generateSpeech(chunks[0].text, {
+              voiceName: chunks[0].speakers[0]?.voiceName,
+              signal: controller.signal,
+            });
+          } else {
+            // Multi-chunk or multi-speaker — generate each chunk and concatenate
+            const blobParts: Blob[] = [];
+            for (const chunk of chunks) {
+              if (controller.signal.aborted) return;
+              let chunkBlob: Blob;
+              if (chunk.isMultiSpeaker) {
+                chunkBlob = await generateMultiSpeakerSpeech(chunk.text, chunk.speakers, {
+                  signal: controller.signal,
+                });
+              } else {
+                chunkBlob = await generateSpeech(chunk.text, {
+                  voiceName: chunk.speakers[0]?.voiceName,
+                  signal: controller.signal,
+                });
+              }
+              blobParts.push(chunkBlob);
+            }
+
+            if (controller.signal.aborted) return;
+
+            // Concatenate WAV blobs by extracting PCM data (skip 44-byte headers)
+            const pcmArrays: Uint8Array[] = [];
+            for (const blob of blobParts) {
+              const buf = new Uint8Array(await blob.arrayBuffer());
+              pcmArrays.push(buf.slice(44)); // skip WAV header
+            }
+            const totalLen = pcmArrays.reduce((s, a) => s + a.length, 0);
+            const combined = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const arr of pcmArrays) {
+              combined.set(arr, offset);
+              offset += arr.length;
+            }
+
+            // Build new WAV with combined PCM
+            const header = new ArrayBuffer(44);
+            const view = new DataView(header);
+            const writeStr = (o: number, s: string) => {
+              for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i));
+            };
+            writeStr(0, 'RIFF');
+            view.setUint32(4, 36 + combined.length, true);
+            writeStr(8, 'WAVE');
+            writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true); // mono
+            view.setUint32(24, 24000, true); // sample rate
+            view.setUint32(28, 48000, true); // byte rate
+            view.setUint16(32, 2, true); // block align
+            view.setUint16(34, 16, true); // bits per sample
+            writeStr(36, 'data');
+            view.setUint32(40, combined.length, true);
+
+            wavBlob = new Blob([header, combined], { type: 'audio/wav' });
+          }
         }
 
         if (controller.signal.aborted) return;

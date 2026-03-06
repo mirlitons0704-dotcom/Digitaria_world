@@ -67,6 +67,15 @@ export interface TtsOptions {
   signal?: AbortSignal;
 }
 
+export interface SpeakerConfig {
+  speaker: string;
+  voiceName: string;
+}
+
+export interface MultiSpeakerTtsOptions {
+  signal?: AbortSignal;
+}
+
 async function getAccessToken(): Promise<string> {
   const {
     data: { session },
@@ -99,6 +108,52 @@ export async function generateSpeech(text: string, options: TtsOptions = {}): Pr
       apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({ text, voiceName }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const errJson = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errJson.error || `TTS error (${res.status})`);
+  }
+
+  const { audioData } = await res.json();
+
+  if (!audioData) {
+    throw new Error('No audio data in TTS response');
+  }
+
+  const blob = pcmToWavBlob(audioData);
+  addToCache(cacheKey, blob);
+  return blob;
+}
+
+/**
+ * Generate multi-speaker speech via the Edge Function.
+ * Text must be in "Speaker: text" format.
+ * speakers maps speaker names to voice names.
+ */
+export async function generateMultiSpeakerSpeech(
+  text: string,
+  speakers: SpeakerConfig[],
+  options: MultiSpeakerTtsOptions = {}
+): Promise<Blob> {
+  const { signal } = options;
+
+  const cacheKey = getCacheKey(text, speakers.map((s) => s.voiceName).join(','));
+  const cached = audioCache.get(cacheKey);
+  if (cached) return cached;
+
+  const accessToken = await getAccessToken();
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const res = await fetch(`${supabaseUrl}/functions/v1/text-to-speech`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ text, speakers }),
     signal,
   });
 

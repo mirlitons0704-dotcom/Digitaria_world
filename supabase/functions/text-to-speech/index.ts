@@ -96,9 +96,14 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { text, voiceName = 'Kore' } = (await req.json()) as {
+    const {
+      text,
+      voiceName = 'Kore',
+      speakers,
+    } = (await req.json()) as {
       text: string;
       voiceName?: string;
+      speakers?: { speaker: string; voiceName: string }[];
     };
 
     if (!text || typeof text !== 'string') {
@@ -117,21 +122,48 @@ Deno.serve(async (req: Request) => {
     }
 
     // ------ Call Gemini TTS API ------
-    // The TTS model requires explicit instruction to read the text aloud.
-    const ttsPrompt = `Read the following text aloud in a natural, expressive voice:\n\n${text}`;
+    const isMultiSpeaker = Array.isArray(speakers) && speakers.length >= 2;
+
+    let ttsPrompt: string;
+    let speechConfig: Record<string, unknown>;
+
+    if (isMultiSpeaker) {
+      // Multi-speaker mode: text is in "Speaker: text" format
+      ttsPrompt = `TTS the following conversation:\n${text}`;
+      speechConfig = {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: speakers!.map((s) => ({
+            speaker: s.speaker,
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: s.voiceName },
+            },
+          })),
+        },
+      };
+    } else {
+      // Single-speaker mode (backward compatible)
+      ttsPrompt = `Read the following text aloud in a natural, expressive voice:\n\n${text}`;
+      speechConfig = {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName },
+        },
+      };
+    }
+
     const requestBody = {
       contents: [{ parts: [{ text: ttsPrompt }] }],
       generationConfig: {
         responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName },
-          },
-        },
+        speechConfig,
       },
     };
 
-    console.log('[TTS] Calling Gemini API with voiceName:', voiceName, 'text length:', text.length);
+    console.log(
+      '[TTS] Calling Gemini API',
+      isMultiSpeaker ? `multi-speaker (${speakers!.length})` : `voice: ${voiceName}`,
+      'text length:',
+      text.length
+    );
 
     const geminiRes = await fetch(`${TTS_ENDPOINT}?key=${geminiApiKey}`, {
       method: 'POST',

@@ -51,29 +51,9 @@ const SAMPLE_RATE = 24000;
 const BITS_PER_SAMPLE = 16;
 const NUM_CHANNELS = 1;
 
-// ─── Character → Voice mapping ───────────────────────────────────────────────
+// ─── Default narrator voice ──────────────────────────────────────────────────
 
-const CHARACTER_VOICE_MAP = {
-  '11111111-1111-1111-1111-111111111111': 'Puck',      // ビットくん
-  '22222222-2222-2222-2222-222222222222': 'Kore',       // バイトさん
-  '33333333-3333-3333-3333-333333333333': 'Aoede',      // ファイラ
-  '44444444-4444-4444-4444-444444444444': 'Enceladus',  // ストラクト博士
-  '55555555-5555-5555-5555-555555555555': 'Leda',       // ループちゃん
-  '66666666-6666-6666-6666-666666666666': 'Sadachbia',  // HTMLくん
-  '77777777-7777-7777-7777-777777777777': 'Umbriel',    // CSSちゃん
-  '88888888-8888-8888-8888-888888888888': 'Fenrir',     // ルーター船長
-  '99999999-9999-9999-9999-999999999999': 'Gacrux',     // JSマスター
-  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa': 'Schedar',    // リアクト先生
-  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb': 'Callirrhoe', // UIデザイナー・ミア
-  'cccccccc-cccc-cccc-cccc-cccccccccccc': 'Algieba',    // テイル職人
-  'dddddddd-dddd-dddd-dddd-dddddddddddd': 'Rasalgethi', // ターミナルじいさん
-  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee': 'Achird',    // パッケージ配達員
-  'ffffffff-ffff-ffff-ffff-ffffffffffff': 'Iapetus',    // ギット管理人
-  '00000000-0000-0000-0001-000000000001': 'Charon',     // サーバー守護者
-  '00000000-0000-0000-0002-000000000002': 'Vindemiatrix', // API大使
-  '00000000-0000-0000-0003-000000000003': 'Despina',       // コードバタフライたち
-};
-const DEFAULT_VOICE = 'Puck'; // ナレーション・デフォルト
+const NARRATOR_VOICE = 'Kore';
 
 // ─── Parse CLI arguments ─────────────────────────────────────────────────────
 
@@ -138,8 +118,11 @@ function pcmBase64ToWavBuffer(pcmBase64) {
   return buffer;
 }
 
-// ─── Gemini TTS API call ─────────────────────────────────────────────────────
+// ─── Gemini TTS API calls ────────────────────────────────────────────────────
 
+/**
+ * Single-speaker TTS (used for narration-only chunks).
+ */
 async function callGeminiTts(text, voiceName) {
   const apiKey = getNextGeminiKey();
   const ttsPrompt = `Read the following text aloud in a natural, expressive voice:\n\n${text}`;
@@ -177,23 +160,144 @@ async function callGeminiTts(text, voiceName) {
   return audioData; // base64 PCM
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+/**
+ * Multi-speaker TTS (2 speakers max).
+ * Text must be in "Speaker: text" format.
+ * speakers is an array of { speaker, voiceName }.
+ */
+async function callGeminiMultiSpeakerTts(text, speakers) {
+  const apiKey = getNextGeminiKey();
+  const prompt = `TTS the following conversation:\n${text}`;
 
-function sceneToText(scene) {
-  const parts = [scene.title, scene.content].filter(Boolean);
-  const raw = parts.join('\n\n');
-  // Strip image markers like {{image:...}} and speaker tags like {{speaker:...}}
-  return raw
-    .replace(/\{\{image:[^}]+\}\}/g, '')
-    .replace(/\{\{speaker:[^}]*\}\}\n?/g, '')
-    .trim();
+  const requestBody = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: speakers.map((s) => ({
+            speaker: s.speaker,
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: s.voiceName },
+            },
+          })),
+        },
+      },
+    },
+  };
+
+  const res = await fetch(`${TTS_ENDPOINT}?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => 'Unknown');
+    throw new Error(`Gemini API ${res.status}: ${errText}`);
+  }
+
+  const json = await res.json();
+  const audioData = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+  if (!audioData) {
+    throw new Error('No audio data in Gemini response');
+  }
+
+  return audioData; // base64 PCM
 }
 
-function getVoiceForScene(scene) {
-  const charIds = scene.character_ids || [];
-  if (charIds.length === 0) return DEFAULT_VOICE;
-  // Use the first character's voice
-  return CHARACTER_VOICE_MAP[charIds[0]] || DEFAULT_VOICE;
+// ─── Content parsing & chunking ──────────────────────────────────────────────
+
+/**
+ * Parse scene content into labelled segments.
+ * Each segment = { speaker: 'Kore' | 'Puck' | ..., text: '...' }
+ */
+function parseContentToSegments(content) {
+  // Strip image markers
+  const cleaned = content.replace(/\{\{image:[^}]+\}\}/g, '').trim();
+  const paragraphs = cleaned.split('\n\n');
+  const segments = [];
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) continue;
+
+    // Check for speaker tag: {{speaker:VoiceName}}\ntext
+    const tagMatch = trimmed.match(/^\{\{speaker:([^}]+)\}\}\n?(.*)$/s);
+    if (tagMatch) {
+      const speaker = tagMatch[1];
+      const text = tagMatch[2].trim();
+      if (text) {
+        segments.push({ speaker, text });
+      }
+    } else {
+      // No speaker tag → narrator (Kore)
+      segments.push({ speaker: NARRATOR_VOICE, text: trimmed });
+    }
+  }
+  return segments;
+}
+
+/**
+ * Group segments into chunks where each chunk has at most 2 unique speakers.
+ * When a new non-narrator character appears, start a new chunk.
+ * Trailing narration before the new character moves to the new chunk
+ * (it's typically the introduction for that character's dialogue).
+ */
+function groupIntoChunks(segments) {
+  if (segments.length === 0) return [];
+
+  const chunks = [];
+  let currentChunk = [];
+  let currentCharacter = null; // non-narrator speaker in current chunk
+
+  for (const seg of segments) {
+    if (seg.speaker === NARRATOR_VOICE) {
+      currentChunk.push(seg);
+    } else {
+      if (currentCharacter !== null && currentCharacter !== seg.speaker) {
+        // Character change → split chunk
+        // Move trailing narrator segments to new chunk (they introduce the new character)
+        const trailingNarration = [];
+        while (
+          currentChunk.length > 0 &&
+          currentChunk[currentChunk.length - 1].speaker === NARRATOR_VOICE
+        ) {
+          trailingNarration.unshift(currentChunk.pop());
+        }
+        // Save current chunk if it has content
+        if (currentChunk.length > 0) {
+          chunks.push(currentChunk);
+        }
+        // Start new chunk with trailing narration + new character
+        currentChunk = [...trailingNarration, seg];
+      } else {
+        currentChunk.push(seg);
+      }
+      currentCharacter = seg.speaker;
+    }
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
+
+/**
+ * Get unique speakers in a chunk.
+ */
+function getChunkSpeakers(chunk) {
+  return [...new Set(chunk.map((s) => s.speaker))];
+}
+
+/**
+ * Format a chunk as "Speaker: text" lines for Gemini multi-speaker input.
+ */
+function formatChunkForGemini(chunk) {
+  return chunk.map((s) => `${s.speaker}: ${s.text}`).join('\n');
 }
 
 function storagePath(chapterId, sceneNumber) {
@@ -285,20 +389,54 @@ async function main() {
       }
     }
 
-    const text = sceneToText(scene);
-    if (!text || text.length < 5) {
+    // Parse content into speaker-labelled segments and group into chunks
+    const titleSegments = scene.title
+      ? [{ speaker: NARRATOR_VOICE, text: scene.title }]
+      : [];
+    const contentSegments = parseContentToSegments(scene.content);
+    const allSegments = [...titleSegments, ...contentSegments];
+
+    if (allSegments.length === 0 || allSegments.every((s) => s.text.length < 3)) {
       console.log(`⏭️  ${label} — too short or empty, skipping`);
       skipped++;
       continue;
     }
 
-    const voice = getVoiceForScene(scene);
+    const chunks = groupIntoChunks(allSegments);
+    const chunkSummary = chunks
+      .map((c) => getChunkSpeakers(c).join('+'))
+      .join(' | ');
+    process.stdout.write(`🔊 ${label} (${chunks.length} chunks: ${chunkSummary})... `);
 
     try {
-      process.stdout.write(`🔊 ${label} (${voice}, ${text.length} chars)... `);
+      const pcmBuffers = [];
 
-      const pcmBase64 = await callGeminiTts(text, voice);
-      const wavBuffer = pcmBase64ToWavBuffer(pcmBase64);
+      for (const chunk of chunks) {
+        const speakers = getChunkSpeakers(chunk);
+
+        let pcmBase64;
+        if (speakers.length === 1) {
+          // Single speaker → use standard single-speaker TTS
+          const plainText = chunk.map((s) => s.text).join('\n');
+          pcmBase64 = await callGeminiTts(plainText, speakers[0]);
+        } else {
+          // 2 speakers → use multi-speaker TTS
+          const formattedText = formatChunkForGemini(chunk);
+          const speakerConfigs = speakers.map((s) => ({ speaker: s, voiceName: s }));
+          pcmBase64 = await callGeminiMultiSpeakerTts(formattedText, speakerConfigs);
+        }
+
+        pcmBuffers.push(Buffer.from(pcmBase64, 'base64'));
+
+        // Delay between chunk API calls
+        if (chunks.length > 1) {
+          await sleep(DELAY_MS);
+        }
+      }
+
+      // Concatenate all PCM buffers and convert to WAV
+      const combinedPcm = Buffer.concat(pcmBuffers);
+      const wavBuffer = pcmBase64ToWavBuffer(combinedPcm.toString('base64'));
 
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
@@ -325,7 +463,7 @@ async function main() {
       }
     }
 
-    // Delay between requests to avoid rate limits
+    // Delay between scenes
     await sleep(DELAY_MS);
   }
 
